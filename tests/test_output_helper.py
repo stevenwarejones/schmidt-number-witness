@@ -77,10 +77,52 @@ for name in ACCEPT:
     if BUILD.resolve() != p.parent or not str(p).startswith(str(BUILD.resolve())):
         fails.append(f"{name!r} escaped build/: {p}")
 
+# --- the resolved-parent branch, which no string test reaches ----------------------------
+# Every case above is decided by inspecting the NAME.  The final check in output_path compares
+# the RESOLVED destination's parent against the resolved build directory, and only the
+# filesystem can exercise it: a name with no separators at all can still leave the directory
+# if it is a symlink.  Skipping this branch would leave containment resting on string rules.
+#
+# Run against a TEMPORARY build directory, so the repository's own build/ is never touched.
+import os                                                                 # noqa: E402
+import tempfile                                                           # noqa: E402
+
+import outputs                                                            # noqa: E402
+
+if not hasattr(os, 'symlink'):
+    fails.append('this platform has no os.symlink, so the resolved-parent branch is untested')
+else:
+    real_build = outputs.BUILD
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        outputs.BUILD = tmp / 'build'
+        outputs.BUILD.mkdir()
+        target = tmp / 'outside' / 'escaped.json'
+        target.parent.mkdir()
+        target.write_text('')
+        try:
+            os.symlink(target, outputs.BUILD / 'symlink_probe.json')
+        except OSError as exc:                                            # noqa: BLE001
+            fails.append(f'could not create a symlink to test that branch: {exc}')
+        else:
+            try:
+                got = outputs.output_path('symlink_probe.json')
+            except ValueError as exc:
+                print(f"  PASS refused (symlink leaving the output directory): "
+                      f"'symlink_probe.json' -- {str(exc)[:56]}")
+            except Exception as exc:                                      # noqa: BLE001
+                fails.append(f'symlink case raised {type(exc).__name__}, expected ValueError')
+            else:
+                fails.append(f'ACCEPTED a name resolving outside the output directory via a '
+                             f'symlink: {got} -- containment rests on string rules alone')
+        finally:
+            outputs.BUILD = real_build
+
 if fails:
     print("\nFAILED:")
     for f in fails:
         print("   " + f)
     raise SystemExit(1)
 print(f"\nPASS output_path accepts {len(ACCEPT)} ordinary names and refuses "
-      f"{len(REFUSE) + 4} escaping or ill-typed ones, all inside {BUILD.name}/")
+      f"{len(REFUSE) + 5} escaping or ill-typed ones -- including a symlink that leaves the\n"
+      f"     output directory, which is the one case the name rules alone cannot decide.")

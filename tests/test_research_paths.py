@@ -106,15 +106,18 @@ class Resolved:
 
 
 def all_binding_sites(tree):
-    """Count EVERY binding of every name, in any form, anywhere in the module.
+    """Count the bindings of each name in the ENUMERATED forms below.
 
-    This is the fail-closed half of the analysis.  Rather than enumerate the binding forms
-    that are dangerous -- which is a losing game, and lost three times: plain reassignment,
-    then annotated assignment, then assignment inside a conditional -- it counts every
-    binding of any kind and trusts a name only when the count matches the module-level
-    simple assignments we can actually read.  Anything else (a nested rebinding, an
-    annotation, a loop variable, an import, a parameter, a walrus, a def) makes the name
-    untrusted, and an untrusted name is not usable as a path or a filename component.
+    This is a conservative heuristic over supported source forms, NOT a general analysis of
+    Python binding.  It counts Name stores, function and class definitions, imports,
+    parameters, `global` and `nonlocal`.  It does not cover every way Python can bind a name
+    -- `match`/`case` pattern capture binds through MatchAs.name and is not counted here, and
+    there are certainly others.
+
+    A name is trusted only when this count matches the module-level simple assignments that
+    `trusted_module_values` can actually read, so any binding form it DOES see makes the name
+    untrusted.  What it does not see, it does not catch, which is why the containment
+    guarantee for computed file names lives in research/outputs.py and not here.
     """
     counts = {}
 
@@ -147,17 +150,6 @@ def trusted_module_values(tree):
             simple.setdefault(stmt.targets[0].id, []).append(stmt.value)
     return {n: v[0] for n, v in simple.items()
             if len(v) == 1 and counts.get(n, 0) == 1}
-
-
-def integer_names(tree):
-    """Trusted module names whose one binding is provably an integer, to a fixpoint."""
-    values = trusted_module_values(tree)
-    good = set(values)
-    while True:
-        shrunk = {n for n in good if integer_valued(values[n], good)}
-        if shrunk == good:
-            return shrunk
-        good = shrunk
 
 
 def _component(name):
@@ -240,9 +232,12 @@ def bind_paths(tree, script):
     """Bind top-level names to paths by EVALUATION, never by execution.
 
     Only names that `trusted_module_values` vouches for are bound: a name rebound anywhere
-    else in the module -- including as a function parameter -- resolves to nothing here, so
-    an expression using it is reported rather than silently resolved against the module's
-    value.
+    else in the module, in one of the binding forms `all_binding_sites` enumerates -- a
+    function parameter, say -- resolves to nothing here, so an expression using it is
+    reported rather than silently resolved against the module's value.
+
+    This is a statement about the source as written, in the supported syntax.  It does not
+    establish what the module does at run time.
     """
     trusted = set(trusted_module_values(tree))
     env = {}
@@ -411,4 +406,7 @@ if fails:
     for f in fails:
         print("   " + f)
     raise SystemExit(1)
-print("\nPASS every discovery read and write resolves, with no code executed")
+print("\nPASS in the supported syntax, every static path in the current discovery scripts "
+      "resolves where it should,\n     and every computed file name is routed through "
+      "research/outputs.py:output_path.  No code was executed.\n     This is a check of the "
+      "documented convention in these scripts, not an analysis of arbitrary Python.")
