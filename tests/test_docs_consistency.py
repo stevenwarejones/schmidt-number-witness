@@ -10,9 +10,12 @@ Three directions:
   * every path-like token in the documentation resolves to a file that exists;
   * every tracked script is mentioned in the documentation or the CI workflow, so a file
     cannot sit in the tree unreferenced;
-  * mathematics written in Markdown stays renderable on GitHub, which is stricter than
-    LaTeX and fails SILENTLY -- a reader sees raw TeX or an error box, and nothing in a
-    local PDF build reveals it.
+  * Markdown math follows this project's authoring convention, which exists because a
+    document that builds perfectly under XeLaTeX can still fail in a web renderer, and
+    nothing in a local PDF build reveals it.
+
+    This last one is a LINT, not a rendering check.  Matching a regex does not establish
+    that any document renders anywhere; only looking at a rendered page does that.
 
 Generated paths under `build/` are exempt: they are git-ignored by design, and the prose
 sometimes names one to describe a defect (`build/clifford_bound.py` is where a bad path
@@ -118,17 +121,27 @@ for a, b, an, bn in ((readme, contrib, 'README.md', 'CONTRIBUTING.md'),
         if cmd not in b:
             fails.append(f"{an} documents `python {cmd}` but {bn} does not")
 
-# 5. Markdown math must render on GitHub, not only under XeLaTeX.  GitHub renders math with
-#    a restricted KaTeX: it rejects \operatorname, and it does not recognise \[ ... \] as
-#    display math at all -- those lines appear verbatim.  Both build perfectly in the PDF, so
-#    only a check like this catches them.  Use \mathrm{...} and $$ ... $$ instead.
+# 5. Markdown math authoring convention.  Two rules, with different standing:
+#
+#    * DELIMITERS.  GitHub documents `$...$` (or $`...`$) for inline math and `$$ ... $$`
+#      (or a ```math fence) for display math.  `\[ ... \]` is not among them and appears
+#      verbatim.  This rule follows GitHub's own documented syntax.
+#    * MACROS.  \operatorname was observed to produce "The following macros are not allowed"
+#      on GitHub.  GitHub's documentation says it renders with MathJax, and \operatorname is
+#      supported by both MathJax and KaTeX in general, so this is a restriction of GitHub's
+#      configuration rather than of either engine.  An earlier version of this file asserted
+#      that GitHub uses KaTeX and that KaTeX rejects the command; BOTH were wrong, even
+#      though the observed failure was real.  The rule is kept as a project convention on
+#      observed behaviour, not as a fact about a renderer.
+#
+#    Neither rule establishes that anything renders correctly.  This is a syntax lint.
 GITHUB_MATH_BANNED = (
     (re.compile(r'\\operatorname\b'),
-     'GitHub\'s KaTeX rejects \\operatorname; use \\mathrm{...}'),
+     'observed to be rejected by GitHub\'s math configuration; use \\mathrm{...}'),
     (re.compile(r'^\\\[\s*$|^\\\]\s*$', re.M),
-     'GitHub does not render \\[ ... \\] display math; use $$ ... $$'),
+     'not a delimiter GitHub documents for display math; use $$ ... $$'),
     (re.compile(r'\\(newcommand|def|DeclareMathOperator|renewcommand)\b'),
-     'GitHub\'s KaTeX has no persistent macro definitions'),
+     'persistent macro definitions do not carry across GitHub-rendered math blocks'),
 )
 for rel in TRACKED:
     if not rel.endswith('.md'):
@@ -141,7 +154,7 @@ for rel in TRACKED:
             fails.append(f"{rel}:{line}: {why}")
             hit = True
     if not hit:
-        print(f"  PASS math renders on GitHub: {rel}")
+        print(f"  PASS Markdown math syntax lint: {rel}")
 
 if exempt:
     print(f"\nnote: {len(exempt)} generated path(s) named in prose, not required to exist: "

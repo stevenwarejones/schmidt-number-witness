@@ -46,9 +46,10 @@ What this derivation does NOT give, and what the rest of the repository is for:
     certified saturating point at which M_A exceeds 6 and another at which M_B does.  That
     is consistent -- each such point lies in the opposite side's hull, where that inequality
     was never claimed -- but it means neither derivation alone reaches the whole face.
-  * the sharp Schmidt-number-two bound (proofs/verify_sharp_qubit.py).  The
-    partial-locality derivation displayed here does not establish that bound; it requires
-    the separate quantum argument given there.
+  * the sharp Schmidt-number-two bound (proofs/verify_sharp_qubit.py).  The partial-locality
+    derivation DISPLAYED HERE does not establish that bound; it requires the separate quantum
+    argument given there.  That is a statement about this derivation, not a proof that no
+    partial-local argument could ever reach it -- no such universal claim is made.
 """
 import sys as _sys
 

@@ -31,10 +31,25 @@ manifest. A solver status is not evidence.
 
 These are two different kinds of workflow and should not be described together.
 
-`rational_sharp.py` is the **generator of the shipped sharp certificate**: it identifies exact
-equality-family kernels, solves on the remaining Gram subspace, and corrects a numerical matrix
-onto the exact rational affine constraints. Its output is what `proofs/verify_sharp_qubit.py`
-checks. Rerunning it is a reproduction of the certificate, and needs the SDP stack.
+`rational_sharp.py` is the **rational-rounding step** that produced the shipped sharp
+certificate. It does *not* identify the equality kernels or solve a new SDP. It reads the
+archived reduced face map and face solution, projects the numerical matrix, rounds it, corrects
+the selected affine equations exactly, verifies every coefficient equation, and checks exact
+Gram positivity. It needs NumPy, SciPy and Python-FLINT — **not** CVXPY or any SDP solver.
+
+Rerunning it regenerates a **valid** certificate, not the shipped bytes: an independent audit
+ran it with CVXPY absent and obtained a positive rational 70x70 Gram, which
+was accepted by `proofs/verify_sharp_qubit.py`, with only `reduced_gram` differing from the shipped file. Numerical QR and
+floating-point steps need not reproduce identical rationals across environments, so the shipped
+certificate is kept unless there is a substantive reason to change it.
+
+Three activities are easy to conflate and are not the same thing:
+
+| Activity | Inputs | What it establishes |
+|---|---|---|
+| Proof verification | the shipped exact data | deterministic acceptance of the theorem; needs no solver — see `VERIFY.md` |
+| Rational regeneration | the archived numerical arrays | a separately verified exact certificate, not guaranteed byte-identical |
+| Full numerical rediscovery | solver runs and searches | how the original certificate was found; expensive, and not rerun by anything here |
 
 The **historical discovery scripts** — the fixed-target searches, and the three profile and
 endpoint scripts — were exploratory. The fixed-target run they were written for did not
@@ -43,8 +58,10 @@ succeed; the sharp bound came from the exact Gram construction above. They are k
 reproducible, not because any current claim rests on them.
 
 Outputs: `qubit_theta_profile.py`, `qubit_joint_search.py` and `qubit_endpoint_scaling.py`
-write **nothing** — their results go to stdout, and they record no seed, workload or optimizer
-status. Every other script here writes to the git-ignored `build/`. Nothing under `research/`
+write **nothing** — their results go to stdout. Seeds and workloads are hard-coded in their
+source, and the joint search prints its restart count; what is missing is a machine-readable
+run artifact recording environment, optimizer status and results. Every other script here
+writes to the git-ignored `build/`. Nothing under `research/`
 is committed as a result file, so no claim can rest on a stale one.
 
 Some scripts still read another script's source text to reuse a builder; replacing that with

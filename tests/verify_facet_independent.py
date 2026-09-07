@@ -6,8 +6,8 @@ use:
 
   * proofs/verify_qutrit.py computes the 36 probabilities from scalar Gaussian-integer
     formulas for the marginals and the joint rank-one term.  This file instead builds the
-    9-dimensional state vector and the full 9x9 measurement operators, forms the 81x81
-    tensor products, and evaluates <psi| A tensor B |psi> / <psi|psi> directly.
+    9-dimensional state vector and the full 3x3 local effects, and evaluates
+    <psi| A tensor B |psi> / <psi|psi> against the 9x9 tensor products directly.
   * proofs/verify_facet.py certifies membership of the saturating points by exhibiting the
     stored local models and checking positivity/CHSH dual certificates.  This file ignores
     both and CONSTRUCTS a local hidden-variable model for each point from scratch, by Fine's
@@ -27,6 +27,11 @@ product over Bob's three settings gives an explicit deterministic-strategy decom
 
 This is the construction sketched in docs/review_2026-09-07_ai.md; the implementation here is
 written from the description rather than copied.
+
+SCOPE.  The point sets give LOWER bounds on the face dimensions: exhibiting affinely
+independent members of a face bounds it from below.  The matching upper bounds come from the
+dual-support argument in proofs/verify_face_dimensions.py, which this file does not duplicate
+and does not independently establish.
 
 Exact rational and exact complex-rational arithmetic throughout, in the standard library
 only -- no SymPy, so this file can be run against an unpacked archive with nothing installed.
@@ -161,11 +166,24 @@ for side in 'AB':
               f"affine rank 13")
 
 homog = []
-for e in facet['saturating_points']:
+for n, e in enumerate(facet['saturating_points']):
     v = [Fr(t) for t in e['v']]
     assert sum(a * b for a, b in zip(W, v)) == 7
-    if build_local_model(v, e['side'], e['pair']) is None:
-        fails.append("facet: no local model constructed for a supplied saturating point")
+    # GLOBAL positivity, over all 36 events -- not only the designated restriction.  An
+    # earlier version omitted this here (it was present in the one-sided loops above), and a
+    # point could carry a negative probability on an UNUSED setting while still satisfying
+    # F = 7, the designated-pair locality and the rank check.  That is a behavior that does
+    # not exist, accepted as a member of the face.
+    worst = min(prob(v, x, y, a, b) for x, y, a, b
+                in product(range(3), range(3), range(2), range(2)))
+    if worst < 0:
+        fails.append(f"facet point {n}: negative probability {worst} outside the designated "
+                     f"restriction -- not a behavior at all")
+    if e.get('side') not in ('A', 'B') or tuple(e.get('pair', ())) not in \
+            {(0, 1), (0, 2), (1, 2)}:
+        fails.append(f"facet point {n}: bad side/pair metadata {e.get('side')} {e.get('pair')}")
+    elif build_local_model(v, e['side'], e['pair']) is None:
+        fails.append(f"facet point {n}: no local model constructed")
     homog.append([1] + v)
 r = rank(homog) - 1
 if r != 14:

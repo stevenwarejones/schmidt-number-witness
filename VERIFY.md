@@ -89,8 +89,9 @@ gate and refuses to run under `python -O`, where assertions would be stripped;
 | `python make_snapshot.py` | build `build/verification-snapshot-<commit>.tar.gz`: extract it anywhere and it verifies itself |
 | `python research/audit_catalog_folds.py` | a scoped comparison, not a proof gate |
 | `python tests/test_comparison_acceptance.py` | corrupt Q and the catalogue, require both comparisons to reject |
+| `python tests/test_checker_mutations.py` | replay every defect the auxiliary checkers once accepted, and require rejection for the intended reason |
 | `python research/legacy/verify_routing.py --legacy-routing` | historical; supports no current claim |
-| `bash paper/build.sh` | rebuild the manuscript PDF (needs Pandoc + XeLaTeX) |
+| `bash paper/build.sh` | build the manuscript into `build/paper/manuscript.pdf` (needs Pandoc + XeLaTeX) |
 
 ## Environment
 

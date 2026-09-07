@@ -18,10 +18,12 @@ question is whether it lands in the 2304-element relabeling orbit of F.
     matches: 0
 
 Two integrity checks make that number mean something.  Every one of the 129 source vectors is
-independently confirmed to have classical maximum 0 in the source's probability convention, so
-a mis-transcribed row is rejected rather than silently compared.  And a positive control lifts
-F itself to four settings by splitting one of Alice's rows, then requires the fold to find it --
-so a search that could never match anything would fail here.
+independently confirmed to have classical maximum 0 in the source's probability convention --
+which is a check on the COEFFICIENTS, not authentication of which published equation was
+transcribed; a matching bound is necessary, not sufficient.  And a positive control lifts F
+itself to four settings by adding an unused all-zero setting, then requires the fold to find it
+again, so a search that could never match anything would fail here.  That control does not
+split a nonzero row between two settings, and is weaker than one that did.
 
 ORIGIN.  The 129 coefficient vectors were extracted from the paper's source by ChatGPT
 ("Astra"), whose fold search this is adapted from; see docs/review_2026-09-07_ai.md.  The
@@ -106,7 +108,10 @@ def fold(M, ma, mb):
                      + tuple(R[i][j] for i, j in product((1, 2, 3), repeat=2)))
 
 
-# Positive control: lift F to four settings by splitting Alice's first row, then find it again.
+# Positive control: lift F to four settings by giving Alice an UNUSED fourth setting (an
+# all-zero row), then require the fold to recover it.  This exercises the search end to end,
+# so a fold procedure that could never match anything fails here.  It does NOT split a nonzero
+# row across two settings, so it is a weaker control than that would be.
 M = [[0] * 5 for _ in range(5)]
 for i in range(3):
     M[i + 1][0] = W[i]

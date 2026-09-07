@@ -12,16 +12,19 @@ Needs Pandoc, XeLaTeX and the DejaVu Serif/Sans/Mono fonts named in the YAML hea
 bash paper/build.sh
 ```
 
-It resolves paths relative to itself, stops on failure, and overwrites only
-`paper/manuscript.pdf`. Inspect the rendered pages, not just extracted text — missing glyphs,
+It resolves paths relative to itself, stops on failure, and writes only
+`build/paper/manuscript.pdf`. Inspect the rendered pages, not just extracted text — missing glyphs,
 clipped vectors, split headings and overlapping equations do not show up in a text dump:
 
 ```sh
-pdftoppm -r 110 -png paper/manuscript.pdf /tmp/manuscript-review
+pdftoppm -r 110 -png build/paper/manuscript.pdf /tmp/manuscript-review
 ```
 
-`manuscript.pdf` is **git-ignored**. One canonical PDF belongs on a release, not in the history
-of every source edit. Build it when you need it.
+The PDF is generated into **`build/paper/`**, with every other generated file. It is not
+tracked: one canonical PDF belongs on a release, not in the history of every source edit. CI
+builds it and uploads it as an artifact. Keeping it out of `paper/` also matters for
+`manifest.py verify-archive`, which has no Git-ignore rules and would otherwise report it as an
+unlisted file in an extracted snapshot.
 
 ## Provenance
 

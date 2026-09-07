@@ -25,10 +25,20 @@ the six violated in quantum physics. There are exact identities
     F  =  M_A  -  4 p(00|10)  +  1
     F  =  M_B  -  4 p(11|22)  +  1
 
-where `M_A` is a relabeling of eq. (48) by local input/output relabelings **without party
+where `M_A` is obtained from eq. (48) by local input/output relabelings **without party
 exchange** — both parties may be relabeled; what matters is that an Alice-partial-local class
-is not converted into a Bob-partial-local class — and `M_B` is the image of `M_A` under the
-party exchange. Setting relabelings map `L^A_2conv` to itself, so `M_A <= 6`
+is not converted into a Bob-partial-local class — and `M_B` is obtained from eq. (48) by local
+relabelings **together with** party exchange.
+
+`M_B` is **not** the bare party swap of this particular `M_A`: the two live in the same
+published orbit but need different relabelings. Explicitly, in the repository's ordering,
+
+    M_A       = [1, 0, 1,  0,-1, 1, -1,-1,-1,  0,-1, 1,  1,-1,-1]
+    M_B       = [1,-1, 0, -1,-1, 0, -1,-1,-1, -1,-1, 1,  1,-1, 0]
+    swap(M_A) = [0,-1, 1,  1, 0, 1, -1, 0, 1, -1,-1,-1, -1, 1,-1]
+
+`proofs/verify_m3322_corollary.py` checks the correct statement — that each lies in the
+appropriate half of the orbit — and never claims one is the swap of the other. Setting relabelings map `L^A_2conv` to itself, so `M_A <= 6`
 holds throughout `H_A` and `M_B <= 6` throughout `H_B`. With `p >= 0` this gives `F <= 7` on
 `H_A`, on `H_B`, and hence on `H = Conv(H_A, H_B)` — in three lines, from a published facet.
 
@@ -75,7 +85,8 @@ quantum membership — `Q` is a quantum counterexample to that implication.
 
 ### The correlation-weighted family, over its whole parameter range
 
-The ordinary thresholds above are the `c = 1` point of a published one-parameter family,
+The ordinary **I3322** threshold above is the `c = 1` member of a published one-parameter
+family — this does not apply to the M3322 or CHSH thresholds, which are not members of it —
 
     I3322(c) = <A0> + <A1> + <B0> + <B1> - <A0B0> - <A0B1> - <A1B0> - <A1B1>
                + c ( <A0B2> - <A1B2> + <A2B0> - <A2B1> ),
@@ -105,8 +116,10 @@ deterministic substitutions):
     129 inequalities  ×  20 Alice maps  ×  20 Bob maps  =  51,600 reductions,  0 matches.
 
 Two integrity checks give that number meaning: every source vector is independently confirmed
-to have classical maximum 0 in the source convention, and a positive control lifts `F` to four
-settings and requires the fold to find it again.
+to have classical maximum 0 in the source convention — a check on the coefficients, **not**
+authentication of which published equation was transcribed — and a positive control lifts `F`
+to four settings, by adding an unused all-zero setting, and requires the fold to recover it. A
+control that split a nonzero row between two settings would be stronger; this one is not that.
 
 **This covers 129 rows of one table** — not all 241 inequalities of that survey, not all 175
 four-setting classes, not five settings, not arbitrary wirings, and not positive combinations
@@ -114,11 +127,6 @@ of several inequalities. Zero matches is not evidence of novelty.
 
 ### Comparisons that remain open
 
-- **A Hardy-based Schmidt-rank witness.** Mukherjee et al., *Device independent Schmidt rank
-  witness by using Hardy paradox*, is the closest comparator by *claim type* found so far — it
-  witnesses Schmidt rank, not merely dimension. Its coefficient-level relation to `F` has
-  **not** been examined. The Hardy remark below concerns the (2 settings, 3 outcomes)
-  dimension tests and does not dispose of this one.
 - the broader Gigena–Kaniewski family. An exploratory projected-simulator search was
   **inconclusive**: its finite strategy library left eight targets uncovered, so neither
   detection nor non-detection follows. That work is not in this repository.
@@ -181,29 +189,48 @@ out consequences of several inequalities together, other positivity penalties, r
 larger scenarios, filtering, or other dimension tradeoffs. That distinction is maintained in
 every novelty statement in this repository. The verifier also
 locates the discrepancy exactly: the penalty `−4 p(00|10)` is a **joint** probability, and its
-correlator `E21` is precisely the single entry M3322 leaves at zero. The ninth correlator is
+correlator `E10` (zero-based, as `docs/THEORY.md` declares) is precisely the single entry
+M3322 leaves at zero. The ninth correlator is
 what a joint-probability penalty buys and a marginal tilt cannot.
 
-### Hardy-type conditional witnesses cannot be applied to this behavior
+### The Hardy comparator: one paper, and only its exact-zero form is disposed of
 
-The Hardy dimension witnesses — Mukherjee, Roy, Bhattacharya, Das, Gazi and Banik, PRA **92**,
-022302 (2015), [arXiv:1407.2146](https://arxiv.org/abs/1407.2146), building on Chen, Cabello,
-Xu, Su, Wu and Kwek, [arXiv:1308.4468](https://arxiv.org/abs/1308.4468) — live in the
-**(2 settings, 3 outcomes)** scenario, not (3,3,2,2), and condition on probabilities vanishing
-**exactly**. Our behavior `Q` has **no exact zeros**: its smallest probability is
-`53279182288146183/66660503297129198901092 ≈ 7.99 × 10⁻⁷`. A witness conditioned on exact
-zeros does not apply to it as written.
+Mukherjee, Roy, Bhattacharya, Das, Gazi and Banik appear under two titles that are **versions
+of the same work**, not two comparators: *Device independent Schmidt rank witness by using
+Hardy paradox* ([arXiv:1407.2146](https://arxiv.org/abs/1407.2146)) and *Hardy's test as a
+device-independent dimension witness* (PRA **92**, 022302 (2015),
+[doi](https://doi.org/10.1103/PhysRevA.92.022302)). An earlier version of this document listed
+them as two distinct open items. It builds on Chen, Cabello, Xu, Su, Wu and Kwek,
+[arXiv:1308.4468](https://arxiv.org/abs/1308.4468).
+
+It is the closest comparator found by **claim type**, since it witnesses Schmidt rank rather
+than merely dimension.
+
+Disposed of: the **displayed exact-zero test**. It lives in the **(2 settings, 3 outcomes)**
+scenario, not (3,3,2,2), and conditions on probabilities vanishing exactly. `Q` has **no exact
+zeros** — its smallest probability is `53279182288146183/66660503297129198901092 ≈ 7.99 ×
+10⁻⁷` — so that test does not apply to it as written.
+
+**Not** disposed of: any robust, noise-tolerant or transformed version of the same idea, and
+the coefficient-level relation of that construction to `F`, which has not been examined.
 
 ### Context: the usual I3322 threshold does not detect the supplied qutrit behavior
 
-This is a statement about **`Q`**, established directly by the exact benchmark above, and it
-must not be inflated into a general claim about tight 3322 inequalities. I3322 *is* a dimension
-witness in the qubit-versus-arbitrary-dimension sense: its qubit value is 0.25, its true maximum
-0.250875… is larger and is not attained in any finite dimension (Pál and Vértesi,
-[arXiv:1006.3032](https://arxiv.org/abs/1006.3032)). What it is not is a qubit-versus-**qutrit**
-witness — its maximum is 0.25 in `C³⊗C³` as well (Navascués and Vértesi, PRL **115**, 020501
-(2015), [arXiv:1412.0924](https://arxiv.org/abs/1412.0924), certified to 7 digits). A
-qubit-versus-qutrit comparison is the narrower question, and it is the one `F` answers.
+This is a statement about **`Q`**, established directly by the exact achievable benchmark
+above, and it must not be inflated into a general claim about tight 3322 inequalities.
+
+Two qualifications matter, and an earlier version of this document got both wrong:
+
+- Pál and Vértesi ([arXiv:1006.3032](https://arxiv.org/abs/1006.3032)) exhibit a construction
+  approaching `0.250875…`, above the qubit value `0.25`, and **conjecture** that the supremum
+  is not attained in any finite dimension. That is their conjecture, not a theorem, and this
+  document previously cited it as one.
+- Navascués and Vértesi ([arXiv:1412.0924](https://arxiv.org/abs/1412.0924)) report a
+  **numerical** SDP computation, certified to seven significant digits, that the `C³⊗C³`
+  maximum is also `0.25`. That is a numerical result, not an exact equality theorem.
+
+Neither qualification weakens anything here, because the non-detection argument needs only the
+exact achievable benchmark constructed in the verifier — not any literature maximum.
 
 Separately, Pál and Vértesi's survey of 241 tight two-outcome inequalities up to five settings
 per party ([arXiv:0810.1615](https://arxiv.org/abs/0810.1615)) found higher-dimensional
@@ -211,21 +238,26 @@ advantage in 43 cases, all at four and five settings, remarking that the simples
 inequality was "surprisingly" not among them. `F` is **not** a facet of the local polytope, so
 it falls outside that survey — which is also why absence from it proves nothing.
 
-### What these audits did NOT clear
+### Status of each comparison
 
-- The verbatim defining equation of `I3322(η)` was never retrieved; the exclusion above rests
-  on its tilt term being a one-party marginal, which was read from a summarizer rather than
-  from a displayed equation. If that term is in fact a joint probability, the exclusion fails
-  and the comparison must be redone.
-- No catalogue of dimension-witness **coefficient vectors** was located, so the hypothesis that
-  `F` is a larger-scenario inequality restricted under setting identifications is **untested**.
-  The 4422 and 5522 tables of arXiv:0810.1615 are the obvious place to test it; those vectors
-  could not be extracted.
-- Non-facet 3322 expressions are outside every survey found. Searching was English-language web
-  search only, not INSPIRE or full-text scholarly search.
+One table, so that nothing is described as both complete and unperformed. An earlier version
+of this document still listed the efficiency equation and the catalogue extraction as never
+done, in the same file as the sections reporting them done.
 
-Absence of hits is not evidence of novelty, and none of the above was performed by a human
-expert.
+| Comparison | Status | Exact scope | Evidence |
+|---|---|---|---|
+| ordinary I3322 / M3322 / CHSH score thresholds on `Q` | **resolved** | all relabelings of three functionals, against achievable qubit benchmarks constructed in the verifier | `proofs/verify_novelty_comparison.py` |
+| correlation-weighted `I3322(c)`, every `c >= 1` | **resolved** | all relabelings, whole parameter range, exact rational decision | `proofs/verify_i3322_family.py` |
+| `F` as a marginal tilt of I3322 or M3322 | **resolved** | correlator support 9 vs 8 across the orbits; excludes every marginal-tilted family at once | `proofs/verify_novelty_comparison.py` |
+| the detection-efficiency term's *form* | **resolved from a primary source** | fixed local fallback under independent one-sided loss; not setting-dependent efficiency, not postselection | quant-ph/0702130, quoted above |
+| `F` as a four-setting catalogue inequality under setting identification | **partially resolved** | 129 rows of Table I of arXiv:0810.1615, 20 surjective reductions per party, 51,600 folds, zero matches | `research/audit_catalog_folds.py` |
+| the rest of that catalogue | **open** | the remaining inequalities of that survey, all 175 four-setting classes, and the 5522 tables | — |
+| broader Gigena–Kaniewski family | **open, attempted** | an exploratory projected-simulator search was **inconclusive** — its finite strategy library left eight targets uncovered, so neither detection nor non-detection follows | not in this repository |
+| Hardy-type comparators | **partially resolved** | the displayed exact-zero test does not apply to `Q`; robust or transformed variants are untouched | below |
+| wirings, filtering, many-copy protocols, combinations of several inequalities, conditional tradeoffs generally | **open** | — | — |
+
+Searching was English-language web search only, not INSPIRE or full-text scholarly search.
+Absence of hits is not evidence of novelty, and none of this was performed by a human expert.
 
 ## Still open
 
@@ -236,11 +268,11 @@ expert.
 | [Tendick, Budroni and Quintino (2025)](https://arxiv.org/abs/2506.21223) | Distinct notions of measurement reduction and convexification have different meanings. Locate our compatible-pair mixture definition precisely; do not equate it with every notion of needing three measurements. |
 | [Navascues and Vertesi](https://arxiv.org/abs/1412.0924), [Navascues et al.](https://arxiv.org/abs/1507.07521) | The sharp bound certifies Schmidt number >= 3 for the supplied behavior. Compare against dimension and entanglement-dimension witnesses. The general method is established; priority of this particular witness is not. |
 
-The highest-value remaining work is now narrow and specific: obtain the displayed definition of
-`I3322(η)` and confirm its tilt term is a marginal, and extract the 4422/5522 coefficient
-vectors of arXiv:0810.1615 to test `F` under setting identifications. A targeted expert question
-should show the coefficient vector, the two positivity identities, and the correlator-support
-argument above — not the phrase "two-sided partial locality". No outreach has been performed.
+The highest-value remaining work, per the status table above: the untested remainder of the
+four-setting catalogue, the broader Gigena–Kaniewski family, and any robust form of the Hardy
+Schmidt-rank comparator. A targeted expert question should show the coefficient vector, the two
+positivity identities, and the correlator-support argument — not the phrase "two-sided partial
+locality". No outreach has been performed.
 
 The candidate contribution, stated so that the corollary above cannot be read back into it:
 

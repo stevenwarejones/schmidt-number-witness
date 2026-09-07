@@ -22,11 +22,26 @@ each failure is a regression test below.
      `OUTPUT_DIR / dynamic / '..' / '..' / 'escaped.txt'` was approved on the strength of its
      `build/` prefix while normalizing to a destination outside `build/`.
 
+  5. It executed nothing and rejected traversal, but still approved two escapes.
+     `OUTPUT_DIR / f'../../{name}'` passed because an unknown FINAL operand was treated as a
+     harmless filename without any evidence that it contains no separators, and
+     `(OUTPUT_DIR.parent / 'escaped.txt').open('w')` passed because `Path.open` was not
+     recognised as a filesystem access at all.
+
 This version executes NOTHING.  It evaluates a deliberately restricted path-expression
 language -- string constants, `__file__`, `Path(...)`, `.parent`, `.resolve()`, previously
 bound path names, and `/` joining -- and reports anything outside it rather than skipping it.
-An unknown component computed at run time is tolerated only as the FINAL filename; unknown
-directory components, absolute components and `..` traversal are rejected.
+
+A component computed at run time is accepted ONLY as the final filename and ONLY on evidence,
+never on position: every literal fragment must be free of separators and traversal, and every
+interpolated value must be provably integer-valued (bound at module level to an `int(...)`
+call, an integer literal, or a conditional over those).  That is exactly what
+`f'clifford_level{level}.json'` satisfies, since `level = int(sys.argv[1]) if ... else 3`.
+An arbitrary unknown name is not accepted as a component at all.
+
+SCOPE.  This checks the source patterns it supports and names anything else as unsupported.
+It is not a proof that arbitrary Python cannot reach another path: runtime behaviour and
+general static analysis are different problems, and this is the narrower one.
 """
 import sys as _sys
 
@@ -42,6 +57,8 @@ ROOT = Path(__file__).resolve().parent.parent
 RESEARCH = ROOT / 'research'
 BUILD = (ROOT / 'build').resolve()
 fails = []
+
+SAFE_NAME = object()          # a run-time value proven to be a single filename component
 
 READ_METHODS = ('read_text', 'read_bytes')
 WRITE_METHODS = ('write_text', 'write_bytes')
@@ -64,6 +81,30 @@ class Resolved:
         self.path, self.exact = path, exact
 
 
+def integer_valued(node, ints):
+    """True when this expression is provably an integer, by a deliberately narrow rule."""
+    if isinstance(node, ast.Constant):
+        return isinstance(node.value, int) and not isinstance(node.value, bool)
+    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == 'int':
+        return True
+    if isinstance(node, ast.IfExp):
+        return integer_valued(node.body, ints) and integer_valued(node.orelse, ints)
+    if isinstance(node, ast.Name):
+        return node.id in ints
+    return False
+
+
+def integer_names(tree):
+    """Module-level names bound to a provably integer value."""
+    found = set()
+    for stmt in tree.body:
+        if (isinstance(stmt, ast.Assign) and len(stmt.targets) == 1
+                and isinstance(stmt.targets[0], ast.Name)
+                and integer_valued(stmt.value, found)):
+            found.add(stmt.targets[0].id)
+    return found
+
+
 def _component(name):
     """Validate one path component before joining it. Traversal never gets past here."""
     p = PurePosixPath(name)
@@ -75,14 +116,25 @@ def _component(name):
     return name
 
 
-def evaluate(node, env, script):
+def evaluate(node, env, script, ints=frozenset()):
     """Evaluate a path expression, or raise Unsupported. Never calls into user code."""
     if isinstance(node, ast.Constant):
         if isinstance(node.value, str):
             return node.value
         raise Unsupported(f"non-string constant {node.value!r}")
     if isinstance(node, ast.JoinedStr):
-        return None                                    # an f-string: known only at run time
+        # Acceptable only if it PROVABLY cannot contain a separator or traversal.
+        for part in node.values:
+            if isinstance(part, ast.Constant) and isinstance(part.value, str):
+                _component(part.value)                 # raises Unsupported on '/' or '..'
+            elif isinstance(part, ast.FormattedValue):
+                if not integer_valued(part.value, ints):
+                    raise Unsupported(
+                        f'f-string interpolates {ast.unparse(part.value)}, which is not '
+                        f'provably an integer, so it may contain a path separator')
+            else:
+                raise Unsupported('unsupported f-string part')
+        return SAFE_NAME
     if isinstance(node, ast.Name):
         if node.id == '__file__':
             return str(script)
@@ -90,10 +142,10 @@ def evaluate(node, env, script):
             return 'Path'                              # only ever used as Path(...)
         if node.id in env:
             return env[node.id]
-        return None                                    # a name we did not bind: unknown
+        raise Unsupported(f'name {node.id!r} is not a path bound in this module')
     if isinstance(node, ast.Attribute):
         if node.attr in PATH_ATTRS:
-            base = evaluate(node.value, env, script)
+            base = evaluate(node.value, env, script, ints)
             if not isinstance(base, Resolved):
                 raise Unsupported(f".{node.attr} on a non-path")
             if not base.exact:
@@ -103,36 +155,36 @@ def evaluate(node, env, script):
     if isinstance(node, ast.Call):
         f = node.func
         if isinstance(f, ast.Name) and f.id == 'Path' and len(node.args) == 1:
-            arg = evaluate(node.args[0], env, script)
+            arg = evaluate(node.args[0], env, script, ints)
             if isinstance(arg, Resolved):
                 return arg
             if arg is None:
                 raise Unsupported("Path() of a value not known statically")
             return Resolved(Path(arg))
         if isinstance(f, ast.Attribute) and f.attr in PATH_CALLS and not node.args:
-            base = evaluate(f.value, env, script)
+            base = evaluate(f.value, env, script, ints)
             if not isinstance(base, Resolved):
                 raise Unsupported(f".{f.attr}() on a non-path")
             return Resolved(base.path.resolve(), base.exact)
         raise Unsupported(f"call {ast.unparse(f)}(...)")
     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
-        left = evaluate(node.left, env, script)
+        left = evaluate(node.left, env, script, ints)
         if not isinstance(left, Resolved):
             raise Unsupported("left operand of / is not a path")
         if not left.exact:
             # the reviewer's escape: a later component after an unknown one is a directory,
             # and an unknown directory can carry the destination anywhere.
             raise Unsupported("component joined after an unknown directory component")
-        right = evaluate(node.right, env, script)
-        if right is None:
-            return Resolved(left.path, exact=False)    # unknown FINAL filename: allowed
+        right = evaluate(node.right, env, script, ints)
+        if right is SAFE_NAME:
+            return Resolved(left.path, exact=False)    # a PROVEN single filename component
         if isinstance(right, Resolved):
             raise Unsupported("right operand of / is itself a path")
         return Resolved(left.path / _component(right))
     raise Unsupported(f"expression form {type(node).__name__}")
 
 
-def bind_paths(tree, script):
+def bind_paths(tree, script, ints):
     """Bind top-level names to paths by EVALUATION, never by execution."""
     env = {}
     for stmt in tree.body:
@@ -140,7 +192,7 @@ def bind_paths(tree, script):
                 and isinstance(stmt.targets[0], ast.Name)):
             continue
         try:
-            value = evaluate(stmt.value, env, script)
+            value = evaluate(stmt.value, env, script, ints)
         except Unsupported:
             continue                                   # not a path expression; leave unbound
         if isinstance(value, Resolved) and value.exact:
@@ -148,8 +200,9 @@ def bind_paths(tree, script):
     return env
 
 
-def _open_kind(node):
-    mode = node.args[1] if len(node.args) > 1 else None
+def _open_kind(node, first_arg_is_mode=False):
+    args = node.args
+    mode = (args[0] if args else None) if first_arg_is_mode else (args[1] if len(args) > 1 else None)
     for kw in node.keywords:
         if kw.arg == 'mode':
             mode = kw.value
@@ -176,6 +229,9 @@ def io_sites(tree):
                 yield node.lineno, node.args[0], 'write'
         elif isinstance(f, ast.Name) and f.id == 'open' and node.args:
             yield node.lineno, node.args[0], _open_kind(node)
+        elif isinstance(f, ast.Attribute) and f.attr == 'open':
+            # Path.open(...) -- the receiver is the path, and the mode is argument 0.
+            yield node.lineno, f.value, _open_kind(node, first_arg_is_mode=True)
 
 
 def mkdir_targets(tree):
@@ -186,7 +242,8 @@ def mkdir_targets(tree):
 
 scripts = sorted(RESEARCH.glob('*.py'))
 trees = {p: ast.parse(p.read_text()) for p in scripts}
-envs = {p: bind_paths(t, p) for p, t in trees.items()}
+ints = {p: integer_names(t) for p, t in trees.items()}
+envs = {p: bind_paths(t, p, ints[p]) for p, t in trees.items()}
 
 # 1. archived inputs load, without pickle
 for p in sorted((RESEARCH / 'inputs').iterdir()):
@@ -214,7 +271,7 @@ for p in scripts:
                          f"path -- parenthesize the path expression")
             continue
         try:
-            r = evaluate(expr, env, p)
+            r = evaluate(expr, env, p, ints[p])
         except Unsupported as exc:
             fails.append(f"{where}: unsupported {kind} path expression `{shown}` -- {exc}")
             continue

@@ -58,6 +58,11 @@ jobs:
       - name: Comparison corruption tests
         run: python tests/test_comparison_acceptance.py
 
+      # The checkers must reject the specific defects they were written for.  These were
+      # previously run as external sweeps and only reported in commit messages.
+      - name: Checker mutation regressions
+        run: python tests/test_checker_mutations.py
+
       - name: Documentation paths and entry-point coverage
         run: python tests/test_docs_consistency.py
 
@@ -75,8 +80,33 @@ jobs:
       - name: Independent reconstruction of the geometry and the realization
         run: python tests/verify_facet_independent.py
 
-      - name: Self-contained snapshot builds and verifies itself without Git
+      # Exercise the distribution a reader actually downloads, not just its hashes.
+      - name: Snapshot builds, and its hashes verify without Git
         run: |
           python make_snapshot.py
           mkdir -p /tmp/snap && tar -xzf build/verification-snapshot-*.tar.gz -C /tmp/snap
           cd /tmp/snap/verification-snapshot-* && python manifest.py verify-archive
+
+      - name: The proof chain runs INSIDE the extracted snapshot
+        run: |
+          cd /tmp/snap/verification-snapshot-*
+          python run_checks.py
+          python tests/verify_facet_independent.py
+
+      # A visitor should not need a TeX install to read a typeset paper.
+      - name: Build the manuscript
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq pandoc texlive-xetex texlive-fonts-recommended fonts-dejavu
+          bash paper/build.sh
+          pdfinfo build/paper/manuscript.pdf
+
+      - name: Upload the verification snapshot and the paper
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-snapshot-and-paper
+          path: |
+            build/verification-snapshot-*.tar.gz
+            build/paper/manuscript.pdf
+          if-no-files-found: warn
