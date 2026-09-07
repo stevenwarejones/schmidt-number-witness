@@ -19,6 +19,7 @@ verifiers in `proofs/` accept or reject a certificate without any of this.
 | `rational_sharp.py` | rational rounding of the reduced face solution |
 | `certify_upper.py`, `certify_upper_level3.py` | rational SOS upper certificates rounded from the level-2 and level-3 numerical Gram duals |
 | `quantum_upper.py` | the dimension-unrestricted upper bound |
+| `audit_catalog_folds.py` | a scoped COMPARISON, not a proof: folds the 129 four-setting inequalities of arXiv:0810.1615 Table I down to three settings, 51,600 reductions, zero matches against `F`'s orbit |
 | `search_qubits.py`, `search_schmidt_profile.py` | counterexample searches over qubit strategies |
 | `qubit_theta_profile.py`, `qubit_joint_search.py`, `qubit_endpoint_scaling.py` | the angle-profile, joint and endpoint-scaling searches reviewed in `docs/review_2026-09-06_ai.md` |
 

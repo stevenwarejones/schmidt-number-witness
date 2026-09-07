@@ -48,8 +48,18 @@ jobs:
       - name: Comparison with the standard I3322/M3322 score thresholds
         run: python proofs/verify_novelty_comparison.py
 
+      - name: Comparison with the correlation-weighted I3322(c) family, all c >= 1
+        run: python proofs/verify_i3322_family.py
+
+      # A scoped comparison, not a proof gate: no claim in proofs/ depends on it.
+      - name: Four-setting catalogue fold search (comparison only)
+        run: python research/audit_catalog_folds.py
+
       - name: Documentation paths and entry-point coverage
         run: python tests/test_docs_consistency.py
+
+      - name: Legacy routing (historical; supports no current claim)
+        run: python research/legacy/verify_routing.py --legacy-routing
 
       - name: Manifest content and coverage
         run: python manifest.py check

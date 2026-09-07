@@ -25,11 +25,13 @@ run(PROOFS / 'verify_face_dimensions.py')
 run(PROOFS / 'verify_m3322_corollary.py')
 # The affirmative counterweight: what F detects that the standard score thresholds do not.
 run(PROOFS / 'verify_novelty_comparison.py')
-run(PROOFS / 'verify_routing.py')
+# And the same for the published one-parameter family, over its whole parameter range.
+run(PROOFS / 'verify_i3322_family.py')
+run(PROOFS / 'verify_qutrit.py')
 run(PROOFS / 'verify_sharp_qubit.py')
 run(PROOFS / 'verify_quantum_upper.py')
 
-q = json.loads((PROOFS / 'routing_certificate.json').read_text())
+q = json.loads((PROOFS / 'qutrit_certificate.json').read_text())
 s = json.loads((PROOFS / 'sharp_qubit_certificate.json').read_text())
 u = json.loads((PROOFS / 'quantum_upper_certificate.json').read_text())
 facet = json.loads((PROOFS / 'facet_certificate.json').read_text())

@@ -44,6 +44,8 @@ python tests/check_sharp_pauli.py            # exact Pauli reconstruction
 python tests/verify_sos_independent.py       # numerical, independent of the word reduction
 python tests/test_research_paths.py          # discovery input/output paths
 python tests/test_docs_consistency.py        # documented paths exist; no unreferenced script
+python research/audit_catalog_folds.py       # comparison only, not a proof gate
+python research/legacy/verify_routing.py --legacy-routing   # historical; no current claim
 python manifest.py check                     # hash and coverage
 ```
 
@@ -61,15 +63,17 @@ exact; none calls a solver.
 | `proofs/verify_face_dimensions.py` | `proofs/face_dimension_points.json` | each one-sided face has dimension 13, by exact dual-support upper bounds and matching explicit points |
 | `proofs/verify_sharp_qubit.py` | `proofs/sharp_qubit_certificate.json` | `F <= 7` for every Schmidt-number-two behavior, from a 70×70 rational Gram positive definite by exact LDL. Standard library only |
 | `proofs/verify_quantum_upper.py` | `proofs/quantum_upper_certificate.json` | `F <= 7.041387041` with no dimension-specific identities, which is what makes the qutrit violation a bounded fraction of the available room |
-| `proofs/verify_routing.py` | `proofs/routing_certificate.json` | exact qutrit Born probabilities from Gaussian-integer data: `F = 7.0129123854899715 > 7` |
+| `proofs/verify_qutrit.py` | `proofs/qutrit_certificate.json` | exact qutrit Born probabilities from Gaussian-integer data: `F = 7.0129123854899715 > 7` |
 | `proofs/verify_m3322_corollary.py` | — | bounds our own claim: the *valid inequality* `F <= 7` follows from a published one-sided facet plus positivity |
 | `proofs/verify_novelty_comparison.py` | — | the counterweight: the shipped behavior satisfies every relabeled ordinary I3322/M3322/CHSH score threshold while violating `F <= 7`, and `F` is not either family tilted by a one-party marginal |
+| `proofs/verify_i3322_family.py` | — | the same for the published correlation-weighted `I3322(c)` family, for **every** `c >= 1` and every relabeling, against a qubit benchmark derived here from the Born rule |
 
 | Path | Role |
 |---|---|
 | `docs/` | model and geometry, the sharp proof, prior-art status, and the dated independent AI reviews |
 | `tests/` | adversarial corruption tests, the optimized-execution regression, documentation and discovery-path checks, and `tests/verify_sos_independent.py`, a second implementation of the SOS check deliberately not shared with the primary verifier |
 | `research/` | discovery code that produced the certificates: SDP search, rational rounding, counterexample searches. Not part of any proof |
+| `research/legacy/` | the historical routing/record calculation the qutrit certificate originated from, with its original certificate byte for byte. Supports no current claim |
 
 ## Limitations
 
@@ -87,8 +91,9 @@ not reach.
 The rest of the prior-art audit is incomplete and priority is unresolved. No human expert or peer review
 has taken place; the reviews in `docs/review_2026-09-06_ai.md` and `docs/review_2026-09-07_ai.md` are by AI systems. The global quantum
 maximum of `F` and the tight decomposition cost are unresolved. Experimental feasibility is
-not demonstrated — the quantum violation is `0.0129` and the corresponding uniform-noise
-tolerance is roughly `0.18%`. Nothing here concerns faster-than-light communication,
+not demonstrated — the quantum violation is `0.0129`, and the corresponding tolerance to
+**uniform white-noise admixture of the output distribution** is roughly `0.18%`. That figure is
+not a detection efficiency, not a visibility, and not a demonstrated experimental tolerance. Nothing here concerns faster-than-light communication,
 observer-relative events, or an interpretation of quantum mechanics.
 
 ## License, citation and provenance

@@ -47,7 +47,7 @@ from pathlib import Path
 import sympy as sp
 
 HERE = Path(__file__).resolve().parent
-CERT = json.loads((HERE / 'routing_certificate.json').read_text())
+CERT = json.loads((HERE / 'qutrit_certificate.json').read_text())
 
 # --- the shipped behavior, as an exact correlator vector -----------------------------
 IDX = list(product(range(3), range(3), range(2), range(2)))

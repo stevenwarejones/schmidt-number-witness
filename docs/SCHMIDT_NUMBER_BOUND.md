@@ -118,7 +118,7 @@ recorded at `docs/review_2026-09-07_ai.md`.
 
 Take the product state |00>, all three Alice observables equal to Z, and all three Bob observables equal to -Z. Then A_i=+1, B_j=-1 and E_ij=-1 in expectation, giving F=7 exactly.
 
-The previously shipped qutrit state and POVMs are reconstructed from exact rational/Gaussian-integer data by `proofs/verify_routing.py`. Its exact F value is strictly larger than 7. The main check runner also verifies that the Bell coefficient vectors match across the facet, sharp-bound, and quantum-realization certificates.
+The qutrit state and POVMs are reconstructed from exact rational/Gaussian-integer data by `proofs/verify_qutrit.py`. Its exact F value is strictly larger than 7. The main check runner also verifies that the Bell coefficient vectors match across the facet, sharp-bound, and quantum-realization certificates.
 
 ## 5. A quantitative consequence
 

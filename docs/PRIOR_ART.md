@@ -73,8 +73,58 @@ upper bound, because neither is one.
 So `F <= 7` is **not implied** by the conjunction of those relabeled scalar thresholds with
 quantum membership — `Q` is a quantum counterexample to that implication.
 
-**Scope.** This covers input permutations, output flips and party exchange of two inequality
-families, and nothing else: not local preprocessing, filtering, sequential wirings, many-copy
+### The correlation-weighted family, over its whole parameter range
+
+The ordinary thresholds above are the `c = 1` point of a published one-parameter family,
+
+    I3322(c) = <A0> + <A1> + <B0> + <B1> - <A0B0> - <A0B1> - <A1B0> - <A1B1>
+               + c ( <A0B2> - <A1B2> + <A2B0> - <A2B1> ),
+
+defined at [arXiv:1507.07521](https://arxiv.org/abs/1507.07521) Eq. (26) and
+[arXiv:1808.02412](https://arxiv.org/abs/1808.02412) Eq. (E1).
+`proofs/verify_i3322_family.py` settles it for **every** `c >= 1` at once.
+
+It derives the qubit benchmark rather than quoting one: with the maximally entangled two-qubit
+state and `A₀ = tX + zZ`, `A₁ = −tX + zZ`, `A₂ = X`, `B₀ = tX − zZ`, `B₁ = −tX − zZ`, `B₂ = X`
+on `t² + z² = 1`, the score is `4 − 4t² + 4ct`, giving `4 + c²` at `t = c/2` and `4c` at
+`t = 1`. Each relabeling makes `c ↦ I3322(c)(Q)` an affine function, 576 distinct lines in all,
+and every one lies strictly below the benchmark on both intervals — smallest margin
+`0.5834085189625386` near `c ≈ 1.6027`, decided in exact rational arithmetic.
+
+These are **achievable** qubit scores, i.e. lower witnesses. Nothing here claims they are the
+qubit maxima, and the argument does not need that.
+
+### Is F a four-setting inequality with settings identified?
+
+`research/audit_catalog_folds.py` — a **comparison, not a proof gate** — takes the 129
+four-setting `J⁽ⁿ⁾₄₄₂₂` inequalities of Pál and Vértesi's Table I
+([arXiv:0810.1615](https://arxiv.org/abs/0810.1615)), archived verbatim, and folds each down to
+three settings under the 20 surjective reductions per party (12 signed pair identifications, 8
+deterministic substitutions):
+
+    129 inequalities  ×  20 Alice maps  ×  20 Bob maps  =  51,600 reductions,  0 matches.
+
+Two integrity checks give that number meaning: every source vector is independently confirmed
+to have classical maximum 0 in the source convention, and a positive control lifts `F` to four
+settings and requires the fold to find it again.
+
+**This covers 129 rows of one table** — not all 241 inequalities of that survey, not all 175
+four-setting classes, not five settings, not arbitrary wirings, and not positive combinations
+of several inequalities. Zero matches is not evidence of novelty.
+
+### Comparisons that remain open
+
+- the broader Gigena–Kaniewski family. An exploratory projected-simulator search was
+  **inconclusive**: its finite strategy library left eight targets uncovered, so neither
+  detection nor non-detection follows. That work is not in this repository.
+- the detection-efficiency family's own detection comparison, as opposed to the
+  correlator-support argument above.
+- the remainder of the complete four-setting catalogue data.
+- arbitrary combinations of prior bounds, wirings, filtering, many-copy protocols, and
+  conditional or probability-penalized tradeoffs generally.
+
+**Scope.** The score-threshold comparison covers input permutations, output flips and party
+exchange of two inequality families, and nothing else: not local preprocessing, filtering, sequential wirings, many-copy
 protocols, probability-conditioned tradeoffs, or dimension-constrained inequalities generally,
 any of which could imply the bound while the scalar thresholds do not. The supported claim is
 "missed by the standard score thresholds", not "missed by every existing witness". `Q` does

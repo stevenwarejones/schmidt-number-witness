@@ -1,4 +1,17 @@
-"""Standalone exact verifier. Python standard library only."""
+"""HISTORICAL. The routing/record calculation the qutrit certificate originated from.
+
+This supports NO claim in the current paper or repository. It is kept because the qutrit
+behavior verified by proofs/verify_qutrit.py was found while studying it, and because
+discarding a calculation that once motivated a shipped certificate makes the record harder to
+audit, not easier. See research/legacy/README.md.
+
+The active realization check now lives in proofs/verify_qutrit.py. This file re-derives the
+same probabilities from the same data as a self-contained precondition, then runs the routing
+checks. Its certificate is the ORIGINAL routing_certificate.json, byte for byte.
+
+Standalone; Python standard library only. Run with --legacy-routing to include the routing
+optimisations, as before.
+"""
 import sys as _sys
 
 if _sys.flags.optimize:
