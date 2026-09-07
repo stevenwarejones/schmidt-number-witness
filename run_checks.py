@@ -30,14 +30,25 @@ run(PROOFS / 'verify_i3322_family.py')
 run(PROOFS / 'verify_qutrit.py')
 run(PROOFS / 'verify_sharp_qubit.py')
 run(PROOFS / 'verify_quantum_upper.py')
+# The penalised functional G = F + eps0 * p strengthens the sharp Schmidt-number-two bound and
+# NOTHING else.  verify_penalty_not_partial_local.py is the guard on that scope: it proves,
+# from the facet certificate checked above, that G is not valid on H, so the facet result
+# cannot be carried over to it.  See docs/CERTIFICATE_PENALTY_ENDPOINT.md.
+run(PROOFS / 'verify_penalty_endpoint.py')
+run(PROOFS / 'verify_improved_qutrit.py')
+run(PROOFS / 'verify_penalty_not_partial_local.py')
 
 q = json.loads((PROOFS / 'qutrit_certificate.json').read_text())
 s = json.loads((PROOFS / 'sharp_qubit_certificate.json').read_text())
 u = json.loads((PROOFS / 'quantum_upper_certificate.json').read_text())
 facet = json.loads((PROOFS / 'facet_certificate.json').read_text())
+endpoint = json.loads((PROOFS / 'penalty_endpoint_certificate.json').read_text())
 
-if not q['coefficients'] == s['coefficients'] == u['coefficients'] == facet['w']:
+if not (q['coefficients'] == s['coefficients'] == u['coefficients'] == facet['w']
+        == endpoint['coefficients']):
     raise SystemExit('Bell coefficients mismatch across certificates')
+if not Fraction(endpoint['epsilon']) + Fraction(endpoint['alpha']) == 4:
+    raise SystemExit('Endpoint epsilon and alpha are not complementary')
 if not Fraction(q['score']) > Fraction(s['bound']):
     raise SystemExit('Sharp quantum separation FAILED')
 weight = (Fraction(q['score']) - 7) / (Fraction(u['bound']) - 7)
@@ -45,4 +56,7 @@ if not weight > Fraction(3119, 10000):
     raise SystemExit('Weight bound FAILED')
 
 print('All exact checks passed: sharp bound 7, qutrit separation, and quantum remainder weight >31.19%.')
-print('Global quantum maximum, tight decomposition cost, novelty, and external review remain open.')
+print(f"Penalty endpoint: M_A <= 6 + {endpoint['alpha']} p on Schmidt number two, against a lower "
+      f"strategy at 0.16310160 -- and NOT valid on the partial-local hull H.")
+print('Global quantum maximum, tight decomposition cost, the exact optimal penalty alpha_star, '
+      'novelty, and external review remain open.')

@@ -5,8 +5,8 @@ python -m pip install -r requirements.txt
 python run_checks.py
 ```
 
-That is the whole thing. It takes a few seconds and needs no SDP solver, no network, and no
-Git history.
+That is the whole thing. It takes well under a minute and needs no SDP solver, no network, and
+no Git history.
 
 **Verifying these proofs does not require rerunning the search that found them.** The
 certificates are data; the verifiers re-derive every claim from that data in exact arithmetic.
@@ -41,12 +41,24 @@ There are two entry points a reader most likely wants, and neither touches resea
 | 6 | exact qutrit Born probabilities: `F = 7.0129123854899715 > 7` | `proofs/verify_qutrit.py` |
 | 7 | `F <= 7` for **every Schmidt-number-two behavior** | `proofs/verify_sharp_qubit.py` |
 | 8 | `F <= 7.041387041` with no dimension assumption | `proofs/verify_quantum_upper.py` |
+| 9 | the strengthening `F + 3.83689 p <= 7` on Schmidt number two, i.e. `M_A <= 6 + 0.16311 p`, against a lower strategy reaching `0.16310160` | `proofs/verify_penalty_endpoint.py` |
+| 10 | a qutrit realization with `G = 7.0928393387` and `1.5136%` white-noise tolerance, which the original `F` does **not** detect | `proofs/verify_improved_qutrit.py` |
+| 11 | that same strengthening is **not** valid on the partial-local hull `H`, for any `eps > 0` | `proofs/verify_penalty_not_partial_local.py` |
+
+Checks 9–11 concern a **different functional**, `G = F + eps * p` with `p = P(00|10)`. Check 11
+is the scope guard: `F` is both a facet of `H` and bounded on Schmidt number two, and `G` keeps
+only the second property. `docs/CERTIFICATE_PENALTY_ENDPOINT.md` is the guide, and its §0 is the
+part not to skip. Checks 9–11 add roughly 30 seconds, almost all of it exact rational LDL on a
+Gram whose least pivot is `1.4 * 10^-7`.
 
 Expected final output:
 
 ```
 All exact checks passed: sharp bound 7, qutrit separation, and quantum remainder weight >31.19%.
-Global quantum maximum, tight decomposition cost, novelty, and external review remain open.
+Penalty endpoint: M_A <= 6 + 16311/100000 p on Schmidt number two, against a lower strategy at
+0.16310160 -- and NOT valid on the partial-local hull H.
+Global quantum maximum, tight decomposition cost, the exact optimal penalty alpha_star, novelty,
+and external review remain open.
 ```
 
 Any failure raises a `CalledProcessError` and stops. Every verifier uses `assert` as a proof
@@ -65,9 +77,17 @@ gate and refuses to run under `python -O`, where assertions would be stripped;
   raises — do these files match the hashes shipped beside them, and is anything present
   unlisted — with no Git metadata. **Neither implies the other**, and neither is mathematical
   correctness, proof authenticity, or historical priority.
-- **Not experimental feasibility.** The violation is `0.0129`, with roughly `0.18%` tolerance
-  to uniform white-noise admixture of the output distribution. That is not a detection
-  efficiency, a visibility, or a demonstrated experimental tolerance.
+- **Not experimental feasibility.** For `F` the violation is `0.0129`, with roughly `0.18%`
+  tolerance to uniform white-noise admixture of the output distribution; for the penalised
+  `G` the new realization gives `1.51%`. Neither is a detection efficiency, a visibility, or a
+  demonstrated experimental tolerance, and the two are not directly comparable — different
+  functionals, different realizations, and different noise thresholds. **The white-noise model
+  is stated exactly** in `docs/CERTIFICATE_PENALTY_ENDPOINT.md` §6: uniform outputs give
+  `F(U) = 0` but `G(U) = eps/4`, so the threshold for `G` is `(G(Q)-7)/(G(Q)-eps/4)` and the
+  naive `(G(Q)-7)/G(Q)` is wrong.
+- **Not the optimal penalty.** `0.1631016 < alpha_star <= 0.16311` is certified from both
+  sides; the exact value of `alpha_star` is undetermined, and `research/endpoint_numerics.json`
+  records a numerical stationary point that is evidence and not a certificate.
 - **Not one step of the sharp bound.** The reduction from arbitrary binary POVMs and Schmidt
   rank two to the projective qubit case is a mathematical argument, not machine-checked. It is
   written out constructively in `docs/SCHMIDT_NUMBER_BOUND.md` §2–3 and mapped in
@@ -91,6 +111,8 @@ gate and refuses to run under `python -O`, where assertions would be stripped;
 | `python tests/test_comparison_acceptance.py` | corrupt Q and the catalogue, require both comparisons to reject |
 | `python tests/test_output_helper.py` | the validated output-path helper accepts ordinary names and refuses escaping ones |
 | `python tests/test_checker_mutations.py` | replay every defect the auxiliary checkers once accepted, and require rejection for the intended reason |
+| `python tests/verify_endpoint_independent.py` | the endpoint certificate by three routes that are not the proof path — a second Clifford rewriting, exact Gaussian-rational qubit matrices with no normal ordering, and integer Bareiss minors — plus the branch duals rebuilt from the 36 probability positivity constraints, with an attaining behaviour exhibited for each. About 30 s |
+| `python tests/test_endpoint_mutations.py` | corrupt each endpoint certificate and require rejection **for the intended reason**, including a Gram perturbation that leaves the operator identity exactly intact and destroys only positivity. About 6 minutes |
 | `python research/legacy/verify_routing.py --legacy-routing` | historical; supports no current claim |
 | `bash paper/build.sh` | build the manuscript into `build/paper/manuscript.pdf` (needs Pandoc + XeLaTeX) |
 

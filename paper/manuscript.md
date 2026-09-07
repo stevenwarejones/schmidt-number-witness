@@ -24,11 +24,11 @@ header-includes:
 
 **Statement on AI use.** This manuscript and the artifact it describes were produced by two AI systems working adversarially against each other under the direction of the repository maintainer, who is not a physicist and whose intended authorship for any submission version is not asserted here. This draft was written by ChatGPT (OpenAI), working as "Astra"; the repository's verifiers, certificates and tests were written by Claude (Anthropic), which also reviewed this work, and Astra in turn reviewed Claude's. Where one system's construction was adopted by the other it was re-derived first -- the qubit benchmarks are rebuilt symbolically in `proofs/verify_i3322_family.py` and `proofs/verify_novelty_comparison.py`, and the geometry and Born reconstruction are redone independently in `tests/verify_facet_independent.py` -- and the disagreements are recorded in the repository rather than reconciled silently. That is a claim about those specific checks, not a general guarantee that two systems make every statement independent. No claim here has been checked by a human domain expert. It is circulated to invite exactly the scrutiny it has not had.
 
-**For the reviewer.** Please prioritize the exact operator identity and positivity certificate; the extension to arbitrary binary POVMs and Schmidt number two; the prior-art comparison, especially probability-conditioned dimension bounds; and the interpretation of the convex-remainder bound. The mathematical baseline is linked in Section 7. This revision incorporates the detailed novelty audit of 7 September 2026, including its exact one-parameter comparison and explicitly incomplete catalogue audit. This PDF is a manuscript handoff, not a replacement for its machine-readable certificates.
+**For the reviewer.** Please prioritize the exact operator identity and positivity certificate; the extension to arbitrary binary POVMs and Schmidt number two; the prior-art comparison, especially probability-conditioned dimension bounds; and the interpretation of the convex-remainder bound. The mathematical baseline is linked in Section 8. Section 7 is new and has a deliberately narrower scope than the rest: its results are about a different functional, and Propositions 1-2 do not transfer to it. This revision incorporates the detailed novelty audit of 7 September 2026, including its exact one-parameter comparison and explicitly incomplete catalogue audit. This PDF is a manuscript handoff, not a replacement for its machine-readable certificates.
 
 ## Abstract
 
-We study a binary-outcome bipartite Bell functional with three measurement settings per party. An exact rational sum-of-squares identity establishes the sharp bound F ≤ 7 for all states of Schmidt number at most two and arbitrary local binary POVMs. A fully specified two-qutrit realization attains F = 7.0129123854899715..., thereby certifying Schmidt number at least three. The functional is a positivity-penalized relabeling of M3322 on either party. Its supporting face has dimension 13 on each one-sided partial-local hull and dimension 14 on their convex union, making it a facet only of the latter among these three sets. Consequently the witness also excludes setting-independent mixtures in which the party supplying a compatible measurement pair may vary between components. The supplied behavior remains below explicit qubit-achievable benchmarks for all relabelings of ordinary I3322 and M3322 and every member of a published correlation-weighted I3322 family with parameter c at least one. A certified unrestricted quantum upper bound yields a lower bound exceeding 31.19% on the quantum remainder outside the convex hull of the Schmidt-number-two and compatible-pair classes for the supplied behavior.
+We study a binary-outcome bipartite Bell functional with three measurement settings per party. An exact rational sum-of-squares identity establishes the sharp bound F ≤ 7 for all states of Schmidt number at most two and arbitrary local binary POVMs. A fully specified two-qutrit realization attains F = 7.0129123854899715..., thereby certifying Schmidt number at least three. The functional is a positivity-penalized relabeling of M3322 on either party. Its supporting face has dimension 13 on each one-sided partial-local hull and dimension 14 on their convex union, making it a facet only of the latter among these three sets. Consequently the witness also excludes setting-independent mixtures in which the party supplying a compatible measurement pair may vary between components. The supplied behavior remains below explicit qubit-achievable benchmarks for all relabelings of ordinary I3322 and M3322 and every member of a published correlation-weighted I3322 family with parameter c at least one. A certified unrestricted quantum upper bound yields a lower bound exceeding 31.19% on the quantum remainder outside the convex hull of the Schmidt-number-two and compatible-pair classes for the supplied behavior. A second exact certificate strengthens the Schmidt-number-two statement to the near-optimal conditional form M_A ≤ 6 + 0.16311 p(00|10), bracketed from below by an explicit two-qubit strategy at 0.16310160, with the exact optimal coefficient left open; that strengthening holds on Schmidt number two alone and is provably invalid on the partial-local hull, so the facet interpretation does not transfer to it.
 
 ## 1. Scenario and relation to existing inequalities
 
@@ -44,7 +44,7 @@ $$
 
 The analysis uses the ordinary local quantum Bell model, $p(ab|xy)=\mathrm{tr}[\rho(M_{a|x}\otimes N_{b|y})]$, and setting-independent convex weights. It concerns certification from probabilities; no hidden signaling or observer-dependent event assumption is imposed.
 
-**Main result.** The functional below has the attained bound F ≤ 7 on all Schmidt-number-two quantum behaviors with arbitrary binary POVMs, while an exact qutrit realization exceeds it. Section 3 proves the bound; Section 4 specifies the separating realization.
+**Main result.** The functional below has the attained bound F ≤ 7 on all Schmidt-number-two quantum behaviors with arbitrary binary POVMs, while an exact qutrit realization exceeds it. Section 3 proves the bound; Section 4 specifies the separating realization; Section 7 strengthens the bound to a near-optimal conditional penalty on Schmidt number two alone.
 
 M3322 originates in nonlocal-resource inequalities [1,2]. One-sided partial-locality and its connection to measurement structure are developed in [3], with a general n-input extension in [4]. Dimension certification and dimension-constrained bounds are established subjects [5-7]. The result considered here is the exact bound for the particular F above together with its two-sided geometric role. Historical originality of this specific bound remains under review.
 
@@ -316,7 +316,92 @@ $$
 
 For (3), the right side is 0.3119910285437303... >31.19%. This bounds the quantum remainder in every such decomposition. It also bounds a decomposition with a Schmidt-number-two first component alone, since $Q_2\subseteq K$. The same numeric U must not be used for an arbitrary nonsignaling remainder. It is not an exact resource cost, nor does it identify accessible labels on individual runs. Applied to mixtures of implementations, components outside the specified easy classes must carry at least this weight; the inequality does not determine their individual states or measurements.
 
-## 7. Limits and reproducibility
+## 7. A near-optimal conditional penalty, on a strictly smaller scope
+
+Theorem 3 is equivalent to the probability-conditioned tradeoff $M_A\le6+4p$, where
+$M_A=F+4p-1$ and $p=P(00|10)$. The coefficient 4 is not optimal. Define
+
+$$
+\alpha_\star:=\sup\Big\{\frac{M_A(P)-6}{p(P)}\ :\ P\in S_2,\ p(P)>0\Big\},
+$$
+
+the smallest coefficient making $M_A\le6+\alpha p$ valid on all Schmidt-number-two behaviors.
+
+**Theorem 6.** $0.1631016<\alpha_\star\le16311/100000=0.16311$.
+
+The upper bound is a second exact rational sum-of-squares certificate on the same 84-word basis
+and 84-by-70 integer basis map as Theorem 3, with a positive-definite 70-by-70 rational Gram
+satisfying
+
+$$
+\Big(7-\tfrac{\varepsilon_0}{4}\Big)I-\mathcal B_{f+\varepsilon_0 d}
+=\sum_{j,k}X_{jk}J_j^\dagger J_k,
+\qquad \varepsilon_0=\frac{383689}{100000}=4-\alpha_\star^{\rm upper},
+$$
+
+where $d$ carries $1/4$ in the $A_1$, $B_0$ and $E_{10}$ slots. The constant $\varepsilon_0/4$ is
+part of the statement: the penalised functional contains a probability, not only correlators.
+The Gram sits close to the boundary of the positive-definite cone -- its least exact LDL pivot
+is about $1.39\times10^{-7}$ -- so positivity is checked in exact rational arithmetic and
+cross-checked by integer Bareiss elimination.
+
+The lower bound is an explicit two-qubit strategy: state $(|00\rangle+t|11\rangle)/\sqrt{1+t^2}$
+with rational $t$, and six observables $[2z/(1+z^2)]X+[(1-z^2)/(1+z^2)]Z$ with rational
+half-angle tangents $z$, for which every Born expectation is rational despite the square root in
+the normalization. It has $M_A>6$, so it is nonlocal, and it attains ratio
+$0.16310160137\ldots$. The exact value of $\alpha_\star$ is **not** determined; the certified
+interval has width below $8.4\times10^{-6}$.
+
+**The deterministic-observable branch is not inherited.** Section 3 disposes of a deterministic
+observable by routing the behavior into a partial-local class and applying Proposition 1. That
+route is unavailable here for the reason recorded next, and is replaced by twelve exact
+no-signaling dual certificates -- one per (observable, sign) pair -- each a nonnegative
+combination of the 36 positivity constraints plus one multiplier on the deterministic marginal,
+giving $M_A\le6$ on that branch. Coverage is by construction rather than by enumeration: a
+deterministic observable forces its marginal, which is the only hypothesis each dual uses. Each
+dual value is attained by an exhibited behavior. Without the branch hypothesis the no-signaling
+maximum of $M_A$ is 8, so the hypothesis is doing real work.
+
+**Scope: the penalised functional is not valid on $H$.** Of the fifteen affinely independent
+points of $H$ saturating $F=7$ that establish Proposition 2, exactly one has $p>0$: the side-$B$,
+pair-$(0,2)$ point, with $F=7$ and $p=1/3$ exactly. Hence $F+\varepsilon p=7+\varepsilon/3>7$
+there for **every** $\varepsilon>0$. No positive penalty preserves the partial-local reading, so
+Propositions 1-2, Corollary 5 and the facet interpretation apply to $F$ and not to
+$F+\varepsilon p$. This is proved from the same facet certificate that establishes Proposition 2.
+
+**A separating realization.** An exactly specified two-qutrit state and six real rank-one
+projective measurements, given as integers, yield
+
+$$
+F=6.469225039506\ldots\le7,\qquad
+G:=F+\varepsilon_0 p=7.092839338673\ldots>7,
+$$
+
+with Schmidt rank three certified by a nonzero determinant of the coefficient matrix. The
+original $F$ does not detect this behavior at all. Under uniform-output admixture the
+appropriate threshold is **not** $(G(Q)-7)/G(Q)$: uniform outputs give $F(U)=0$ but
+$p(U)=1/4$, hence $G(U)=\varepsilon_0/4\ne0$, and
+
+$$
+\eta_{\rm crit}=\frac{G(Q)-7}{G(Q)-\varepsilon_0/4}=0.01513614904798648\ldots,
+$$
+
+about $1.51\%$. This is a particular output-noise model, not a detector-efficiency threshold,
+and the comparison with the $0.1841\%$ of Section 8 is between two different functionals on two
+different realizations. The see-saw search that produced this realization is a lower-bound
+discovery method, not a proof of the global qutrit maximum of $G$.
+
+Certificates and verifiers: `proofs/verify_penalty_endpoint.py`,
+`proofs/verify_improved_qutrit.py` and `proofs/verify_penalty_not_partial_local.py`, with an
+independent reconstruction along three routes that are not the proof path in
+`tests/verify_endpoint_independent.py`, and `docs/CERTIFICATE_PENALTY_ENDPOINT.md` as the guide.
+
+**Not established here:** the exact value of $\alpha_\star$; the global qutrit or unrestricted
+quantum maximum of $G$; any facet, dimension or partial-locality property of $G$; a self-testing
+statement at the conjectured critical penalty; or novelty of any of it.
+
+
+## 8. Limits and reproducibility
 
 For uniform-output admixture $Q_\eta$=(1−η)Q+ηP_uniform, all uniform correlators and marginals vanish. Hence F($Q_\eta$)=(1−η)F(Q), and the supplied realization violates 7 for
 
@@ -328,7 +413,7 @@ The corresponding tolerance is approximately 0.1841%. This is a particular proba
 
 The sharp lower-dimensional ceiling is proved, while the unrestricted quantum maximum, optimal remainder cost, and complete facet description of H remain undetermined. Experimental validation and assessment of novelty relative to equivalent witnesses remain separate tasks.
 
-The companion artifact reviewed here is pinned to [commit 522bfcf](https://github.com/stevenwarejones/schmidt-number-witness/tree/522bfcfd3ef5a414f8de668439c17fb740b2ff55). The exact chain passes at this snapshot. All active certificates are in `proofs/`: `proofs/verify_sharp_qubit.py` checks (2), `proofs/verify_quantum_upper.py` checks $U$, and `proofs/verify_qutrit.py` reconstructs the qutrit probabilities. The historical routing calculation that certificate originated from has been moved to `research/legacy/` and is not a premise of this paper.
+The companion artifact for Sections 1-6 and 8 is pinned to [commit 522bfcf](https://github.com/stevenwarejones/schmidt-number-witness/tree/522bfcfd3ef5a414f8de668439c17fb740b2ff55). The exact chain passes at this snapshot. The Section 7 certificates postdate that pin; they are in `proofs/` on the current tree, run by `run_checks.py`, and guided by `docs/CERTIFICATE_PENALTY_ENDPOINT.md`. All active certificates are in `proofs/`: `proofs/verify_sharp_qubit.py` checks (2), `proofs/verify_quantum_upper.py` checks $U$, and `proofs/verify_qutrit.py` reconstructs the qutrit probabilities. The historical routing calculation that certificate originated from has been moved to `research/legacy/` and is not a premise of this paper.
 
 The comparisons of Section 5 are integrated as `proofs/verify_i3322_family.py`, which derives its qubit benchmarks symbolically and then decides the continuum comparison in exact rational arithmetic, and `research/audit_catalog_folds.py`, a scoped comparison rather than a proof gate. `tests/test_comparison_acceptance.py` corrupts the qutrit behaviour and the catalogue data in turn and requires both to be rejected.
 
