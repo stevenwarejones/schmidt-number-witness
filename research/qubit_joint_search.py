@@ -1,6 +1,6 @@
 """Joint (theta, U) search for the (pre-certificate) qubit conjecture.
 
-Supplied so the 600-restart figure quoted in INDEPENDENT_REVIEW.md is reproducible rather
+Supplied so the 600-restart figure quoted in docs/review_2026-09-06_ai.md is reproducible rather
 than externally reported.  Superseded by the exact sharp-bound certificate; retained only
 as the record of the pre-certificate numerical position.
 

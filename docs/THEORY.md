@@ -53,6 +53,14 @@ Write each constituent polytope's positivity/CHSH inequalities as r_i.(1,v) >= 0
 
 For each constituent, form the nullspace of those active rows in homogeneous coordinates (1,v). The span of the three nullspaces for one side contains the homogeneous span of its entire saturating face. Its rank is 14, hence the face dimension is at most 13. Explicit nonsignaling points belonging to the designated 2x3-local restrictions give matching affine rank 13. Combining both sides gives affine rank 14.
 
+A note on what this rests on. Positivity together with all 2x2 CHSH inequalities is complete
+for binary 2x3 locality — by Fine's theorem plus an interval-intersection argument, since for
+each of Bob's inputs the feasible values of `t = P(A0=1, A1=1)` form an interval, CHSH gives
+pairwise intersections, and intervals on a line intersect in common whenever they intersect
+pairwise. But the upper-bound duals do not need that completeness: **positive combinations of
+necessary inequalities already prove validity.** Completeness is required only where these rows
+are used as a membership test, not where they are used to prove an upper bound.
+
 `proofs/verify_face_dimensions.py` checks the dual identities, nullspaces, membership inequalities and ranks exactly. For binary 2x3 restrictions, positivity and the complete set of 2x2 CHSH inequalities characterize locality; the separate facet verifier also supplies explicit deterministic local models for its 15 points. No claim of exhaustive enumeration of H's facets is made.
 
 Thus F is a facet of H, but not of H_A or H_B. This is a structural distinction; it is not by itself a novelty proof.

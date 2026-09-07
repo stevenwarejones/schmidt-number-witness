@@ -60,19 +60,59 @@ The standalone verifier uses a right-insertion normal-order algorithm, separatel
 
 ## 2. Arbitrary binary qubit POVMs
 
-A binary effect lies in the compact convex set 0<=M<=I, whose extreme points are projections. For fixed state and other measurements the Bell functional is affine in each effect. Therefore a maximum over all six effects can be attained with each effect projective.
+The reduction below is **constructive**: it exhibits the mixture explicitly rather than
+appealing to a maximum over a convex set. That matters because the weights must be shown to be
+setting independent, which an extremality argument does not by itself establish.
 
-A projective qubit observable is either nontrivial and traceless, or deterministic (+I or -I). If any observable is deterministic, it is jointly measurable with another measurement on that party. The behavior then belongs to one of the partial-local classes. The separately supplied exact facet-validity certificate gives F<=7 in that case.
+A binary qubit effect `M` with eigenvalues `0 <= L- <= L+ <= 1` and eigenprojection `PI` for
+`L+` decomposes as
 
-This covers all projective cases, and hence all binary qubit POVMs. The state may be mixed.
+    M  =  L-  * I  +  (L+ - L-) * PI  +  (1 - L+) * 0,
+
+a convex mixture of three valid effects — the deterministic `I`, the projection `PI`, and the
+deterministic `0` — with nonnegative weights summing to 1. Decompose all six effects
+independently and sample their component labels **before** the settings are chosen. The joint
+weight of a combination is the product of six weights, none of which depends on any setting, so
+the resulting mixture is a legitimate setting-independent implementation.
+
+Every implementation in that mixture uses only projective or deterministic measurements, and
+each is covered:
+
+- if any observable is deterministic, it is jointly measurable with another measurement on that
+  party, so the behavior lies in one of the partial-local classes and the exact facet-validity
+  certificate (`proofs/verify_facet.py`) gives `F <= 7`;
+- otherwise all six observables are nontrivial traceless projective qubit observables, and the
+  sum-of-squares identity of section 1 gives `F <= 7` for **every** state, since its
+  anticommutator relations hold for arbitrary unit Bloch vectors rather than for any selected
+  or coplanar configuration.
+
+`F` is affine in the behavior, so the bound survives the mixture. The state may be mixed.
 
 ## 3. Schmidt-number extension
 
-Every pure state of Schmidt rank at most two is supported on local subspaces of dimensions at most two. Compressing the local binary POVMs to those subspaces preserves the probabilities and yields valid qubit POVMs. Thus the bound holds for any such pure state, even in larger ambient Hilbert spaces.
+Let `psi` be pure of Schmidt rank at most two in some ambient bipartite space. Write
+`psi = (V_A tensor V_B) psi~` with local isometries `V_A`, `V_B` onto its Schmidt supports.
+The compressed effects `V_A^dagger M V_A` and `V_B^dagger N V_B` are positive and sum to the
+identity on those supports, and they reproduce every Born probability exactly. A rank-one
+support embeds into a qubit.
 
-For a state of Schmidt number at most two, apply this argument to a decomposition into pure states of Schmidt rank at most two and average. Linearity also permits setting-independent mixtures of measurement implementations.
+**The compressed effects need not be projective**, which is precisely why section 2 must handle
+arbitrary binary POVMs and must come after this step rather than before it. Compression yields
+qubit POVMs; section 2 then reduces those to projective or deterministic implementations.
 
-This proves the stated theorem for all Schmidt-number-two models, not merely for systems explicitly built from two qubits.
+For a state of Schmidt number at most two, decompose it into pure states of Schmidt rank at most
+two and apply the argument to each component. Different components may induce different
+compressed effects; the bound of section 2 is universal over states and effects, so it applies
+componentwise, and averaging preserves it.
+
+This proves the theorem in arbitrary finite ambient dimension and under setting-independent
+mixtures of measurement implementations. It claims nothing about signaling devices,
+input-dependent source mixtures, or postselected probability tables outside the stated Bell
+model — those are premises of the theorem, not additional apparatus assumptions.
+
+This reduction is elementary and has no machine certificate; it is the one step of the argument
+that is prose rather than exact arithmetic. It was independently reconstructed in the review
+recorded at `docs/review_2026-09-07_ai.md`.
 
 ## 4. Sharpness and qutrit separation
 
@@ -114,7 +154,7 @@ This is a lower bound on the unrestricted remainder in **every such decompositio
 
 ## 6. Discovery and validation
 
-The earlier residual certificates established 7.002051833 and then 7.0000010221. They remain available as historical independent certificates; the sharp certificate supersedes their role in the dimension threshold.
+Two earlier approximate certificates established 7.002051833 and then 7.0000010221 on the way to this result. They are **not** in this snapshot — they were removed when the exact certificate superseded them, and no historical copy is linked here. `research/certify_upper.py` and `research/certify_upper_level3.py` are the generators that produced them.
 
 The successful construction proceeded by identifying exact equality-family kernels, solving on the remaining Gram subspace, and correcting a numerical matrix onto the exact rational affine constraints. The final certificate has positive exact LDL pivots and no polynomial residual. The correctness of those operations is independently checked from the exported artifact, so the proof does not rely on interpreting a numerical solver status as exact.
 
@@ -149,6 +189,14 @@ That last command requires only the Python standard library and `proofs/sharp_qu
 The **sharp qubit/Schmidt-number-two bound is no longer conjectural in this project**. What remains to be established independently is the correctness of this proof package and its novelty relative to existing dimension-witness and incompatibility literature.
 
 The global quantum maximum of F is not determined here. Nor is the decomposition-weight bound claimed tight, the full two-sided polytope classified, or experimental feasibility established.
+
+A bounded, specific follow-up was identified in the 7 September review: the sharp bound is
+equivalent to the probability-conditioned tradeoff `M_A <= 6 + 4 p(00|10)` for Schmidt number at
+most two, and it is **open whether 4 is the smallest universally valid coefficient**. Sharpness
+of `F <= 7` does not settle this, because the saturating points have `p(00|10) = 0` and so give
+no lower bound on the ratio `(M_A - 6)/p(00|10)`. Either an exact family with positive `p`
+approaching ratio 4, or a certified smaller coefficient, would turn one functional into a sharp
+tradeoff statement.
 
 Dimension-constrained SDP methods are established, for example in [Navascues and Vertesi (2015)](https://arxiv.org/abs/1412.0924) and [Navascues et al. (2015)](https://arxiv.org/abs/1507.07521). The contribution to audit is this particular sharp witness bound, its two-sided facet role, and the joint physical conclusion—not the general idea of dimension certification.
 

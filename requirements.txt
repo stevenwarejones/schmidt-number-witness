@@ -1,9 +1,10 @@
 # Verification dependencies only.  The sharp Schmidt-number-two verifier
-# (proofs/dimension/verify_sharp_qubit.py) is standard-library only and needs none of these.
+# (proofs/verify_sharp_qubit.py) is standard-library only and needs none of these.
 #
-# sympy  - exact algebra for proofs/geometry/verify_face_dimensions.py and
-#          tests/check_sharp_pauli.py
-# numpy  - numerical cross-checks in review/
+# sympy  - exact algebra for proofs/verify_face_dimensions.py, the explicit qubit
+#          benchmarks in proofs/verify_novelty_comparison.py, and tests/check_sharp_pauli.py
+# numpy  - archived-input loading in tests/test_research_paths.py and the numerical
+#          cross-check in tests/verify_sos_independent.py
 #
 # Tested on CPython 3.10.12 with sympy 1.14.0 and numpy 2.2.6.
 # SDP solvers for discovery are in research/requirements.txt and are NOT needed to verify.

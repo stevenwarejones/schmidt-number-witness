@@ -5,7 +5,7 @@ That file shows the valid inequality F <= 7 on H is a corollary of published wor
 one shows the shipped qutrit behavior Q is nonetheless invisible to every relabeled
 ordinary score threshold for I3322 and M3322, while F sees it.
 
-    max over relabelings of I3322 on Q  <  the qubit ceiling for I3322
+    max over relabelings of I3322 on Q  <  a score two qubits explicitly achieve
     max over relabelings of M3322 on Q  <  a score two qubits explicitly achieve
     max over relabelings of CHSH   on Q  <  2*sqrt(2)
     F(Q) = 7.0129...                      >  7, the proved Schmidt-number-two ceiling
@@ -21,18 +21,18 @@ imply our bound while the scalar thresholds do not.  The supported claim is "mis
 standard score thresholds", not "missed by every existing witness", and this file is not
 evidence of historical novelty.  See docs/PRIOR_ART.md.
 
-Benchmarks differ in status, and the printed table says which is which:
+No published maximum is relied on anywhere in this file.  Each leg needs only an ACHIEVABLE
+qubit benchmark: a behavior scoring below something qubits reach cannot have crossed the true
+qubit maximum, whatever that maximum is.
 
-  CHSH   2*sqrt(2) is Tsirelson's theorem, and holds for every quantum behavior in any
+  CHSH   2*sqrt(2) is Tsirelson's theorem.  It holds for every quantum behavior in any
          dimension, so it is not a qubit-specific threshold at all.
-  I3322  the qubit maximum 1/4 in probability normalization, equivalently 5 here under
-         I = 4J + 4, is taken from the literature (Pal and Vertesi, arXiv:0810.1615, and
-         the dimension-witness discussion in arXiv:1302.1336).  It is NOT certified here.
-  M3322  no published maximum is relied on.  An explicit two-qubit state and six binary
-         projective observables are built in exact rational arithmetic and their score is
-         computed exactly; Q's best relabeled score is strictly below it.  A behavior
-         cannot cross the true qubit maximum while scoring below something qubits achieve,
-         so this leg is self-contained.
+  I3322  the maximally entangled two-qubit state with A0 = B0 = (sqrt(3) X + Z)/2,
+         A1 = B1 = (sqrt(3) X - Z)/2, A2 = B2 = Z scores exactly 5, computed here in exact
+         symbolic arithmetic.  That is a LOWER witness, not a proof of the qubit maximum,
+         and it is all the argument needs.
+  M3322  likewise: an explicit two-qubit state and six binary projective observables are
+         built in exact rational arithmetic and their score computed exactly.
 """
 import sys as _sys
 
@@ -106,15 +106,18 @@ score = sum(a * b for a, b in zip(W, V))
 assert score == Fr(CERT['score']) > 7
 print(f'PASS F(Q) = {float(score):.16f} > 7, the proved Schmidt-number-two ceiling')
 
-# Each representative was transcribed from the paper's HTML through a summarizer, not from
-# the PDF, so each is checked against its published local bound before anything rests on it.
+# Each representative was transcribed from the paper's HTML through a summarizer, not from the
+# PDF.  Its local bound is checked below.  That is a NECESSARY CONDITION, not an
+# authentication: many coefficient vectors share a local bound.  The vectors are printed so a
+# human can compare them against the displayed equations, which is what would settle it.
 LOCAL = [list(a) + list(b) + [x * y for x in a for y in b]
          for a, b in product(product([-1, 1], repeat=3), repeat=2)]
 assert len(LOCAL) == 64
 for name, bound in (('I3322', 4), ('M3322', 6), ('CHSH', 2)):
     got = max(sum(u * v for u, v in zip(REPS[name], p)) for p in LOCAL)
     assert got == bound, (name, got, bound)
-    print(f'PASS {name} has local bound {bound}, as published')
+    print(f'PASS {name} has local bound {bound}, matching the published value '
+          f'(necessary, not sufficient): {list(REPS[name])}')
 
 best = {}
 for name, w in REPS.items():
@@ -127,12 +130,38 @@ assert m > 0 and m * m < 8
 print(f'PASS CHSH: max over {n} relabelings = {float(m):.16f} < 2*sqrt(2)  '
       f'(Tsirelson; holds in every dimension, so not a qubit-specific threshold)')
 
-# --- I3322: below the qubit ceiling quoted in the literature ---------------------------
+# --- I3322: below a score that two qubits explicitly achieve ---------------------------
+# No published maximum is relied on.  The non-detection argument needs only an ACHIEVABLE
+# qubit benchmark: a behavior scoring below something qubits reach cannot have crossed the
+# true qubit maximum, whatever that maximum is.  (It is 5 here, equivalently 1/4 in the
+# probability normalization I = 4J + 4, but this file does not need that and does not
+# assert it -- the construction below is a lower witness, not an upper bound.)
+PHI = sp.Matrix([1, 0, 0, 1]) / sp.sqrt(2)
+PX, PZ = sp.Matrix([[0, 1], [1, 0]]), sp.diag(1, -1)
+I_OBS = [(sp.sqrt(3) * PX + PZ) / 2, (sp.sqrt(3) * PX - PZ) / 2, PZ]
+for o in I_OBS:
+    assert sp.simplify(o * o - sp.eye(2)) == sp.zeros(2, 2)
+    assert sp.simplify(sp.trace(o)) == 0
+wI = REPS['I3322']
+qubit_I = sum(wI[i] * sp.simplify((PHI.T * sp.kronecker_product(I_OBS[i], sp.eye(2)) * PHI)[0])
+              for i in range(3))
+qubit_I += sum(wI[3 + j] * sp.simplify((PHI.T * sp.kronecker_product(sp.eye(2), I_OBS[j]) * PHI)[0])
+               for j in range(3))
+qubit_I += sum(wI[6 + 3 * i + j]
+               * sp.simplify((PHI.T * sp.kronecker_product(I_OBS[i], I_OBS[j]) * PHI)[0])
+               for i, j in product(range(3), repeat=2))
+qubit_I = sp.simplify(qubit_I)
+assert qubit_I == 5, qubit_I
+
 n, m = best['I3322']
-assert m < 5
-print(f'PASS I3322: max over {n} relabelings = {float(m):.16f} < 5 '
-      f'(= 4*(1/4)+4, the qubit maximum in probability normalization; LITERATURE VALUE, '
-      f'not certified here)')
+assert m < Fr(int(sp.numer(qubit_I)), int(sp.denom(qubit_I)))
+print(f'PASS I3322: max over {n} relabelings = {float(m):.16f}')
+print(f'          < {float(qubit_I):.16f}, achieved EXACTLY by the maximally entangled two-qubit '
+      f'state with')
+print(f'            A0 = B0 = (sqrt(3) X + Z)/2, A1 = B1 = (sqrt(3) X - Z)/2, A2 = B2 = Z '
+      f'(all marginals vanish)')
+print('          so no relabeled I3322 score can place Q beyond the qubit maximum, '
+      'whatever that maximum is')
 
 # --- M3322: below a score that two qubits explicitly achieve ---------------------------
 # A real two-qubit state and six traceless binary projective observables, exact rationals.
@@ -212,7 +241,7 @@ assert MA in {relabel(REPS['M3322'], *g) for g in GROUP}
 slot = 6 + 3 * x + y
 assert MA[slot] == 0 and W[slot] != 0
 assert [i for i in range(6, 15) if MA[i] == 0] == [slot]
-print(f'PASS the penalty -4 p({a}{b}|{x}{y}) is a JOINT probability, and its correlator E{x+1}{y+1} '
+print(f'PASS the penalty -4 p({a}{b}|{x}{y}) is a JOINT probability, and its correlator E{x}{y} '
       f'is exactly the one entry M3322 leaves at zero')
 print('          so the ninth correlator is what a joint-probability penalty buys and a '
       'marginal tilt cannot')

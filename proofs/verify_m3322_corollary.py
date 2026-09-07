@@ -35,7 +35,9 @@ failed the corollary would collapse -- so both bounds are certified DIRECTLY ins
 each of the six constituent classes, by exact duals over the same positivity and 2x2 CHSH
 rows verify_facet.py uses for F.  Each certificate is a plain sum of five rows.  The
 transcription of eq. (48) itself, which was read from the paper's HTML through a summarizer
-rather than from the PDF, is likewise checked against its published local bound of 6.
+rather than from the PDF, has its local bound checked against the published 6 -- a necessary
+condition only, since many coefficient vectors share a local bound, so the vector is printed
+for comparison against the displayed equation.
 
 What this derivation does NOT give, and what the rest of the repository is for:
 
@@ -109,19 +111,22 @@ assert not (orbit6 & orbitF)
 print('PASS F is not a relabeling of M3322: the two 2304-element orbits are disjoint')
 
 
-# --- the transcription of eq. (48) is checked against its published local bound ----------
+# --- the LOCAL BOUND of the transcribed expression, checked ------------------------------
 # F_6 was read from the paper's HTML through a summarizer, not from the PDF, so it is treated
-# as unverified input.  A mis-transcribed coefficient would almost certainly move the maximum
-# over the 64 deterministic local vertices off the published value, so that maximum is checked
-# for every functional this file relies on.
+# as unverified input.  What follows is a NECESSARY CONDITION, not an authentication: many
+# coefficient vectors share a local bound, so agreement here cannot establish that this IS
+# eq. (48).  It only rules out a transcription whose local bound differs from the published
+# one.  The vector is printed for human comparison against the displayed equation, which is
+# the only thing that can settle it.
 LOCAL = [list(a) + list(b) + [x * y for x in a for y in b]
          for a, b in product(product([-1, 1], repeat=3), repeat=2)]
 assert len(LOCAL) == 64
 for name, w, bound in (('F', W, 7), ('eq. (48) = M3322', F6, 6)):
     got = max(sum(u * v for u, v in zip(w, p)) for p in LOCAL)
     assert got == bound, (name, got, bound)
-    print(f'PASS {name} has local bound {bound}, as published '
-          f'(maximum over the 64 deterministic local vertices)')
+    print(f'PASS {name} has local bound {bound}, matching the published value (maximum over '
+          f'the 64 deterministic local vertices; necessary, not sufficient)')
+    print(f'     for human comparison against the displayed equation: {list(w)}')
 
 
 # --- M_A <= 6 on H_A and M_B <= 6 on H_B, by exact dual certificates ----------------------

@@ -25,8 +25,10 @@ the six violated in quantum physics. There are exact identities
     F  =  M_A  -  4 p(00|10)  +  1
     F  =  M_B  -  4 p(11|22)  +  1
 
-where `M_A` is a relabeling of eq. (48) using only Alice-side operations, and `M_B` is the
-same with the parties swapped. Setting relabelings map `L^A_2conv` to itself, so `M_A <= 6`
+where `M_A` is a relabeling of eq. (48) by local input/output relabelings **without party
+exchange** — both parties may be relabeled; what matters is that an Alice-partial-local class
+is not converted into a Bob-partial-local class — and `M_B` is the image of `M_A` under the
+party exchange. Setting relabelings map `L^A_2conv` to itself, so `M_A <= 6`
 holds throughout `H_A` and `M_B <= 6` throughout `H_B`. With `p >= 0` this gives `F <= 7` on
 `H_A`, on `H_B`, and hence on `H = Conv(H_A, H_B)` — in three lines, from a published facet.
 
@@ -38,9 +40,11 @@ explicitly:
   realizations rather than a statement about `H`, and no facet of a partial-local polytope
   implies it.
 - **that `F <= 7` is a facet of `H`** (`proofs/verify_facet.py`: an exact
-  14-dimensional face). `M_A` is slack at one of the fifteen certified saturating points and
-  `M_B` at another, so neither one-sided derivation is tight across the whole face and
-  neither gives the facet property on its own.
+  14-dimensional face). Neither parent inequality holds over the entire two-sided face:
+  `M_A` reaches `22/3 > 6` at one certified saturating point and `M_B` at another. Those are
+  violations at points lying outside that parent's own one-sided domain — permitted, and
+  checked to be of exactly that kind — so neither one-sided derivation reaches the whole face
+  and neither gives the facet property on its own.
 
 `F` itself is not a relabeling of M3322: the two 2304-element orbits under outcome flips,
 setting permutations and the party swap are disjoint. That remains true, and is now much less
@@ -56,14 +60,15 @@ inequality families in this scenario, while `F` sees it:
 | Test | Distinct relabelings | Largest value on `Q` | Benchmark | Detected? |
 |---|---:|---:|---|:--:|
 | CHSH | 72 | 2.0876402763431794 | `2*sqrt(2)` (Tsirelson; every dimension) | no |
-| I3322, local bound 4 | 576 | 4.1403881793679336 | qubit ceiling 5 — **literature value**, not certified here | no |
+| I3322, local bound 4 | 576 | 4.1403881793679336 | 5, achieved exactly by `Φ⁺` with `A₀=B₀=(√3X+Z)/2`, `A₁=B₁=(√3X−Z)/2`, `A₂=B₂=Z` | no |
 | M3322, local bound 6 | 2304 | 6.0221540521920467 | 6.0243205027525546, achieved exactly by an explicit two-qubit state built in the verifier | no |
 | `F` | its shipped orientation | 7.0129123854899715 | proved Schmidt-number-two ceiling 7 | **yes** |
 
-The M3322 leg relies on no published maximum. A real two-qubit state and six traceless binary
-projective observables are constructed in exact rational arithmetic and their score computed
-exactly; `Q` scores strictly below it, so no relabeled M3322 threshold can place `Q` beyond
-the qubit maximum, whatever that maximum is.
+**No leg relies on a published maximum.** Each needs only an *achievable* qubit benchmark: a
+behavior scoring below something qubits reach cannot have crossed the true qubit maximum,
+whatever that maximum is. Both the I3322 and M3322 benchmarks are explicit two-qubit
+constructions evaluated exactly in the verifier. Neither is presented as a proof of a qubit
+upper bound, because neither is one.
 
 So `F <= 7` is **not implied** by the conjunction of those relabeled scalar thresholds with
 quantum membership — `Q` is a quantum counterexample to that implication.
@@ -84,13 +89,22 @@ worked; one closed at coefficient level, the other only narrowed.
 
 ### The closest published family tilts a MARGINAL; F penalizes a JOINT probability
 
-The nearest published object in shape is the detection-efficiency family `I3322(η)` of Vértesi,
-Pironio and Brunner, PRL **104**, 060401 (2010),
-[arXiv:0909.3171](https://arxiv.org/abs/0909.3171), used for local-dimension bounds by
-Navascués, de la Torre and Vértesi, PRX **4**, 011011 (2014),
-[arXiv:1308.3410](https://arxiv.org/abs/1308.3410), whose Table I gives two-qubit maxima down
-to ≈10⁻¹⁷ at η ≈ 0.428. Here η is Bob's detection efficiency, and the η-dependent term is a
-coefficient `(1−η)/η` times a **one-party marginal**.
+The nearest published objects in shape are the **detection-efficiency** variants of I3322,
+used for local-dimension bounds by Navascués, de la Torre and Vértesi, PRX **4**, 011011 (2014),
+[arXiv:1308.3410](https://arxiv.org/abs/1308.3410).
+
+The relevant fact is the *form* of the η-dependent term, and it is now taken from a primary
+source rather than a search summary. Brunner, Gisin, Scarani and Simon,
+[quant-ph/0702130](https://arxiv.org/abs/quant-ph/0702130), give the probability polynomial and
+detection formula; with a fixed local fallback output for the nondetected party at `η_A = 1`,
+the one-sided expression is proportional to
+
+    J_η  =  J + ((1−η)/η) · [ p_A(0|0) − 1 ]
+
+— a **one-party marginal plus a constant**. More generally, a fixed local fallback output under
+independent one-sided loss changes the surviving joint-probability functional only by a positive
+overall scaling and one-party terms. This does **not** extend to setting-dependent efficiencies
+or to postselection, and no claim is made about those.
 
 That is enough to settle the comparison without their displayed equation, because a one-party
 marginal occupies coordinates 0–5 and **cannot change any correlator coefficient**. The size of
@@ -104,7 +118,13 @@ invariant under relabeling. `proofs/verify_novelty_comparison.py` checks the thr
 | M3322 | 8 |
 
 So `F` is not I3322 or M3322 tilted by any one-party marginal, in any relabeling, at any
-positive scale — and neither is any other member of a marginal-tilted family. The verifier also
+positive scale — and neither is any other member of a marginal-tilted family.
+
+**This is coefficient non-equivalence, which is weaker than non-derivability.** It rules out
+relabeling and scaling of these two parent families plus marginal tilts. It does **not** rule
+out consequences of several inequalities together, other positivity penalties, restrictions of
+larger scenarios, filtering, or other dimension tradeoffs. That distinction is maintained in
+every novelty statement in this repository. The verifier also
 locates the discrepancy exactly: the penalty `−4 p(00|10)` is a **joint** probability, and its
 correlator `E21` is precisely the single entry M3322 leaves at zero. The ninth correlator is
 what a joint-probability penalty buys and a marginal tilt cannot.
@@ -119,22 +139,22 @@ Xu, Su, Wu and Kwek, [arXiv:1308.4468](https://arxiv.org/abs/1308.4468) — live
 `53279182288146183/66660503297129198901092 ≈ 7.99 × 10⁻⁷`. A witness conditioned on exact
 zeros does not apply to it as written.
 
-### Context: no *tight* binary 3322 inequality is a dimension witness
+### Context: the usual I3322 threshold does not detect the supplied qutrit behavior
 
-Two results make the surrounding territory clearer, and both point away from the standard
-facets rather than toward them:
+This is a statement about **`Q`**, established directly by the exact benchmark above, and it
+must not be inflated into a general claim about tight 3322 inequalities. I3322 *is* a dimension
+witness in the qubit-versus-arbitrary-dimension sense: its qubit value is 0.25, its true maximum
+0.250875… is larger and is not attained in any finite dimension (Pál and Vértesi,
+[arXiv:1006.3032](https://arxiv.org/abs/1006.3032)). What it is not is a qubit-versus-**qutrit**
+witness — its maximum is 0.25 in `C³⊗C³` as well (Navascués and Vértesi, PRL **115**, 020501
+(2015), [arXiv:1412.0924](https://arxiv.org/abs/1412.0924), certified to 7 digits). A
+qubit-versus-qutrit comparison is the narrower question, and it is the one `F` answers.
 
-- I3322's maximum is **0.25 in both `C²⊗C²` and `C³⊗C³`** (Navascués and Vértesi, PRL **115**,
-  020501 (2015), [arXiv:1412.0924](https://arxiv.org/abs/1412.0924), certified to 7 digits), so
-  the only nontrivial tight 3322 facet class is **not** a qubit-versus-qutrit witness at all.
-- Pál and Vértesi's survey of 241 tight two-outcome inequalities up to five settings per party
-  ([arXiv:0810.1615](https://arxiv.org/abs/0810.1615)) found higher-dimensional advantage in 43
-  cases, all at four and five settings, and remark that the simplest three-setting inequality
-  was "surprisingly" not among them.
-
-`F` is **not** a facet of the local polytope, so it falls outside both surveys, which target
-tight inequalities. That is where it lives, and it is also why absence from those catalogues
-proves nothing.
+Separately, Pál and Vértesi's survey of 241 tight two-outcome inequalities up to five settings
+per party ([arXiv:0810.1615](https://arxiv.org/abs/0810.1615)) found higher-dimensional
+advantage in 43 cases, all at four and five settings, remarking that the simplest three-setting
+inequality was "surprisingly" not among them. `F` is **not** a facet of the local polytope, so
+it falls outside that survey — which is also why absence from it proves nothing.
 
 ### What these audits did NOT clear
 

@@ -28,9 +28,24 @@ A candidate produced here is not a certificate. Promotion requires exact verific
 standalone verifier, a diff of every claim whose value or scope changes, and a regenerated
 manifest. A solver status is not evidence.
 
-The fixed-target run these scripts were written for was unsuccessful; the sharp bound was
-subsequently established by the exact Gram certificate in `proofs/`. Their outputs are not
-committed — everything here writes to the git-ignored `build/`, so a claim can never rest on
-a stale result file. Some scripts still read another script's source text to reuse a builder;
-replacing that with explicit builder functions is a known follow-up, to be done only after
-comparing basis ordering and coefficient maps against the archived inputs.
+These are two different kinds of workflow and should not be described together.
+
+`rational_sharp.py` is the **generator of the shipped sharp certificate**: it identifies exact
+equality-family kernels, solves on the remaining Gram subspace, and corrects a numerical matrix
+onto the exact rational affine constraints. Its output is what `proofs/verify_sharp_qubit.py`
+checks. Rerunning it is a reproduction of the certificate, and needs the SDP stack.
+
+The **historical discovery scripts** — the fixed-target searches, and the three profile and
+endpoint scripts — were exploratory. The fixed-target run they were written for did not
+succeed; the sharp bound came from the exact Gram construction above. They are kept because
+`docs/review_2026-09-06_ai.md` quotes figures from them and those figures should be
+reproducible, not because any current claim rests on them.
+
+Outputs: `qubit_theta_profile.py`, `qubit_joint_search.py` and `qubit_endpoint_scaling.py`
+write **nothing** — their results go to stdout, and they record no seed, workload or optimizer
+status. Every other script here writes to the git-ignored `build/`. Nothing under `research/`
+is committed as a result file, so no claim can rest on a stale one.
+
+Some scripts still read another script's source text to reuse a builder; replacing that with
+explicit builder functions is a known follow-up, to be done only after comparing basis ordering
+and coefficient maps against the archived inputs.

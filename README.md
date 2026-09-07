@@ -67,7 +67,7 @@ exact; none calls a solver.
 
 | Path | Role |
 |---|---|
-| `docs/` | model and geometry, the sharp proof, prior-art status, and the independent AI review |
+| `docs/` | model and geometry, the sharp proof, prior-art status, and the dated independent AI reviews |
 | `tests/` | adversarial corruption tests, the optimized-execution regression, documentation and discovery-path checks, and `tests/verify_sos_independent.py`, a second implementation of the SOS check deliberately not shared with the primary verifier |
 | `research/` | discovery code that produced the certificates: SDP search, rational rounding, counterexample searches. Not part of any proof |
 
@@ -85,7 +85,7 @@ marginal, which is the shape of the published detection-efficiency dimension wit
 are exact, and neither is a novelty clearance; `docs/PRIOR_ART.md` states what the audits did
 not reach.
 The rest of the prior-art audit is incomplete and priority is unresolved. No human expert or peer review
-has taken place; the review in `docs/review_2026-09-06_ai.md` is by a second AI system. The global quantum
+has taken place; the reviews in `docs/review_2026-09-06_ai.md` and `docs/review_2026-09-07_ai.md` are by AI systems. The global quantum
 maximum of `F` and the tight decomposition cost are unresolved. Experimental feasibility is
 not demonstrated — the quantum violation is `0.0129` and the corresponding uniform-noise
 tolerance is roughly `0.18%`. Nothing here concerns faster-than-light communication,
@@ -98,7 +98,7 @@ Steven W. Jones — sources, certificate data and documentation alike. There is 
 license. `CITATION.cff` carries the citation metadata; `CONTRIBUTING.md` describes what a
 change to a certificate must demonstrate.
 
-`docs/review_2026-09-06_ai.md` and `tests/verify_sos_independent.py` contain prose and code written by a second AI system
+`docs/review_2026-09-06_ai.md`, `docs/review_2026-09-07_ai.md` and `tests/verify_sos_independent.py` contain prose and code written by AI systems
 (Claude, Anthropic) acting as an adversarial reviewer, contributed by the owner under the same
 terms. No third-party code has been imported; record the origin and license here before adding
 any.

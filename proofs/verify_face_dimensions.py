@@ -24,6 +24,15 @@ def rows(side,pair):
     for sign,(x,y) in zip(signs,ix):q[7+3*x+y]=-sign
     r.append(q)
  return r
+# Coverage: the six duals must be exactly the six (side,pair) constituents, with no
+# duplicates and none missing.  Without this the file would still reject any dual it is
+# given, but would compute a face dimension from a subset of the constituents if one were
+# absent -- an upper bound over fewer classes than the claim is about.  verify_facet.py
+# already asserts the same thing over the same records; both entry points now do.
+assert {(d['side'],tuple(d['pair'])) for d in c['partial_hull_duals']}==set(
+    product(['A','B'],combinations(range(3),2)))
+assert len(c['partial_hull_duals'])==6
+
 spaces={k:[] for k in ['A','B']}
 for d in c['partial_hull_duals']:
  rr=rows(d['side'],d['pair']);weights=list(map(s.Rational,d['weights']))
