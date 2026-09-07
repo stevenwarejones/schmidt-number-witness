@@ -109,28 +109,56 @@ def integer_valued(node, ints):
     return False
 
 
-def integer_names(tree):
-    """Module-level names for which EVERY binding is provably integer.
+def all_binding_sites(tree):
+    """Count EVERY binding of every name, in any form, anywhere in the module.
 
-    The earlier version only ever added to this set, so
-
-        level = 3
-        level = '../../escaped'
-
-    left `level` classified as an integer and its value usable as a filename.  A name is
-    accepted here only if every top-level assignment to it is integer-valued, computed to a
-    fixpoint so that chains like `a = 3; b = a` still resolve.
+    This is the fail-closed half of the analysis.  Rather than enumerate the binding forms
+    that are dangerous -- which is a losing game, and lost three times: plain reassignment,
+    then annotated assignment, then assignment inside a conditional -- it counts every
+    binding of any kind and trusts a name only when the count matches the module-level
+    simple assignments we can actually read.  Anything else (a nested rebinding, an
+    annotation, a loop variable, an import, a parameter, a walrus, a def) makes the name
+    untrusted, and an untrusted name is not usable as a path or a filename component.
     """
-    targets = {}
+    counts = {}
+
+    def bump(name):
+        counts[name] = counts.get(name, 0) + 1
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            bump(node.id)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            bump(node.name)
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
+            for a in node.names:
+                bump(a.asname or a.name.split('.')[0])
+        elif isinstance(node, ast.arg):
+            bump(node.arg)
+        elif isinstance(node, (ast.Global, ast.Nonlocal)):
+            for n in node.names:
+                bump(n)
+    return counts
+
+
+def trusted_module_values(tree):
+    """name -> its single module-level assigned value, for names bound nowhere else."""
+    counts = all_binding_sites(tree)
+    simple = {}
     for stmt in tree.body:
-        if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 \
-                and isinstance(stmt.targets[0], ast.Name):
-            targets.setdefault(stmt.targets[0].id, []).append(stmt.value)
-        elif isinstance(stmt, ast.AugAssign) and isinstance(stmt.target, ast.Name):
-            targets.setdefault(stmt.target.id, []).append(stmt.value)
-    good = set(targets)
+        if (isinstance(stmt, ast.Assign) and len(stmt.targets) == 1
+                and isinstance(stmt.targets[0], ast.Name)):
+            simple.setdefault(stmt.targets[0].id, []).append(stmt.value)
+    return {n: v[0] for n, v in simple.items()
+            if len(v) == 1 and counts.get(n, 0) == 1}
+
+
+def integer_names(tree):
+    """Trusted module names whose one binding is provably an integer, to a fixpoint."""
+    values = trusted_module_values(tree)
+    good = set(values)
     while True:
-        shrunk = {n for n in good if all(integer_valued(v, good) for v in targets[n])}
+        shrunk = {n for n in good if integer_valued(values[n], good)}
         if shrunk == good:
             return shrunk
         good = shrunk
@@ -218,11 +246,19 @@ def evaluate(node, env, script, ints=frozenset()):
 
 
 def bind_paths(tree, script, ints):
-    """Bind top-level names to paths by EVALUATION, never by execution."""
+    """Bind top-level names to paths by EVALUATION, never by execution.
+
+    Only names that `trusted_module_values` vouches for are bound: a name rebound anywhere
+    else in the module -- including as a function parameter -- resolves to nothing here, so
+    an expression using it is reported rather than silently resolved against the module's
+    value.
+    """
+    trusted = set(trusted_module_values(tree))
     env = {}
     for stmt in tree.body:
         if not (isinstance(stmt, ast.Assign) and len(stmt.targets) == 1
-                and isinstance(stmt.targets[0], ast.Name)):
+                and isinstance(stmt.targets[0], ast.Name)
+                and stmt.targets[0].id in trusted):
             continue
         try:
             value = evaluate(stmt.value, env, script, ints)
@@ -328,7 +364,8 @@ for p in scripts:
                          f"not to a path -- parenthesize the path expression")
             continue
         try:
-            r = evaluate(expr, env, p, ints[p] - shadowed)
+            local = {k: v for k, v in env.items() if k not in shadowed}
+            r = evaluate(expr, local, p, ints[p] - shadowed)
         except Unsupported as exc:
             fails.append(f"{where}: unsupported {kind} path expression `{shown}` -- {exc}")
             continue

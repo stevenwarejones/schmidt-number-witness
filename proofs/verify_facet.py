@@ -28,7 +28,7 @@ points=[]
 for e in c['saturating_points']:
  v=list(map(F,e['v']));assert len(v)==15 and sum(a*b for a,b in zip(v,w))==7
  P={(x,y,a,b):(1+(-1)**a*v[x]+(-1)**b*v[3+y]+(-1)**(a+b)*v[6+3*x+y])/4 for x,y,a,b in product(range(3),range(3),range(2),range(2))}
- assert min(P.values())>=0
+ assert min(P.values())>=0,'[E-NEGATIVE-PROB] a supplied point has a negative probability'
  pair=e['pair'];side=e['side'];assert side in ['A','B'] and tuple(pair) in list(combinations(range(3),2))
  assert sum(F(m['weight']) for m in e['local_model'])==1
  for m in e['local_model']:

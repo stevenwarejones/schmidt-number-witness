@@ -113,6 +113,14 @@ with tempfile.TemporaryDirectory() as td:
          "\nlevel = 3\nlevel = '../../escaped'\ndef probe():\n    (OUTPUT_DIR / f'{level}').write_text('x')\n"),
         ("an 'integer' name shadowed by a function parameter", '[E-DYNAMIC-NAME]',
          "\nlevel = 3\ndef probe(level):\n    (OUTPUT_DIR / f'{level}').write_text('x')\n"),
+        ("an 'integer' name rebound by an ANNOTATED assignment", '[E-DYNAMIC-NAME]',
+         "\nlevel = 3\nlevel: str = '../../escaped'\ndef probe():\n    (OUTPUT_DIR / f'{level}').write_text('x')\n"),
+        ("an 'integer' name rebound inside a module-level conditional", '[E-DYNAMIC-NAME]',
+         "\nlevel = 3\nif True:\n    level = '../../escaped'\ndef probe():\n    (OUTPUT_DIR / f'{level}').write_text('x')\n"),
+        ("an 'integer' name bound by a loop variable", '[E-DYNAMIC-NAME]',
+         "\nfor level in ['../../escaped']:\n    pass\ndef probe():\n    (OUTPUT_DIR / f'{level}').write_text('x')\n"),
+        ("OUTPUT_DIR itself shadowed by a function parameter", '[E-UNBOUND-NAME]',
+         "\ndef probe(OUTPUT_DIR):\n    (OUTPUT_DIR / 'escaped.txt').write_text('x')\n"),
     ]
     for n, (what, code, snippet) in enumerate(ESCAPES):
         d = copy_repo(Path(td) / f'esc{n}')
@@ -157,7 +165,25 @@ with tempfile.TemporaryDirectory() as td:
                   'independent facet checker: point with F = 7 but a negative probability '
                   'outside the designated restriction', '[E-NEGATIVE-PROB]')
     expect_reject(d / 'proofs' / 'verify_facet.py', td,
-                  'primary facet verifier: the same invalid point', 'AssertionError')
+                  'primary facet verifier: the same invalid point', '[E-NEGATIVE-PROB]')
+
+    # --- CONTROL 2: the same idea aimed at the primary verifier ---------------------------
+    # A reviewer defeated the previous version of this case by making verify_facet.py assert
+    # on its own DIRECTORY NAME: it rejected before reaching any certificate condition, and
+    # 'AssertionError' -- all the case then required -- was still in the output.  Requiring
+    # the specific code closes that, and this control keeps it closed.
+    sentinel_facet = copy_repo(Path(td) / 'facetsentinel')
+    fv = sentinel_facet / 'proofs' / 'verify_facet.py'
+    fv.write_text("from pathlib import Path as _AuditPath\n"
+                  "assert 'facetsentinel' not in str(_AuditPath(__file__)), "
+                  "'UNRELATED DIRECTORY SENTINEL'\n" + fv.read_text())
+    problem = rejection_problem(fv, td, '[E-NEGATIVE-PROB]')
+    if problem is None:
+        fails.append("CONTROL FAILED: verify_facet.py rejecting on its own directory name was "
+                     "accepted as the intended reason")
+    else:
+        print(f"  PASS control: an unrelated AssertionError is not the intended reason "
+              f"({problem[:52]}...)")
 
     # --- CONTROL: an unrelated early rejection must NOT count as the intended reason ------
     # Exactly the reviewer's sentinel.  The path checker is made to bail out before it

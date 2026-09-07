@@ -114,12 +114,27 @@ jobs:
         run: python make_snapshot.py
 
       # A visitor should not need a TeX install to read a typeset paper.
-      - name: Build the manuscript
+      # Three named steps, not one: the previous single step bundled apt, the build and the
+      # inspection, so its exit 127 identified none of them.  poppler-utils supplies pdfinfo
+      # and was the missing package.
+      - name: Install the paper toolchain
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq pandoc texlive-xetex texlive-fonts-recommended fonts-dejavu
-          bash paper/build.sh
+          sudo apt-get install -y -qq \
+            pandoc texlive-xetex texlive-fonts-recommended fonts-dejavu poppler-utils
+          pandoc --version | head -1
+          xelatex --version | head -1
+          pdfinfo -v 2>&1 | head -1
+
+      - name: Build the manuscript
+        run: bash paper/build.sh
+
+      - name: Inspect the built PDF
+        run: |
           pdfinfo build/paper/manuscript.pdf
+          pages=$(pdfinfo build/paper/manuscript.pdf | awk '/^Pages:/ {print $2}')
+          echo "pages: $pages"
+          test "${pages:-0}" -ge 1
 
       # Uploaded only after the matrix verified: this is the checked package, not a
       # diagnostic dump from a failed run.
