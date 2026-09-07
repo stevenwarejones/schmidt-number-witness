@@ -32,16 +32,24 @@ This version executes NOTHING.  It evaluates a deliberately restricted path-expr
 language -- string constants, `__file__`, `Path(...)`, `.parent`, `.resolve()`, previously
 bound path names, and `/` joining -- and reports anything outside it rather than skipping it.
 
-A component computed at run time is accepted ONLY as the final filename and ONLY on evidence,
-never on position: every literal fragment must be free of separators and traversal, and every
-interpolated value must be provably integer-valued (bound at module level to an `int(...)`
-call, an integer literal, or a conditional over those).  That is exactly what
-`f'clifford_level{level}.json'` satisfies, since `level = int(sys.argv[1]) if ... else 3`.
-An arbitrary unknown name is not accepted as a component at all.
+A name computed at run time is NOT resolved here at all.  Three rounds of review showed that
+proving such a name safe by source inference does not converge: each round closed the reported
+binding forms and the next found others -- annotated assignment, assignment inside a
+conditional, loop variables, `match` pattern capture, and a shadowed `int` builtin.  The
+"fails closed over every binding" claim in the previous version was itself the fourth such
+overclaim.
 
-SCOPE.  This checks the source patterns it supports and names anything else as unsupported.
-It is not a proof that arbitrary Python cannot reach another path: runtime behaviour and
-general static analysis are different problems, and this is the narrower one.
+Dynamic names go through `research/outputs.py:output_path` instead, which validates the name
+at run time, where the value exists.  This file checks only that scripts USE that helper --
+a convention it can actually verify by reading the source.
+
+WHAT THIS ESTABLISHES.  For the supported I/O forms below, every static path resolves where it
+should, and every computed name is routed through the validated helper.
+
+WHAT IT DOES NOT.  It is not a sandbox and cannot be one.  A script that wants to write
+elsewhere can bypass the helper, and no source lint over arbitrary Python could stop it;
+`tests/test_checker_mutations.py` covers the mistakes this project has actually made, not
+every possible one.  Runtime behaviour and general static analysis are different problems.
 """
 import sys as _sys
 
@@ -57,8 +65,6 @@ ROOT = Path(__file__).resolve().parent.parent
 RESEARCH = ROOT / 'research'
 BUILD = (ROOT / 'build').resolve()
 fails = []
-
-SAFE_NAME = object()          # a run-time value proven to be a single filename component
 
 READ_METHODS = ('read_text', 'read_bytes')
 WRITE_METHODS = ('write_text', 'write_bytes')
@@ -84,7 +90,10 @@ E_UNSUPPORTED = '[E-UNSUPPORTED]'
 E_OUTSIDE = '[E-OUTSIDE-BUILD]'
 E_READ_GENERATED = '[E-READ-GENERATED]'
 E_MISSING = '[E-MISSING-INPUT]'
-E_LITERAL = '[E-STRING-LITERAL]' 
+E_LITERAL = '[E-STRING-LITERAL]'
+E_HELPER = '[E-HELPER]'
+
+HELPER = 'output_path'          # research/outputs.py, validated at run time and tested directly
 
 
 class Resolved:
@@ -94,19 +103,6 @@ class Resolved:
 
     def __init__(self, path, exact=True):
         self.path, self.exact = path, exact
-
-
-def integer_valued(node, ints):
-    """True when this expression is provably an integer, by a deliberately narrow rule."""
-    if isinstance(node, ast.Constant):
-        return isinstance(node.value, int) and not isinstance(node.value, bool)
-    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == 'int':
-        return True
-    if isinstance(node, ast.IfExp):
-        return integer_valued(node.body, ints) and integer_valued(node.orelse, ints)
-    if isinstance(node, ast.Name):
-        return node.id in ints
-    return False
 
 
 def all_binding_sites(tree):
@@ -175,26 +171,17 @@ def _component(name):
     return name
 
 
-def evaluate(node, env, script, ints=frozenset()):
+def evaluate(node, env, script):
     """Evaluate a path expression, or raise Unsupported. Never calls into user code."""
     if isinstance(node, ast.Constant):
         if isinstance(node.value, str):
             return node.value
         raise Unsupported(f"{E_UNSUPPORTED} non-string constant {node.value!r}")
     if isinstance(node, ast.JoinedStr):
-        # Acceptable only if it PROVABLY cannot contain a separator or traversal.
-        for part in node.values:
-            if isinstance(part, ast.Constant) and isinstance(part.value, str):
-                _component(part.value)                 # raises Unsupported on '/' or '..'
-            elif isinstance(part, ast.FormattedValue):
-                if not integer_valued(part.value, ints):
-                    raise Unsupported(
-                        f'{E_DYNAMIC} f-string interpolates '
-                        f'{ast.unparse(part.value)}, which is not provably an integer here, '
-                        f'so it may contain a path separator')
-            else:
-                raise Unsupported(f'{E_UNSUPPORTED} unsupported f-string part')
-        return SAFE_NAME
+        raise Unsupported(
+            f'{E_DYNAMIC} a computed file name must go through '
+            f'research/outputs.py:output_path, which validates it at run time; it is not '
+            f'checked by inference here')
     if isinstance(node, ast.Name):
         if node.id == '__file__':
             return str(script)
@@ -205,7 +192,7 @@ def evaluate(node, env, script, ints=frozenset()):
         raise Unsupported(f'{E_UNBOUND} name {node.id!r} is not a path bound in this module')
     if isinstance(node, ast.Attribute):
         if node.attr in PATH_ATTRS:
-            base = evaluate(node.value, env, script, ints)
+            base = evaluate(node.value, env, script)
             if not isinstance(base, Resolved):
                 raise Unsupported(f"{E_UNSUPPORTED} .{node.attr} on a non-path")
             if not base.exact:
@@ -214,21 +201,27 @@ def evaluate(node, env, script, ints=frozenset()):
         raise Unsupported(f"{E_UNSUPPORTED} attribute .{node.attr}")
     if isinstance(node, ast.Call):
         f = node.func
+        if isinstance(f, ast.Name) and f.id == HELPER:
+            # Routed through research/outputs.py, which validates the name at run time and
+            # is tested directly by tests/test_output_helper.py.  Nothing is inferred here.
+            if len(node.args) != 1:
+                raise Unsupported(f'{E_HELPER} {HELPER}() takes exactly one name')
+            return Resolved(BUILD, exact=False)
         if isinstance(f, ast.Name) and f.id == 'Path' and len(node.args) == 1:
-            arg = evaluate(node.args[0], env, script, ints)
+            arg = evaluate(node.args[0], env, script)
             if isinstance(arg, Resolved):
                 return arg
             if arg is None:
                 raise Unsupported(f"{E_UNSUPPORTED} Path() of a value not known statically")
             return Resolved(Path(arg))
         if isinstance(f, ast.Attribute) and f.attr in PATH_CALLS and not node.args:
-            base = evaluate(f.value, env, script, ints)
+            base = evaluate(f.value, env, script)
             if not isinstance(base, Resolved):
                 raise Unsupported(f"{E_UNSUPPORTED} .{f.attr}() on a non-path")
             return Resolved(base.path.resolve(), base.exact)
         raise Unsupported(f"{E_UNSUPPORTED} call {ast.unparse(f)}(...)")
     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
-        left = evaluate(node.left, env, script, ints)
+        left = evaluate(node.left, env, script)
         if not isinstance(left, Resolved):
             raise Unsupported(f"{E_UNSUPPORTED} left operand of / is not a path")
         if not left.exact:
@@ -236,16 +229,14 @@ def evaluate(node, env, script, ints=frozenset()):
             # and an unknown directory can carry the destination anywhere.
             raise Unsupported(f"{E_UNKNOWN_DIR} component joined after an unknown "
                               f"directory component")
-        right = evaluate(node.right, env, script, ints)
-        if right is SAFE_NAME:
-            return Resolved(left.path, exact=False)    # a PROVEN single filename component
+        right = evaluate(node.right, env, script)
         if isinstance(right, Resolved):
             raise Unsupported(f"{E_UNSUPPORTED} right operand of / is itself a path")
         return Resolved(left.path / _component(right))
     raise Unsupported(f"{E_UNSUPPORTED} expression form {type(node).__name__}")
 
 
-def bind_paths(tree, script, ints):
+def bind_paths(tree, script):
     """Bind top-level names to paths by EVALUATION, never by execution.
 
     Only names that `trusted_module_values` vouches for are bound: a name rebound anywhere
@@ -261,7 +252,7 @@ def bind_paths(tree, script, ints):
                 and stmt.targets[0].id in trusted):
             continue
         try:
-            value = evaluate(stmt.value, env, script, ints)
+            value = evaluate(stmt.value, env, script)
         except Unsupported:
             continue                                   # not a path expression; leave unbound
         if isinstance(value, Resolved) and value.exact:
@@ -332,10 +323,14 @@ def mkdir_targets(tree):
             and n.func.attr == 'mkdir' and isinstance(n.func.value, ast.Name)}
 
 
-scripts = sorted(RESEARCH.glob('*.py'))
+def imports_helper(tree):
+    return any(isinstance(n, ast.ImportFrom) and n.module == 'outputs'
+               and any(a.name == HELPER for a in n.names) for n in ast.walk(tree))
+
+
+scripts = sorted(p for p in RESEARCH.glob('*.py') if p.name != 'outputs.py')
 trees = {p: ast.parse(p.read_text()) for p in scripts}
-ints = {p: integer_names(t) for p, t in trees.items()}
-envs = {p: bind_paths(t, p, ints[p]) for p, t in trees.items()}
+envs = {p: bind_paths(t, p) for p, t in trees.items()}
 
 # 1. archived inputs load, without pickle
 for p in sorted((RESEARCH / 'inputs').iterdir()):
@@ -354,6 +349,9 @@ for p in sorted((RESEARCH / 'inputs').iterdir()):
 # 2. every read and every write resolves, inside the restricted language
 for p in scripts:
     rel, env = p.relative_to(ROOT), envs[p]
+    if any(isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == HELPER
+           for n in ast.walk(trees[p])) and not imports_helper(trees[p]):
+        fails.append(f"{rel}: calls {HELPER}() without importing it from research/outputs.py")
     n_sites = 0
     for lineno, expr, kind, shadowed in sorted(io_sites(trees[p]),
                                                key=lambda t: (t[0], t[2])):
@@ -365,7 +363,7 @@ for p in scripts:
             continue
         try:
             local = {k: v for k, v in env.items() if k not in shadowed}
-            r = evaluate(expr, local, p, ints[p] - shadowed)
+            r = evaluate(expr, local, p)
         except Unsupported as exc:
             fails.append(f"{where}: unsupported {kind} path expression `{shown}` -- {exc}")
             continue

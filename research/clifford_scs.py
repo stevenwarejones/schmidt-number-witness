@@ -8,6 +8,8 @@ from itertools import product
 from pathlib import Path
 OUTPUT_DIR=Path(__file__).resolve().parent.parent/'build'
 OUTPUT_DIR.mkdir(parents=True,exist_ok=True)
+import sys as _s;_s.path.insert(0,str(Path(__file__).resolve().parent))
+from outputs import output_path
 
 import numpy as np, cvxpy as cp,json,time,sys
 level=int(sys.argv[1]) if len(sys.argv)>1 else 3
@@ -63,5 +65,5 @@ print('level',level,'matrix',n,'moments',len(keys),flush=True);t=time.time()
 problem.solve(solver='SCS',eps=1e-10,max_iters=60000,acceleration_lookback=20)
 print('status',problem.status,'value',problem.value,'seconds',time.time()-t,flush=True)
 out={'level':level,'matrix_size':n,'moments':len(keys),'status':problem.status,'numerical_value':problem.value,'seconds':time.time()-t,'warning':'No exact PSD or dual certificate; do not claim proved bound'}
-(OUTPUT_DIR/f'clifford_scs_level{level}.json').write_text(json.dumps(out,indent=2))
-if y.value is not None:np.savez((OUTPUT_DIR/f'clifford_scs_level{level}.npz'),moments=y.value,psd_dual=constraints[0].dual_value,normalization_dual=constraints[1].dual_value,equality_dual=constraints[2].dual_value,R=R.toarray())
+output_path(f'clifford_scs_level{level}.json').write_text(json.dumps(out,indent=2))
+if y.value is not None:np.savez(output_path(f'clifford_scs_level{level}.npz'),moments=y.value,psd_dual=constraints[0].dual_value,normalization_dual=constraints[1].dual_value,equality_dual=constraints[2].dual_value,R=R.toarray())

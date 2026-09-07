@@ -60,6 +60,9 @@ jobs:
 
       # The checkers must reject the specific defects they were written for.  These were
       # previously run as external sweeps and only reported in commit messages.
+      - name: Output-path helper (where the containment guarantee now lives)
+        run: python tests/test_output_helper.py
+
       - name: Checker mutation regressions
         run: python tests/test_checker_mutations.py
 
@@ -115,8 +118,9 @@ jobs:
 
       # A visitor should not need a TeX install to read a typeset paper.
       # Three named steps, not one: the previous single step bundled apt, the build and the
-      # inspection, so its exit 127 identified none of them.  poppler-utils supplies pdfinfo
-      # and was the missing package.
+      # inspection, so its exit 127 identified none of them and the raw log was never read.
+      # poppler-utils supplies pdfinfo and was absent, which is the likely cause; the split
+      # below is what makes any future failure name its own command.
       - name: Install the paper toolchain
         run: |
           sudo apt-get update -qq

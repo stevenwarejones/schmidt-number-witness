@@ -59,6 +59,7 @@ python tests/verify_facet_independent.py     # independent reconstruction, no de
 python tests/test_research_paths.py          # discovery input/output paths
 python tests/test_docs_consistency.py        # documented paths exist; no unreferenced script
 python tests/test_comparison_acceptance.py   # corrupt the comparison data, require rejection
+python tests/test_output_helper.py           # the validated output-path helper
 python tests/test_checker_mutations.py       # replay the defects the checkers once accepted
 python research/audit_catalog_folds.py       # comparison only, not a proof gate
 python research/legacy/verify_routing.py --legacy-routing   # historical; no current claim

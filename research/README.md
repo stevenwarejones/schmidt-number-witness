@@ -19,6 +19,7 @@ verifiers in `proofs/` accept or reject a certificate without any of this.
 | `rational_sharp.py` | rational rounding of the reduced face solution |
 | `certify_upper.py`, `certify_upper_level3.py` | rational SOS upper certificates rounded from the level-2 and level-3 numerical Gram duals |
 | `quantum_upper.py` | the dimension-unrestricted upper bound |
+| `outputs.py` | the one supported way to name a generated file: validates a computed filename at run time and keeps it inside `build/`. Scripts with dynamic output names must use it |
 | `audit_catalog_folds.py` | a scoped COMPARISON, not a proof: folds the 129 four-setting inequalities of arXiv:0810.1615 Table I down to three settings, 51,600 reductions, zero matches against `F`'s orbit |
 | `search_qubits.py`, `search_schmidt_profile.py` | counterexample searches over qubit strategies |
 | `qubit_theta_profile.py`, `qubit_joint_search.py`, `qubit_endpoint_scaling.py` | the angle-profile, joint and endpoint-scaling searches reviewed in `docs/review_2026-09-06_ai.md` |
@@ -56,6 +57,13 @@ endpoint scripts — were exploratory. The fixed-target run they were written fo
 succeed; the sharp bound came from the exact Gram construction above. They are kept because
 `docs/review_2026-09-06_ai.md` quotes figures from them and those figures should be
 reproducible, not because any current claim rests on them.
+
+Every generated file goes to the git-ignored `build/`. A **static** file name is written as
+`OUTPUT_DIR / 'name.json'` and is checked by reading the source; a name **computed at run
+time** must go through `outputs.py:output_path`, which validates it where the value actually
+exists. `tests/test_research_paths.py` checks that convention, and
+`tests/test_output_helper.py` tests the helper itself — that is where the containment
+guarantee lives, because three rounds of review showed a source lint could not carry it.
 
 Outputs: `qubit_theta_profile.py`, `qubit_joint_search.py` and `qubit_endpoint_scaling.py`
 write **nothing** — their results go to stdout. Seeds and workloads are hard-coded in their
