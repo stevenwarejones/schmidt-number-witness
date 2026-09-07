@@ -27,6 +27,17 @@ fraction of experimental runs and not a proven optimal decomposition cost.
 Consequently `F > 7` certifies Schmidt number at least three, and separately excludes the
 two-sided compatible-pair mixture class. One functional does both.
 
+## Verifying
+
+**[`VERIFY.md`](VERIFY.md) — one command, what it establishes, and what it does not.**
+Verifying these proofs does not require rerunning the search that found them.
+
+Two certificate guides are written for a reader who wants to inspect the mathematics before
+running code: [`docs/CERTIFICATE_SHARP_BOUND.md`](docs/CERTIFICATE_SHARP_BOUND.md) for the
+sharp Schmidt-number-two bound, with a proof map separating the machine-checked steps from the
+mathematical ones, and [`docs/CERTIFICATE_FACET.md`](docs/CERTIFICATE_FACET.md) for the
+two-sided facet.
+
 ## Quick start
 
 Tested on CPython 3.10.12; CI also runs 3.12. The sharp Schmidt-number-two verifier is
@@ -70,7 +81,7 @@ exact; none calls a solver.
 
 | Path | Role |
 |---|---|
-| `docs/` | model and geometry, the sharp proof, prior-art status, and the dated independent AI reviews |
+| `docs/` | model and geometry, the two certificate guides, the sharp proof, prior-art status, and the dated independent AI reviews |
 | `tests/` | adversarial corruption tests, the optimized-execution regression, documentation and discovery-path checks, and `tests/verify_sos_independent.py`, a second implementation of the SOS check deliberately not shared with the primary verifier |
 | `research/` | discovery code that produced the certificates: SDP search, rational rounding, counterexample searches. Not part of any proof |
 | `research/legacy/` | the historical routing/record calculation the qutrit certificate originated from, with its original certificate byte for byte. Supports no current claim |
