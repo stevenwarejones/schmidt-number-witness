@@ -184,10 +184,20 @@ proof, and it is labelled as such there.
 ## 6. The improved qutrit realization, and the white-noise model
 
 `proofs/improved_qutrit_certificate.json` gives a real 3-by-3 integer coefficient matrix and six
-integer measurement vectors. `proofs/verify_improved_qutrit.py` rebuilds all 36 Born
+integer measurement vectors. Each of the six settings is a **binary projective measurement
+consisting of a rank-one projector and its rank-two orthogonal complement**; the certificate's
+`rank_one_outcome` field says which outcome carries the rank-one projector, and the verifier
+uses that assignment as given. `proofs/verify_improved_qutrit.py` rebuilds all 36 Born
 probabilities from those integers in exact rational arithmetic — it reads no stored probability
 table — and checks positivity, normalization, no-signaling, and a nonzero determinant of the
-coefficient matrix, which is what establishes Schmidt rank exactly three.
+coefficient matrix.
+
+**What the determinant does and does not establish.** It establishes that the *supplied state*
+has Schmidt rank three. It does not by itself say anything about the behaviour: a
+Schmidt-rank-three state can produce a behaviour some Schmidt-number-two state also produces.
+What rules that out is `G > 7` together with §1: no Schmidt-number-two realization reproduces
+this behaviour, whatever state it uses. The determinant confirms the supplied realization is not
+a rank-two one in disguise; the violation is what makes the behaviour a witness.
 
 | Quantity | Value (exact rational, shown to 12 places) |
 |---|---|
@@ -218,11 +228,13 @@ This is depolarizing noise applied to the outputs of a fixed behaviour. It is **
 detector-efficiency threshold, not a bound for arbitrary physical noise, not a visibility, and
 not a finite-statistics statement.
 
-The `1.513615%` figure is about 8.2 times the `0.184123%` that the repository's original qutrit
-realization has against `F`. That comparison is between two particular certified realizations
-scored against two different functionals with two different noise thresholds. It is not a
-comparison of proven optima, and the see-saw search that found the new realization is a
-lower-bound discovery method, not a proof of the global qutrit maximum of `G`.
+Under the same uniform-output-noise model, the supplied strengthened-witness realization
+tolerates approximately 8.2 times more noise than the supplied original realization —
+`1.513615%` against `0.184123%`. Both witnesses are normalized to the same bound 7, so the two
+percentages are computed the same way; what differs is the functional and the realization, so
+this compares two particular certified realizations and **not** their proven optimal robustness.
+The see-saw search that found the new realization is a lower-bound discovery method, not a proof
+of the global qutrit maximum of `G`.
 
 ## 7. Proof map: what is machine-checked and what is not
 

@@ -129,9 +129,10 @@ The rest of the prior-art audit is incomplete and priority is unresolved. No hum
 has taken place; the reviews in `docs/review_2026-09-06_ai.md` and `docs/review_2026-09-07_ai.md` are by AI systems (Claude and ChatGPT/Astra respectively). The global quantum
 maximum of `F` and the tight decomposition cost are unresolved. Experimental feasibility is
 not demonstrated — the quantum violation of `F` is `0.0129`, and the corresponding tolerance to
-**uniform white-noise admixture of the output distribution** is roughly `0.18%`; the
-strengthened `G` reaches `1.51%` on its own realization, which is a different functional against
-a different threshold and not a like-for-like improvement. Neither figure is
+**uniform white-noise admixture of the output distribution** is roughly `0.18%`. Under the same
+uniform-output-noise model, the supplied strengthened-witness realization tolerates
+approximately 8.2 times more noise than the supplied original realization. This compares
+different functionals and realizations, not their proven optimal robustness. Neither figure is
 a detection efficiency, a visibility, or a demonstrated experimental tolerance. The exact
 optimal penalty `alpha_star` is bracketed but **not determined**, and the equality-face
 classification supplied alongside the endpoint certificate is deliberately **not** integrated: it

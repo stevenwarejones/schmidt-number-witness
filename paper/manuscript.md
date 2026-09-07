@@ -369,16 +369,19 @@ there for **every** $\varepsilon>0$. No positive penalty preserves the partial-l
 Propositions 1-2, Corollary 5 and the facet interpretation apply to $F$ and not to
 $F+\varepsilon p$. This is proved from the same facet certificate that establishes Proposition 2.
 
-**A separating realization.** An exactly specified two-qutrit state and six real rank-one
-projective measurements, given as integers, yield
+**A separating realization.** An exactly specified two-qutrit state together with six binary
+projective measurements, each consisting of a rank-one projector on a real 3-vector and its
+rank-two orthogonal complement, all given as integers, yield
 
 $$
 F=6.469225039506\ldots\le7,\qquad
 G:=F+\varepsilon_0 p=7.092839338673\ldots>7,
 $$
 
-with Schmidt rank three certified by a nonzero determinant of the coefficient matrix. The
-original $F$ does not detect this behavior at all. Under uniform-output admixture the
+The determinant of the coefficient matrix is nonzero, so the supplied STATE has Schmidt rank
+three; that is a fact about this realization. What establishes that no Schmidt-number-two
+realization reproduces the BEHAVIOR is $G>7$ together with Theorem 6. The original $F$ does not
+detect this behavior at all. Under uniform-output admixture the
 appropriate threshold is **not** $(G(Q)-7)/G(Q)$: uniform outputs give $F(U)=0$ but
 $p(U)=1/4$, hence $G(U)=\varepsilon_0/4\ne0$, and
 

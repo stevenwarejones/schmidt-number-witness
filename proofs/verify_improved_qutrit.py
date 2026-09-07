@@ -1,16 +1,28 @@
 """The improved qutrit realization for the penalised functional G = F + eps0 * p.
 
-The state is a real 3x3 coefficient matrix and each measurement is a rank-one
-projector on a real 3-vector, all given as integers, so every Born probability is
-an exact rational.  This file rebuilds all 36 of them from the raw integers -- it
-does not read any stored probability table -- then checks
+The state is a real 3x3 coefficient matrix, and each of the six settings is a BINARY
+PROJECTIVE measurement consisting of a rank-one projector on a real 3-vector together
+with its rank-two orthogonal complement.  The certificate's `rank_one_outcome` field
+records which of the two outcomes the rank-one projector is assigned to, and that
+assignment is preserved here.  Everything is given as integers, so every Born
+probability is an exact rational.  This file rebuilds all 36 of them from the raw
+integers -- it does not read any stored probability table -- then checks
 
   * positivity, normalization and nonsignaling;
-  * Schmidt rank exactly three, via a nonzero determinant of the coefficient matrix
-    (that is what makes the point inaccessible to Schmidt number two);
+  * that the SUPPLIED STATE has Schmidt rank three, via a nonzero determinant of its
+    coefficient matrix;
   * G = F + eps0 * p > 7, so the point is detected by the endpoint witness;
   * F <= 7, so the ORIGINAL functional does not detect it at all;
   * the white-noise threshold under the uniform-output noise model.
+
+WHAT ESTABLISHES WHAT.  The determinant is a fact about the state that was supplied:
+it has Schmidt rank three.  On its own that says nothing about the behaviour, since
+a Schmidt-rank-three state can perfectly well produce a behaviour some
+Schmidt-number-two state also produces.  What rules that out here is G > 7 together
+with the certified bound G <= 7 on every Schmidt-number-two behaviour: NO
+Schmidt-number-two realization reproduces this behaviour, whatever state it uses.
+The determinant says the supplied realization is not a rank-two one in disguise; the
+violation is what makes the behaviour a witness.
 
 WHITE-NOISE MODEL.  U is the uniform-output behaviour, P_U(ab|xy) = 1/4 for every
 a, b, x, y.  All its marginals and correlators vanish, so F(U) = 0 and
@@ -54,7 +66,9 @@ assert norm > 0, '[E-QUTRIT-SHAPE] the state vector is zero'
 
 
 def effects(entry):
-    """[projector, complement] indexed by outcome, from an integer 3-vector."""
+    """One binary projective measurement: a rank-one projector and its rank-two complement,
+    indexed by outcome, built from an integer 3-vector.  `rank_one_outcome` says which outcome
+    carries the rank-one projector, and is used exactly as given."""
     u = entry['vector']
     assert len(u) == 3 and all(isinstance(z, int) for z in u), \
         '[E-QUTRIT-SHAPE] a measurement vector is not three integers'
@@ -103,13 +117,16 @@ for x, y in product(range(3), repeat=2):
 print(f'PASS 36 exact Born probabilities: valid nonsignaling behaviour '
       f'(least probability ~ {float(min(Q.values())):.6f})', flush=True)
 
-# Schmidt rank of the pure state = rank of the 3x3 coefficient matrix.
+# Schmidt rank of the SUPPLIED STATE = rank of its 3x3 coefficient matrix.  This is a
+# statement about the realization, not about the behaviour; see the docstring.
 M = [[state[3 * i + j] for j in range(3)] for i in range(3)]
 det = (M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1])
        - M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0])
        + M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0]))
-assert det != 0, '[E-QUTRIT-RANK] the coefficient matrix is singular, so Schmidt rank < 3'
-print(f'PASS Schmidt rank three: coefficient-matrix determinant = {det} != 0', flush=True)
+assert det != 0, ('[E-QUTRIT-RANK] the coefficient matrix is singular, so the supplied state '
+                  'does not have Schmidt rank three')
+print(f'PASS the SUPPLIED STATE has Schmidt rank three: coefficient-matrix determinant = {det} '
+      f'!= 0 (a fact about the realization, not yet about the behaviour)', flush=True)
 
 
 def coordinates(P):
@@ -137,7 +154,9 @@ assert G_val > Fr(709, 100), '[E-QUTRIT-SCORE] the penalised score falls below t
 print(f'PASS original F = {float(F_val):.12f} <= 7: the ORIGINAL witness does not detect this point',
       flush=True)
 print(f'PASS p = P(00|10) = {float(p_val):.12f}', flush=True)
-print(f'PASS penalised G = F + {eps} p = {float(G_val):.12f} > 7', flush=True)
+print(f'PASS penalised G = F + {eps} p = {float(G_val):.12f} > 7, so NO Schmidt-number-two '
+      f'realization reproduces this BEHAVIOUR -- this, not the determinant, is what makes it a '
+      f'witness', flush=True)
 
 # Uniform-output white noise.
 U = {k: Fr(1, 4) for k in Q}
@@ -157,6 +176,7 @@ assert eta > Fr(15, 1000), '[E-NOISE-MODEL] the white-noise tolerance falls belo
 print(f'PASS uniform-output white-noise tolerance = {float(eta) * 100:.6f}% '
       f'(threshold mixture lands exactly on G = 7)', flush=True)
 
-print(f'IMPROVED QUTRIT VALID: Schmidt rank three, G = {float(G_val):.10f} > 7, '
-      f'noise tolerance {float(eta) * 100:.4f}%.', flush=True)
+print(f'IMPROVED QUTRIT VALID: G = {float(G_val):.10f} > 7, so the behaviour has no '
+      f'Schmidt-number-two realization at all; the supplied state has Schmidt rank three; '
+      f'white-noise tolerance {float(eta) * 100:.4f}%.', flush=True)
 print('     This is a see-saw discovery, not a proven global qutrit maximum of G.', flush=True)
