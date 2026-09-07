@@ -114,6 +114,11 @@ of several inequalities. Zero matches is not evidence of novelty.
 
 ### Comparisons that remain open
 
+- **A Hardy-based Schmidt-rank witness.** Mukherjee et al., *Device independent Schmidt rank
+  witness by using Hardy paradox*, is the closest comparator by *claim type* found so far — it
+  witnesses Schmidt rank, not merely dimension. Its coefficient-level relation to `F` has
+  **not** been examined. The Hardy remark below concerns the (2 settings, 3 outcomes)
+  dimension tests and does not dispose of this one.
 - the broader Gigena–Kaniewski family. An exploratory projected-simulator search was
   **inconclusive**: its finite strategy library left eight targets uncovered, so neither
   detection nor non-detection follows. That work is not in this repository.

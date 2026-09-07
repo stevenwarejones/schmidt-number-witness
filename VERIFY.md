@@ -82,7 +82,9 @@ gate and refuses to run under `python -O`, where assertions would be stripped;
 | `python tests/test_docs_consistency.py` | documented paths exist; no unreferenced script |
 | `python manifest.py check` | file hashes against the Git index |
 | `python research/audit_catalog_folds.py` | a scoped comparison, not a proof gate |
+| `python tests/test_comparison_acceptance.py` | corrupt Q and the catalogue, require both comparisons to reject |
 | `python research/legacy/verify_routing.py --legacy-routing` | historical; supports no current claim |
+| `bash paper/build.sh` | rebuild the manuscript PDF (needs Pandoc + XeLaTeX) |
 
 ## Environment
 

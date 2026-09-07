@@ -55,6 +55,9 @@ jobs:
       - name: Four-setting catalogue fold search (comparison only)
         run: python research/audit_catalog_folds.py
 
+      - name: Comparison corruption tests
+        run: python tests/test_comparison_acceptance.py
+
       - name: Documentation paths and entry-point coverage
         run: python tests/test_docs_consistency.py
 

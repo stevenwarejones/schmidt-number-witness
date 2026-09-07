@@ -55,6 +55,7 @@ python tests/check_sharp_pauli.py            # exact Pauli reconstruction
 python tests/verify_sos_independent.py       # numerical, independent of the word reduction
 python tests/test_research_paths.py          # discovery input/output paths
 python tests/test_docs_consistency.py        # documented paths exist; no unreferenced script
+python tests/test_comparison_acceptance.py   # corrupt the comparison data, require rejection
 python research/audit_catalog_folds.py       # comparison only, not a proof gate
 python research/legacy/verify_routing.py --legacy-routing   # historical; no current claim
 python manifest.py check                     # hash and coverage
@@ -84,6 +85,7 @@ exact; none calls a solver.
 | `docs/` | model and geometry, the two certificate guides, the sharp proof, prior-art status, and the dated independent AI reviews |
 | `tests/` | adversarial corruption tests, the optimized-execution regression, documentation and discovery-path checks, and `tests/verify_sos_independent.py`, a second implementation of the SOS check deliberately not shared with the primary verifier |
 | `research/` | discovery code that produced the certificates: SDP search, rational rounding, counterexample searches. Not part of any proof |
+| `paper/` | the manuscript source and its build script. A **review draft**: unpublished, no author identity, journal status, priority or expert validation asserted. The PDF is git-ignored — build it with `bash paper/build.sh` |
 | `research/legacy/` | the historical routing/record calculation the qutrit certificate originated from, with its original certificate byte for byte. Supports no current claim |
 
 ## Limitations

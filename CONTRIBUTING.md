@@ -12,6 +12,7 @@ python tests/check_sharp_pauli.py
 python tests/verify_sos_independent.py
 python tests/test_research_paths.py
 python tests/test_docs_consistency.py
+python tests/test_comparison_acceptance.py
 python research/audit_catalog_folds.py
 python research/legacy/verify_routing.py --legacy-routing
 python manifest.py check

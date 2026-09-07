@@ -96,9 +96,11 @@ The compressed effects `V_A^dagger M V_A` and `V_B^dagger N V_B` are positive an
 identity on those supports, and they reproduce every Born probability exactly. A rank-one
 support embeds into a qubit.
 
-**The compressed effects need not be projective**, which is precisely why section 2 must handle
-arbitrary binary POVMs and must come after this step rather than before it. Compression yields
-qubit POVMs; section 2 then reduces those to projective or deterministic implementations.
+**The compressed effects need not be projective.** That is precisely why section 2 has to
+handle arbitrary binary POVMs rather than only projective ones. The order of *application* is
+compression first, POVM reduction second: compression yields qubit POVMs, and section 2 is then
+applied to those. (Section 2 is stated first only because its result must be available at the
+point where this section uses it.)
 
 For a state of Schmidt number at most two, decompose it into pure states of Schmidt rank at most
 two and apply the argument to each component. Different components may induce different
