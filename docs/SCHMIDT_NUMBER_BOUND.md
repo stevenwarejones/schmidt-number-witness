@@ -1,6 +1,6 @@
 # Sharp Schmidt-number-two bound
 
-Status: exact computer-assisted proof with an independently implemented verifier. A second AI system has reviewed it (`docs/review_2026-09-06_ai.md`); external human review and the novelty audit remain outstanding.
+Status: exact computer-assisted proof with an independently implemented verifier. Two AI systems have reviewed it — Claude (`docs/review_2026-09-06_ai.md`) and ChatGPT/"Astra" (`docs/review_2026-09-07_ai.md`); external human review and the novelty audit remain outstanding.
 
 ## Results
 

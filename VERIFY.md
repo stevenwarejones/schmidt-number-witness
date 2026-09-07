@@ -58,7 +58,7 @@ gate and refuses to run under `python -O`, where assertions would be stripped;
 - **Not novelty.** `docs/PRIOR_ART.md` states what is settled and what is open. The valid
   inequality on the partial-local hull is prior art; check 3 above proves that against us.
 - **Not peer review.** No human domain expert has reviewed any of this. The reviews under
-  `docs/` are by AI systems.
+  `docs/` are by AI systems — Claude and ChatGPT ("Astra") — not by people.
 - **Not authenticity or provenance.** `python manifest.py check` compares file hashes against
   the Git index: it is an integrity check on a checkout, and it refuses to run without one.
   `python manifest.py verify-archive` answers the different question a downloaded archive

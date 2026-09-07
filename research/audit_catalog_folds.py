@@ -23,6 +23,10 @@ a mis-transcribed row is rejected rather than silently compared.  And a positive
 F itself to four settings by splitting one of Alice's rows, then requires the fold to find it --
 so a search that could never match anything would fail here.
 
+ORIGIN.  The 129 coefficient vectors were extracted from the paper's source by ChatGPT
+("Astra"), whose fold search this is adapted from; see docs/review_2026-09-07_ai.md.  The
+integrity checks below are what make the extraction usable without re-reading the source.
+
 WHAT THIS DOES NOT COVER.  Not all 241 inequalities of that survey, and not all 175 four-setting
 classes -- only the 129 rows of that one table.  Not arbitrary wirings, not positive
 combinations of several inequalities, not five-setting scenarios, not non-surjective or

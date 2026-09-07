@@ -34,6 +34,11 @@ against the benchmark on both intervals in exact rational arithmetic:
                               clamped to the interval;
     on [2,inf) b <= 4 and (8 - a - 2b) > 0, so 4c - (a + bc) is nondecreasing and positive at 2.
 
+ORIGIN.  The family, the benchmark construction and the interval argument were supplied by
+ChatGPT ("Astra") in the review recorded at docs/review_2026-09-07_ai.md.  The derivation was
+reproduced independently before being adopted, and this implementation is not theirs -- it
+re-derives the benchmark symbolically here rather than importing a quoted value.
+
 SCOPE.  This is one published family, compared against Q, under input/output relabelings and
 party exchange.  It says nothing about the broader Gigena-Kaniewski family, about wirings,
 filtering, many-copy protocols, or conditional tradeoffs.  See docs/PRIOR_ART.md.

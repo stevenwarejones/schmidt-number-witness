@@ -33,6 +33,11 @@ qubit maximum, whatever that maximum is.
          and it is all the argument needs.
   M3322  likewise: an explicit two-qubit state and six binary projective observables are
          built in exact rational arithmetic and their score computed exactly.
+
+The two explicit qubit constructions were supplied by ChatGPT ("Astra") in the review recorded
+at docs/review_2026-09-07_ai.md.  Both are checked here from first principles -- the
+observables are confirmed traceless and involutive and the scores recomputed -- rather than
+taken on trust.
 """
 import sys as _sys
 

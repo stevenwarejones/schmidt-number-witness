@@ -106,7 +106,7 @@ marginal, which is the shape of the published detection-efficiency dimension wit
 are exact, and neither is a novelty clearance; `docs/PRIOR_ART.md` states what the audits did
 not reach.
 The rest of the prior-art audit is incomplete and priority is unresolved. No human expert or peer review
-has taken place; the reviews in `docs/review_2026-09-06_ai.md` and `docs/review_2026-09-07_ai.md` are by AI systems. The global quantum
+has taken place; the reviews in `docs/review_2026-09-06_ai.md` and `docs/review_2026-09-07_ai.md` are by AI systems (Claude and ChatGPT/Astra respectively). The global quantum
 maximum of `F` and the tight decomposition cost are unresolved. Experimental feasibility is
 not demonstrated — the quantum violation is `0.0129`, and the corresponding tolerance to
 **uniform white-noise admixture of the output distribution** is roughly `0.18%`. That figure is
@@ -120,7 +120,28 @@ Steven W. Jones — sources, certificate data and documentation alike. There is 
 license. `CITATION.cff` carries the citation metadata; `CONTRIBUTING.md` describes what a
 change to a certificate must demonstrate.
 
-`docs/review_2026-09-06_ai.md`, `docs/review_2026-09-07_ai.md` and `tests/verify_sos_independent.py` contain prose and code written by AI systems
-(Claude, Anthropic) acting as an adversarial reviewer, contributed by the owner under the same
-terms. No third-party code has been imported; record the origin and license here before adding
-any.
+### Which parts were written by which system
+
+This repository was produced by **two AI systems working adversarially against each other**,
+directed by the owner, who is not a physicist: **Claude (Anthropic)** and **ChatGPT (OpenAI),
+working as "Astra"**. Everything below is contributed by the owner under the repository's
+license. No third-party code has been imported; record the origin and license here before
+adding any.
+
+| Artifact | Origin |
+|---|---|
+| `docs/review_2026-09-06_ai.md` | review by Claude |
+| `tests/verify_sos_independent.py` | written by Claude alongside that review |
+| `docs/review_2026-09-07_ai.md` | Claude's condensed record of a review **by Astra**; the findings are Astra's |
+| `paper/manuscript.md` | written **by Astra**, installed here near-verbatim (paths repointed only) |
+| `research/inputs/catalog_coefficients.json` | the 129 catalogue vectors, extracted **by Astra** from arXiv:0810.1615 Table I |
+| `research/audit_catalog_folds.py` | adapted from **Astra's** fold search |
+| `docs/SCHMIDT_NUMBER_BOUND.md` §2–3 | the constructive binary-POVM and Schmidt-compression proof is **Astra's**, written up here |
+| the qubit benchmark constructions in `proofs/verify_novelty_comparison.py` and `proofs/verify_i3322_family.py` | the states and measurements are **Astra's**; the verifier code is Claude's, and each construction was re-derived independently before being adopted |
+| the interval construction in `tests/verify_facet_independent.py` | method described **by Astra**; implementation is Claude's |
+| everything else — verifiers, certificates, tests, other docs | Claude |
+
+Neither system's output has been reviewed by a human domain expert. Where one system's
+mathematics was adopted from the other, it was re-derived independently first, and the
+disagreements that surfaced are recorded in the two review documents rather than silently
+reconciled.
