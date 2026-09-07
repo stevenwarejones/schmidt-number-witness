@@ -26,11 +26,16 @@ For the Bell functional `F` defined in [docs/THEORY.md](docs/THEORY.md):
 | Quantum remainder in any Schmidt-two-plus-remainder decomposition of that behavior | `> 31.19%` |
 | Smallest universally valid penalty `alpha_star` in `M_A <= 6 + alpha p`, `p = P(00\|10)` | certified to `(0.1631016, 0.16311]`; exact value **open** |
 | Qutrit realization for the strengthened `G = F + 3.83689 p` | `G = 7.0928393387`, white-noise tolerance `1.5136%` |
+| Where `F = 7` is attained on Schmidt number two | exactly a four-simplex of five local deterministic behaviors — and the same face for every `F + eps p`, `0 <= eps <= 3.83689` |
 
 The remainder figure is a certified lower bound for the supplied behavior. It is not a measured
 fraction of experimental runs and not a proven optimal decomposition cost.
 
-The last two rows concern a **different functional**. `F` does two things at once — it is a
+The last row is about `F` again: the sharp bound is attained **only** locally, and only inside
+that four-simplex. It classifies observed behaviors, not states — deterministic measurements can
+reach `F = 7` on an entangled state while revealing none of its entanglement.
+
+The two rows before it concern a **different functional**. `F` does two things at once — it is a
 facet of the partial-local hull `H` *and* it is bounded on Schmidt number two. The strengthened
 `G = F + eps p` keeps only the second: `proofs/verify_penalty_not_partial_local.py` proves,
 from this repository's own facet certificate, that `G <= 7` fails on `H` for **every** `eps > 0`
@@ -52,6 +57,9 @@ mathematical ones, and [`docs/CERTIFICATE_FACET.md`](docs/CERTIFICATE_FACET.md) 
 two-sided facet. A third,
 [`docs/CERTIFICATE_PENALTY_ENDPOINT.md`](docs/CERTIFICATE_PENALTY_ENDPOINT.md), covers the
 strengthened penalty and — in its §0 — exactly which earlier results do *not* carry over to it.
+A fourth, [`docs/CERTIFICATE_EQUALITY_FACE.md`](docs/CERTIFICATE_EQUALITY_FACE.md), covers the
+equality face; it was integrated only after the internal review recorded in
+[`docs/review_2026-09-07_equality_face.md`](docs/review_2026-09-07_equality_face.md).
 
 ## Quick start
 
@@ -76,6 +84,8 @@ python tests/test_output_helper.py           # the validated output-path helper
 python tests/test_checker_mutations.py       # replay the defects the checkers once accepted
 python tests/verify_endpoint_independent.py  # the endpoint by three non-proof-path routes
 python tests/test_endpoint_mutations.py      # corrupt each endpoint certificate (~6 min)
+python tests/verify_equality_face_independent.py  # exact simplex; reads no supplied dual (~4 min)
+python tests/test_equality_face_mutations.py      # corrupt the equality-face certificate (~3 min)
 python research/audit_catalog_folds.py       # comparison only, not a proof gate
 python research/legacy/verify_routing.py --legacy-routing   # historical; no current claim
 python manifest.py check                     # hash and coverage (needs a checkout)
@@ -103,6 +113,7 @@ exact; none calls a solver.
 | `proofs/verify_penalty_endpoint.py` | `proofs/penalty_endpoint_certificate.json`, `proofs/penalty_branch_certificates.json`, `proofs/penalty_lower_certificate.json` | `F + 3.83689 p <= 7` on Schmidt number two, from a second positive-definite 70×70 Gram on the same word basis, twelve exact no-signaling duals for the deterministic-observable branches, and an explicit two-qubit strategy pinning `alpha_star` from below |
 | `proofs/verify_improved_qutrit.py` | `proofs/improved_qutrit_certificate.json` | all 36 Born probabilities rebuilt from raw integers: Schmidt rank three by a nonzero determinant, `G = 7.0928393387 > 7`, original `F = 6.4692250395 <= 7`, and the exact white-noise threshold |
 | `proofs/verify_penalty_not_partial_local.py` | `proofs/facet_certificate.json` | the scope guard: `G <= 7` is **false** on `H` for every `eps > 0`, proved at one of the repository's own facet-defining points |
+| `proofs/verify_equality_face.py` | `proofs/equality_face_certificate.json` | `S2` intersected with `{F = 7}` is exactly a four-simplex of five local deterministic behaviors: 48 deterministic-observable patterns closed by 665 exact forced-zero duals plus a projector-equality closure, and the same face for the whole certified family |
 
 | Path | Role |
 |---|---|
@@ -134,9 +145,10 @@ uniform-output-noise model, the supplied strengthened-witness realization tolera
 approximately 8.2 times more noise than the supplied original realization. This compares
 different functionals and realizations, not their proven optimal robustness. Neither figure is
 a detection efficiency, a visibility, or a demonstrated experimental tolerance. The exact
-optimal penalty `alpha_star` is bracketed but **not determined**, and the equality-face
-classification supplied alongside the endpoint certificate is deliberately **not** integrated: it
-is under separate review and appears in no result here. Nothing here concerns faster-than-light communication,
+optimal penalty `alpha_star` is bracketed but **not determined**, and what happens to the
+equality face at that exact critical penalty is a separate open question. The equality theorem's
+Hilbert-space argument, its five projector rules and its POVM/compression reduction are prose,
+not machine-checked; `docs/CERTIFICATE_EQUALITY_FACE.md` §6 marks which steps are which. Nothing here concerns faster-than-light communication,
 observer-relative events, or an interpretation of quantum mechanics.
 
 ## License, citation and provenance
@@ -166,6 +178,7 @@ adding any.
 | the qubit benchmark constructions in `proofs/verify_novelty_comparison.py` and `proofs/verify_i3322_family.py` | the states and measurements are **Astra's**; the verifier code is Claude's, and each construction was re-derived independently before being adopted |
 | the interval construction in `tests/verify_facet_independent.py` | method described **by Astra**; implementation is Claude's |
 | `proofs/penalty_endpoint_certificate.json`, `proofs/penalty_branch_certificates.json`, `proofs/penalty_lower_certificate.json`, `proofs/improved_qutrit_certificate.json`, `research/endpoint_numerics.json` | the certificate **data** is **Astra's**; every claim it makes was re-derived here before adoption, and the verifiers, the independent checker and the mutation suite around it are Claude's |
+| `proofs/equality_face_certificate.json` and the equality argument it certifies | **Astra's**; held out of the repository until reviewed in `docs/review_2026-09-07_equality_face.md`, and re-derived here by an exact rational simplex that reads none of its duals |
 | everything else — verifiers, certificates, tests, other docs | Claude |
 
 Neither system's output has been reviewed by a human domain expert. Where one system's

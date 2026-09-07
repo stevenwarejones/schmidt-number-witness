@@ -37,15 +37,19 @@ run(PROOFS / 'verify_quantum_upper.py')
 run(PROOFS / 'verify_penalty_endpoint.py')
 run(PROOFS / 'verify_improved_qutrit.py')
 run(PROOFS / 'verify_penalty_not_partial_local.py')
+# The equality set of the sharp bound, and -- via the endpoint certificate above -- of the whole
+# certified family.  Reviewed in docs/review_2026-09-07_equality_face.md before integration.
+run(PROOFS / 'verify_equality_face.py')
 
 q = json.loads((PROOFS / 'qutrit_certificate.json').read_text())
 s = json.loads((PROOFS / 'sharp_qubit_certificate.json').read_text())
 u = json.loads((PROOFS / 'quantum_upper_certificate.json').read_text())
 facet = json.loads((PROOFS / 'facet_certificate.json').read_text())
 endpoint = json.loads((PROOFS / 'penalty_endpoint_certificate.json').read_text())
+face = json.loads((PROOFS / 'equality_face_certificate.json').read_text())
 
 if not (q['coefficients'] == s['coefficients'] == u['coefficients'] == facet['w']
-        == endpoint['coefficients']):
+        == endpoint['coefficients'] == face['coefficients']):
     raise SystemExit('Bell coefficients mismatch across certificates')
 if not Fraction(endpoint['epsilon']) + Fraction(endpoint['alpha']) == 4:
     raise SystemExit('Endpoint epsilon and alpha are not complementary')
@@ -58,5 +62,7 @@ if not weight > Fraction(3119, 10000):
 print('All exact checks passed: sharp bound 7, qutrit separation, and quantum remainder weight >31.19%.')
 print(f"Penalty endpoint: M_A <= 6 + {endpoint['alpha']} p on Schmidt number two, against a lower "
       f"strategy at 0.16310160 -- and NOT valid on the partial-local hull H.")
+print('Equality face: F = 7 is attained on Schmidt number two only inside a four-simplex of '
+      'local behaviours, and the same face serves the whole certified family.')
 print('Global quantum maximum, tight decomposition cost, the exact optimal penalty alpha_star, '
-      'novelty, and external review remain open.')
+      'the equality face AT that critical penalty, novelty, and external review remain open.')

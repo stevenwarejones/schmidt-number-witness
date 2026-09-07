@@ -209,8 +209,15 @@ algebraic value, no matching sharp sum-of-squares, and no self-testing statement
 penalty is claimed. See `docs/CERTIFICATE_PENALTY_ENDPOINT.md` and
 `proofs/verify_penalty_endpoint.py`.
 
-Two things about that result belong here rather than there, because they bear directly on the
-argument above:
+**The equality set of `F <= 7` is now classified too.** It is exactly the convex hull of five
+local deterministic behaviours, of affine dimension four, so the sharp bound is attained only
+locally — see `docs/CERTIFICATE_EQUALITY_FACE.md` and `proofs/verify_equality_face.py`. The
+argument reuses §1 above, but needs the Gram to be positive **definite** rather than merely
+semidefinite, which it is. It also classifies the equality set of every `F + eps p` with
+`0 <= eps <= 0.16311`'s complementary `eps0`, and says nothing about the exact critical penalty.
+
+Two things about the penalty result belong here rather than there, because they bear directly on
+the argument above:
 
 * **The deterministic-observable branch had to be redone.** Section 2 disposes of a
   deterministic observable by routing the behavior into a partial-local class and invoking the
@@ -236,3 +243,6 @@ Dimension-constrained SDP methods are established, for example in [Navascues and
    cover every deterministic-observable case; check that the constant `eps/4` is carried
    correctly in both the operator identity and the noise threshold; and try to break the scope
    separation in `docs/CERTIFICATE_PENALTY_ENDPOINT.md` §0.
+8. For the equality face, attack the five projector rules themselves rather than their
+   implementation — that hand-check is the weakest link — and the order-sensitivity of the
+   POVM/compression reduction in `docs/CERTIFICATE_EQUALITY_FACE.md` §4.

@@ -265,7 +265,10 @@ would accept it.
 * the global qutrit maximum, or the dimension-unrestricted quantum maximum, of `G`;
 * a self-testing or rigidity statement at the conjectured critical penalty;
 * any facet, dimension or partial-locality property of `G` — §0 shows the natural one is false;
-* a quantitative distance-to-equality theorem for near-saturating `S2` behaviours;
+* a quantitative distance-to-equality theorem for near-saturating `S2` behaviours (the equality
+  face itself is now classified — `docs/CERTIFICATE_EQUALITY_FACE.md` — but how *fast* a
+  near-saturating behaviour approaches it is not);
+* the equality face at the exact critical penalty `alpha_star`, as opposed to on `[0, eps0]`;
 * experimental feasibility, loss tolerance, or finite-sample significance;
 * novelty. `docs/PRIOR_ART.md` records the audit status, including three comparators located
   in this round — Pauwels [arXiv:2608.29734](https://arxiv.org/abs/2608.29734), Goh et al.
@@ -290,5 +293,8 @@ the `H` counterexample located inside the repository's own facet certificate rat
 on report. The verifiers and tests committed here are Claude's.
 
 The equality-face theorem that arrived in the same package — that the `F = 7` face of `S2` is
-the convex hull of five local deterministic points — is **deliberately not integrated**. It is
-under separate review and appears nowhere in the paper's established results.
+the convex hull of five local deterministic points — was held out of the repository until it had
+been reviewed on its own. That review is `docs/review_2026-09-07_equality_face.md`; the theorem
+is now integrated, with its own guide at `docs/CERTIFICATE_EQUALITY_FACE.md`, and its §5 records
+the corollary that the whole family `F + eps p`, `0 <= eps <= eps0`, has that same equality
+face. What happens at the exact critical penalty is still open.

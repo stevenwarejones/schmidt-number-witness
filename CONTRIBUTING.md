@@ -18,6 +18,8 @@ python tests/test_output_helper.py
 python tests/test_checker_mutations.py
 python tests/verify_endpoint_independent.py   # ~30 s; four independent routes to the endpoint
 python tests/test_endpoint_mutations.py       # ~6 min; corrupts each endpoint certificate
+python tests/verify_equality_face_independent.py   # ~4 min; exact simplex, reads no supplied dual
+python tests/test_equality_face_mutations.py       # ~3 min; corrupts the equality-face certificate
 python research/audit_catalog_folds.py
 python research/legacy/verify_routing.py --legacy-routing
 python manifest.py check

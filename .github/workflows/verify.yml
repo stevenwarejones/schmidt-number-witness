@@ -79,6 +79,14 @@ jobs:
         if: matrix.python-version == '3.12'
         run: python tests/test_endpoint_mutations.py
 
+      # The equality face re-derived by an exact rational simplex that reads no supplied dual.
+      - name: Independent reconstruction of the equality face (EXACT)
+        run: python tests/verify_equality_face_independent.py
+
+      - name: Equality-face mutation regressions (rejection for the intended reason)
+        if: matrix.python-version == '3.12'
+        run: python tests/test_equality_face_mutations.py
+
       - name: Documentation paths and entry-point coverage
         run: python tests/test_docs_consistency.py
 
