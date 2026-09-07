@@ -5,11 +5,14 @@ a verifier that moves leaves a README pointing at nothing, and nothing fails.  A
 runs a documented command and gets `No such file` has no way to tell a stale path from a
 broken proof.  So the paths are checked the same way the certificates are.
 
-Two directions:
+Three directions:
 
   * every path-like token in the documentation resolves to a file that exists;
   * every tracked script is mentioned in the documentation or the CI workflow, so a file
-    cannot sit in the tree unreferenced.
+    cannot sit in the tree unreferenced;
+  * mathematics written in Markdown stays renderable on GitHub, which is stricter than
+    LaTeX and fails SILENTLY -- a reader sees raw TeX or an error box, and nothing in a
+    local PDF build reveals it.
 
 Generated paths under `build/` are exempt: they are git-ignored by design, and the prose
 sometimes names one to describe a defect (`build/clifford_bound.py` is where a bad path
@@ -114,6 +117,31 @@ for a, b, an, bn in ((readme, contrib, 'README.md', 'CONTRIBUTING.md'),
     for cmd in sorted(set(COMMAND.findall(a))):
         if cmd not in b:
             fails.append(f"{an} documents `python {cmd}` but {bn} does not")
+
+# 5. Markdown math must render on GitHub, not only under XeLaTeX.  GitHub renders math with
+#    a restricted KaTeX: it rejects \operatorname, and it does not recognise \[ ... \] as
+#    display math at all -- those lines appear verbatim.  Both build perfectly in the PDF, so
+#    only a check like this catches them.  Use \mathrm{...} and $$ ... $$ instead.
+GITHUB_MATH_BANNED = (
+    (re.compile(r'\\operatorname\b'),
+     'GitHub\'s KaTeX rejects \\operatorname; use \\mathrm{...}'),
+    (re.compile(r'^\\\[\s*$|^\\\]\s*$', re.M),
+     'GitHub does not render \\[ ... \\] display math; use $$ ... $$'),
+    (re.compile(r'\\(newcommand|def|DeclareMathOperator|renewcommand)\b'),
+     'GitHub\'s KaTeX has no persistent macro definitions'),
+)
+for rel in TRACKED:
+    if not rel.endswith('.md'):
+        continue
+    text = (ROOT / rel).read_text()
+    hit = False
+    for pattern, why in GITHUB_MATH_BANNED:
+        for m in pattern.finditer(text):
+            line = text.count('\n', 0, m.start()) + 1
+            fails.append(f"{rel}:{line}: {why}")
+            hit = True
+    if not hit:
+        print(f"  PASS math renders on GitHub: {rel}")
 
 if exempt:
     print(f"\nnote: {len(exempt)} generated path(s) named in prose, not required to exist: "

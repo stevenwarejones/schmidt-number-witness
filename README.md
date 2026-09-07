@@ -1,9 +1,11 @@
-# Two-sided partial locality
+# Schmidt-number witness
 
-Exact certificates for a two-sided partial-locality facet and a sharp Schmidt-number-two
-bound for the same Bell functional. The repository includes a violating qutrit realization
-and a certified lower bound on the quantum remainder in decompositions with a
-Schmidt-number-two component.
+An exact, dependency-free certificate that a joint-probability-penalized M3322 functional is
+bounded by 7 for **every Schmidt-number-two quantum behavior**, with an explicit qutrit
+realization that exceeds it — so the witness certifies Schmidt number at least three. The same
+functional is a facet of the two-sided partial-locality hull, which is where it came from and
+is reported here as a supporting result. Also included: a certified lower bound on the quantum
+remainder in decompositions with a Schmidt-number-two component.
 
 This is a public research repository, not a paper announcement. Priority is unresolved and
 no human expert has reviewed the results.

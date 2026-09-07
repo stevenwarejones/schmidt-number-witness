@@ -55,7 +55,7 @@ for mod in ('sympy', 'numpy'):
 
 SNAPSHOT = f"""# Verification snapshot
 
-Repository: two-sided-partial-locality
+Repository: schmidt-number-witness
 Commit: `{commit}`{'  **(built from a DIRTY working tree; it does not match that commit)**' if dirty else ''}
 Built: {date.today().isoformat()}
 Built with: CPython {platform.python_version()}, {', '.join(versions)}

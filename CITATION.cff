@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this repository, please cite it as below."
-title: "Two-sided partial locality: exact certificates for a partial-locality facet and a sharp Schmidt-number-two Bell bound"
+title: "Schmidt-number witness: an exact sharp bound for a probability-penalized M3322 functional, with a two-sided partial-locality facet"
 abstract: >-
   Exact certificates for a Bell functional F in the 3-setting, 2-outcome bipartite scenario.
   F <= 7 is a facet of the convex hull of the Alice-side and Bob-side partial-local sets, and
@@ -11,5 +11,5 @@ type: software
 authors:
   - family-names: Jones
     given-names: Steven W.
-repository-code: "https://github.com/stevenwarejones/two-sided-partial-locality"
+repository-code: "https://github.com/stevenwarejones/schmidt-number-witness"
 license: MIT

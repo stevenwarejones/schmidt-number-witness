@@ -32,15 +32,15 @@ We study a binary-outcome bipartite Bell functional with three measurement setti
 
 Let $x,y\in\{0,1,2\}$ and $a,b\in\{0,1\}$. With observable outcomes $(-1)^a$ and $(-1)^b$, define marginal expectations $A_x,B_y$ and correlators $E_{xy}$. Consider
 
-\[
+$$
 \begin{aligned}
 F={}&A_0-A_1+A_2-B_0-B_1+B_2\\
 &-E_{00}-E_{01}-E_{02}-E_{10}-E_{11}+E_{12}\\
 &+E_{20}-E_{21}-E_{22}.
 \end{aligned}
-\]
+$$
 
-The analysis uses the ordinary local quantum Bell model, $p(ab|xy)=\operatorname{tr}[\rho(M_{a|x}\otimes N_{b|y})]$, and setting-independent convex weights. It concerns certification from probabilities; no hidden signaling or observer-dependent event assumption is imposed.
+The analysis uses the ordinary local quantum Bell model, $p(ab|xy)=\mathrm{tr}[\rho(M_{a|x}\otimes N_{b|y})]$, and setting-independent convex weights. It concerns certification from probabilities; no hidden signaling or observer-dependent event assumption is imposed.
 
 **Main result.** The functional below has the attained bound F ≤ 7 on all Schmidt-number-two quantum behaviors with arbitrary binary POVMs, while an exact qutrit realization exceeds it. Section 3 proves the bound; Section 4 specifies the separating realization.
 
@@ -48,19 +48,19 @@ M3322 originates in nonlocal-resource inequalities [1,2]. One-sided partial-loca
 
 Define the two relabeled parent functionals by
 
-\[
+$$
 \begin{aligned}
 M_A&=F+A_1+B_0+E_{10},\\
 M_B&=F-A_2-B_2+E_{22}.
 \end{aligned}
-\]
+$$
 
 They are respectively a local input/output relabeling without party exchange and a party-exchanged relabeling of the M3322 representative in [3, Eq.48]. The identities
 
-\[
+$$
 F-7=(M_A-6)-4p(00|10)=(M_B-6)-4p(11|22)
 \tag{1}
-\]
+$$
 
 make their relationship explicit. F is not proposed as an independent parent inequality. Unlike the unpenalized M3322, which admits qubit violations [8], F has the sharp Schmidt-number-two ceiling established below.
 
@@ -68,10 +68,10 @@ make their relationship explicit. F is not proposed as an independent parent ine
 
 For each Alice input pair $S$, let $H_{A,S}$ consist of normalized nonsignaling behaviors whose $S\times\{0,1,2\}$ restriction is Bell local. Set
 
-\[
-H_A=\operatorname{conv}\bigcup_{|S|=2}H_{A,S},\qquad
-H=\operatorname{conv}(H_A\cup H_B),
-\]
+$$
+H_A=\mathrm{conv}\bigcup_{|S|=2}H_{A,S},\qquad
+H=\mathrm{conv}(H_A\cup H_B),
+$$
 
 with $H_B$ defined by exchange of parties.
 
@@ -85,7 +85,7 @@ Let C be the class of setting-independent mixtures of quantum implementations wh
 
 **Proposition 2.** C ⊆ H ∩ Q, and therefore F ≤ 7 on C.
 
-**Proof.** In an Alice-compatible component, write $M_{a|x}=\sum_\lambda p(a|x,\lambda)G_\lambda$. Put $q_\lambda=\operatorname{tr}[\rho(G_\lambda\otimes I)]$ and, for $q_\lambda>0$, $p(b|y,\lambda)=\operatorname{tr}[\rho(G_\lambda\otimes N_{b|y})]/q_\lambda$. These nonnegative normalized responses provide a local decomposition for the pair and every Bob input. The full quantum behavior is nonsignaling. The same argument applies on Bob’s side; setting-independent convexity completes the proof. $\square$
+**Proof.** In an Alice-compatible component, write $M_{a|x}=\sum_\lambda p(a|x,\lambda)G_\lambda$. Put $q_\lambda=\mathrm{tr}[\rho(G_\lambda\otimes I)]$ and, for $q_\lambda>0$, $p(b|y,\lambda)=\mathrm{tr}[\rho(G_\lambda\otimes N_{b|y})]/q_\lambda$. These nonnegative normalized responses provide a local decomposition for the pair and every Bob input. The full quantum behavior is nonsignaling. The same argument applies on Bob’s side; setting-independent convexity completes the proof. $\square$
 
 No equality between C and H ∩ Q is assumed. Quantum partial-locality classes and actual compatible-measurement classes are distinguished in [10]; the operational relation between simulability and compatibility mixtures also requires the definitions in [11]. The present inclusion does not claim a new general incompatibility-quantification method.
 
@@ -95,44 +95,44 @@ No equality between C and H ∩ Q is assumed. Quantum partial-locality classes a
 
 **Proof.** First take nontrivial projective qubit observables $A_i=u_i\cdot\sigma$ and $B_j=v_j\cdot\sigma$. They satisfy $A_i^2=B_j^2=I$, interparty commutation, and scalar anticommutators
 
-\[
+$$
 \{A_i,A_j\}=2g^A_{ij}I,\qquad
 \{B_i,B_j\}=2g^B_{ij}I.
-\]
+$$
 
 The companion rational certificate specifies 84 operator words W_i of length at most three, an integer 84×70 matrix P, and a symmetric rational 70×70 matrix X. For $J_j=\sum_iP_{ij}W_i$, it verifies
 
-\[
+$$
 7I-\mathcal B_F=\sum_{j,k}X_{jk}J_j^\dagger J_k,
 \qquad X\succ0.
 \tag{2}
-\]
+$$
 
 The identity is exact in the polynomial algebra defined by the displayed relations. Positivity follows from strictly positive rational LDL pivots; every polynomial residual coefficient vanishes. Equation (2) therefore proves the bound for every state in the nontrivial projective qubit sector. Sampled Bloch-vector evaluations are cross-checks, not the proof.
 
 Every binary qubit effect has an explicit convex decomposition. If its eigenvalues are $0\le\lambda_-\le\lambda_+\le1$ and $\Pi$ projects onto a maximal-eigenvalue eigenvector, then
 
-\[
+$$
 M=\lambda_-I+(\lambda_+-\lambda_-)\Pi+(1-\lambda_+)0.
 \tag{2a}
-\]
+$$
 
 The coefficients are nonnegative and sum to one. Decompose each of the six effects in this way, and independently sample its component before the inputs are selected. The product of the six weights is setting independent. This expresses the original behavior as a convex mixture of implementations in which every binary measurement is projective or deterministic. A deterministic observable $\pm I$ is jointly measurable with any other measurement on its party; Proposition 2 bounds every component containing one. Equation (2) bounds every remaining component. Thus the result includes arbitrary binary qubit POVMs and mixed two-qubit states.
 
 For a pure state $|\psi\rangle$ of Schmidt rank $r\le2$, choose local isometries $V_A,V_B$ onto its Schmidt supports and write $|\psi\rangle=(V_A\otimes V_B)|\widetilde\psi\rangle$. Define
 
-\[
+$$
 \widetilde M_{a|x}=V_A^\dagger M_{a|x}V_A,\qquad
 \widetilde N_{b|y}=V_B^\dagger N_{b|y}V_B.
-\]
+$$
 
 These effects are positive and sum to the identity on their respective supports. Moreover,
 
-\[
+$$
 \langle\psi|M_{a|x}\otimes N_{b|y}|\psi\rangle
 =\langle\widetilde\psi|\widetilde M_{a|x}\otimes
 \widetilde N_{b|y}|\widetilde\psi\rangle.
-\]
+$$
 
 Rank-one supports can be embedded in qubits with arbitrary valid effects on the unused dimension. Compression need not preserve projectivity: that is why the binary-POVM step precedes compression. For a mixed state of Schmidt number at most two, apply this argument separately to every pure state in a Schmidt-rank-at-most-two decomposition and average. The compressed effects may differ between components; the bound holds for each of them. Linearity also includes setting-independent mixtures of implementations.
 
@@ -142,23 +142,23 @@ Finally, the product state $|00\rangle$, $A_0=A_1=A_2=Z$ and $B_0=B_1=B_2=-Z$ gi
 
 An explicit pure state and six binary measurements give
 
-\[
+$$
 \begin{aligned}
 F(Q)&=\frac{6492685621097725532153123325014736141211841649692233}
 {925818727541981220573252742087143961265664549902695}\\
 &=7.0129123854899715\ldots.
 \end{aligned}\tag{3}
-\]
+$$
 
 For a self-contained specification, normalize the following Gaussian-integer vector in the basis |00$\rangle$, |01$\rangle$, ..., |22$\rangle$:
 
-\[
+$$
 \begin{aligned}
 v=(&4826,-564-4361i,-3959-63i,\\
 &-2206-2587i,-527+2563i,1347-2509i,\\
 &1226-1212i,24-1993i,1646+2349i).
 \end{aligned}
-\]
+$$
 
 Each row below specifies a vector $v$ and the outcome $r$ with effect $|v\rangle\langle v|/\langle v|v\rangle$. The other effect is its complement. Each vector is normalized separately by that formula.
 
@@ -187,22 +187,22 @@ For the same behavior Q, exhaustive input/output/party relabeling gives the foll
 
 The I3322 representative has marginal coefficients $(-1,-1,0)$ and $(1,1,0)$ and correlation matrix
 
-\[
+$$
 C_I=\begin{pmatrix}1&1&1\\1&1&-1\\1&-1&0\end{pmatrix}.
-\]
+$$
 
 It is [3, Eq. (75)] in zero-based input notation. A qubit benchmark of 5 is achieved exactly on $|\phi^+\rangle=(|00\rangle+|11\rangle)/\sqrt2$ by
 
-\[
+$$
 A_0=B_0=\frac{\sqrt3X+Z}{2},\quad
 A_1=B_1=\frac{\sqrt3X-Z}{2},\quad A_2=B_2=Z.
-\]
+$$
 
 All marginals vanish and direct evaluation gives $I=5$. This achievable benchmark alone suffices: the best relabeled score on $Q$ is smaller than a score achievable with qubits. The comparison therefore does not require a literature upper bound on I3322. For reference, its probability form is $I=4J+4$, where
 
-\[
+$$
 J=\sum_{x,y}(C_I)_{xy}p(00|xy)-2p_A(0|0)-p_A(0|1)-p_B(0|0).
-\]
+$$
 
 For M3322 the same lower-benchmark argument applies: an explicit qubit realization gives a rational score above 6.023, while every relabeling on $Q$ is below 6.023. The reported approximate qubit score in [8] is contextual, not a premise of this comparison.
 
@@ -210,15 +210,15 @@ Thus F detects entanglement dimension on data for which neither ordinary relabel
 
 For an exact M3322 qubit lower witness, normalize the real vector
 
-\[
+$$
 \psi=(64474,73134,17575,-13624)
-\]
+$$
 
 in the basis $|00\rangle,|01\rangle,|10\rangle,|11\rangle$. For each setting, outcome 0 has effect $|v\rangle\langle v|/\langle v|v\rangle$, and outcome 1 its complement. Alice's vectors are (100000,312), (98313,18289), (94227,-33485); Bob's are (64814,76152), (-35243,93584), (-11537,-99332). With marginal coefficients (1,1,0) on both sides and correlation matrix
 
-\[
+$$
 \begin{pmatrix}1&-1&1\\1&-1&-1\\1&1&0\end{pmatrix},
-\]
+$$
 
 exact Born evaluation gives 6.024320502752555..., an achievable value rather than a certified maximum.
 
@@ -227,13 +227,13 @@ exact Born evaluation gives 6.024320502752555..., an achievable value rather tha
 
 Consider the published family [12, Eq. (26); 13, Eq. (E1)]
 
-\[
+$$
 \begin{aligned}
 I_c={}&A_0+A_1+B_0+B_1-(A_0+A_1)(B_0+B_1)\\
 &+c[(A_0-A_1)B_2+A_2(B_0-B_1)],\qquad c\ge1.
 \end{aligned}
 \tag{4}
-\]
+$$
 
 Products in this equation denote bipartite correlators. Its parameter changes correlation coefficients; it is distinct from the efficiency-dependent marginal tilt discussed below.
 
@@ -241,26 +241,26 @@ Products in this equation denote bipartite correlators. Its parameter changes co
 
 **Proof.** On $|\phi^+\rangle$, choose real projective observables
 
-\[
+$$
 \begin{aligned}
 A_0&=tX+zZ,& A_1&=-tX+zZ,& A_2&=X,\\
 B_0&=tX-zZ,& B_1&=-tX-zZ,& B_2&=X,
 \end{aligned}
-\]
+$$
 
 where $0\le t\le1$ and $z=\sqrt{1-t^2}$. All marginals vanish and direct Born evaluation gives $I_c=4(1-t^2)+4ct$. Consequently the following scores are achievable:
 
-\[
+$$
 q_{\mathrm{ach}}(c)=\begin{cases}4+c^2,&1\le c\le2,\\4c,&c\ge2.\end{cases}
 \tag{5}
-\]
+$$
 
 For each relabeling the rational behavior Q gives $I_c(Q)=a+bc$ with rational a,b. Exhaustive enumeration yields 576 distinct lines. For each line the accompanying exact comparison verifies
 
-\[
+$$
 4+t_*^2-a-bt_*>0,\qquad
  t_*=\max(1,\min(2,b/2)),
-\]
+$$
 
 and $b\le4$, $8-a-2b>0$. The first inequality is the minimum of $4+c^2-a-bc$ on $[1,2]$. The last two prove positivity of $4c-a-bc$ on $[2,\infty)$. The smallest first-interval gap is approximately 0.5834085189625386. Every comparison is rational; the printed decimal is not a numerical tolerance. This proves the assertion without claiming that (5) is the optimal qubit value. $\square$
 
@@ -268,11 +268,11 @@ and $b\le4$, $8-a-2b>0$. The first inequality is the minimum of $4+c^2-a-bc$ on 
 
 The efficiency family of [14, Eq. (2)] is
 
-\[
+$$
 I_{NN22}(\eta_B)=I_{NN22}
 -\frac{1-\eta_B}{\eta_B}p_A(+1|1)
 \tag{6}
-\]
+$$
 
 in that source's one-based input and signed-outcome notation. For N=3 this is an I3322 marginal penalty; it is used for dimension analysis in [15]. After normalization, its correlator support remains at most eight entries. F has nine. Thus direct equivalence under relabeling, nonzero scaling and an added constant is excluded, even allowing arbitrary marginal tilts. This support argument does not rule out derivations from several inequalities or establish non-detection of Q for all efficiencies.
 
@@ -288,9 +288,9 @@ These checks narrow several concrete equivalence questions. They do not establis
 
 Let $Q_2$ denote the behaviors realizable with Schmidt number at most two, including setting-independent mixtures, and define
 
-\[
-K=\operatorname{conv}(Q_2\cup C).
-\]
+$$
+K=\mathrm{conv}(Q_2\cup C).
+$$
 
 **Corollary 5.** F ≤ 7 on K. Thus a violation excludes even mixtures which alternate between low-Schmidt-number components and compatible-pair components, with no requirement that the same explanation be used in every component.
 
@@ -298,19 +298,19 @@ This follows immediately from Propositions 1-2, Theorem 3 and convexity. It does
 
 A separate exact certificate establishes the dimension-unrestricted quantum upper bound
 
-\[
+$$
 F\le U=\frac{7041387041}{10^9}=7.041387041.
-\]
+$$
 
 This certificate uses interparty commutation and projective involutions without qubit anticommutators, a positive rational Gram matrix, and an explicitly bounded residual. General binary POVMs are included by extremal effects. U is certified but not claimed sharp.
 
 For any decomposition P=(1−t)$P_K$+tP_Q, with $P_K$ ∈ K and $P_Q$ quantum,
 
-\[
+$$
 F(P)\le7(1-t)+Ut,\qquad
  t\ge\frac{F(P)-7}{U-7}\quad(F(P)>7).
 \tag{7}
-\]
+$$
 
 For (3), the right side is 0.3119910285437303... >31.19%. This bounds the quantum remainder in every such decomposition. It also bounds a decomposition with a Schmidt-number-two first component alone, since $Q_2\subseteq K$. The same numeric U must not be used for an arbitrary nonsignaling remainder. It is not an exact resource cost, nor does it identify accessible labels on individual runs. Applied to mixtures of implementations, components outside the specified easy classes must carry at least this weight; the inequality does not determine their individual states or measurements.
 
@@ -318,15 +318,15 @@ For (3), the right side is 0.3119910285437303... >31.19%. This bounds the quantu
 
 For uniform-output admixture $Q_\eta$=(1−η)Q+ηP_uniform, all uniform correlators and marginals vanish. Hence F($Q_\eta$)=(1−η)F(Q), and the supplied realization violates 7 for
 
-\[
+$$
 \eta<1-7/F(Q)=0.0018412301167041293\ldots.
-\]
+$$
 
 The corresponding tolerance is approximately 0.1841%. This is a particular probability-noise model, not a detector-efficiency threshold or an experimental feasibility analysis.
 
 The sharp lower-dimensional ceiling is proved, while the unrestricted quantum maximum, optimal remainder cost, and complete facet description of H remain undetermined. Experimental validation and assessment of novelty relative to equivalent witnesses remain separate tasks.
 
-The companion artifact reviewed here is pinned to [commit 522bfcf](https://github.com/stevenwarejones/two-sided-partial-locality/tree/522bfcfd3ef5a414f8de668439c17fb740b2ff55). The exact chain passes at this snapshot. All active certificates are in `proofs/`: `proofs/verify_sharp_qubit.py` checks (2), `proofs/verify_quantum_upper.py` checks $U$, and `proofs/verify_qutrit.py` reconstructs the qutrit probabilities. The historical routing calculation that certificate originated from has been moved to `research/legacy/` and is not a premise of this paper.
+The companion artifact reviewed here is pinned to [commit 522bfcf](https://github.com/stevenwarejones/schmidt-number-witness/tree/522bfcfd3ef5a414f8de668439c17fb740b2ff55). The exact chain passes at this snapshot. All active certificates are in `proofs/`: `proofs/verify_sharp_qubit.py` checks (2), `proofs/verify_quantum_upper.py` checks $U$, and `proofs/verify_qutrit.py` reconstructs the qutrit probabilities. The historical routing calculation that certificate originated from has been moved to `research/legacy/` and is not a premise of this paper.
 
 The comparisons of Section 5 are integrated as `proofs/verify_i3322_family.py`, which derives its qubit benchmarks symbolically and then decides the continuum comparison in exact rational arithmetic, and `research/audit_catalog_folds.py`, a scoped comparison rather than a proof gate. `tests/test_comparison_acceptance.py` corrupts the qutrit behaviour and the catalogue data in turn and requires both to be rejected.
 
@@ -338,22 +338,22 @@ For a normalized nonsignaling behavior with two Alice settings and any finite nu
 
 For each Bob setting $y$ and outcome $b$, put $r_b=p_B(b|y)$, $u_b=p(1b|0y)$ and $v_b=p(1b|1y)$. In a candidate joint distribution for counterfactual outcomes $A_0,A_1,B_y$, the number $t_b=p(A_0=1,A_1=1,B_y=b)$ must lie between
 
-\[
+$$
 \ell_b=\max(0,u_b+v_b-r_b),\qquad h_b=\min(u_b,v_b).
-\]
+$$
 
 Conversely, each choice in these intervals gives a nonnegative joint distribution by filling its four entries with $t_b,u_b-t_b,v_b-t_b,r_b-u_b-v_b+t_b$. Thus the common parameter $t=p(A_0=1,A_1=1)$ is feasible for setting $y$ precisely when
 
-\[
+$$
 t\in I_y=[\ell_0+\ell_1,h_0+h_1].
-\]
+$$
 
 Fine's theorem applied to each two-setting Bob restriction gives pairwise intersection of these intervals under the CHSH assumptions. A finite collection of real intervals with pairwise intersection has a common intersection. Choose $t$ there and construct a joint distribution $q_y(a_0,a_1,b)$ for each $y$. Nonsignaling makes their $(a_0,a_1)$ marginal $\pi$ identical. For $\pi>0$, the joint extension
 
-\[
+$$
 p(a_0,a_1,b_0,\ldots,b_{n-1})
 =\pi(a_0,a_1)\prod_y\frac{q_y(a_0,a_1,b_y)}{\pi(a_0,a_1)}
-\]
+$$
 
 is a nonnegative normalized distribution reproducing every observed pair; zero-$\pi$ terms contribute zero. It is an explicit local model. This construction independently verifies membership of the supplied face points using rational arithmetic.
 
