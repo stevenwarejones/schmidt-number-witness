@@ -47,8 +47,9 @@ explicitly:
 
 - **the sharp Schmidt-number-two bound** (`docs/SCHMIDT_NUMBER_BOUND.md`,
   `proofs/verify_sharp_qubit.py`). That is a penalized statement about quantum
-  realizations rather than a statement about `H`, and no facet of a partial-local polytope
-  implies it.
+  realizations rather than a statement about `H`, and the displayed partial-local derivation
+  does not establish it — that bound uses the separate quantum argument and certificate. No
+  universal claim is made about what some *other* partial-local argument might reach.
 - **that `F <= 7` is a facet of `H`** (`proofs/verify_facet.py`: an exact
   14-dimensional face). Neither parent inequality holds over the entire two-sided face:
   `M_A` reaches `22/3 > 6` at one certified saturating point and `M_B` at another. Those are

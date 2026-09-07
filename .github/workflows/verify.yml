@@ -81,6 +81,8 @@ jobs:
         run: python tests/verify_facet_independent.py
 
       # Exercise the distribution a reader actually downloads, not just its hashes.
+      # This runs in BOTH matrix jobs; only the packaging job below uploads, because
+      # actions/upload-artifact@v4 refuses two jobs writing one artifact name in a run.
       - name: Snapshot builds, and its hashes verify without Git
         run: |
           python make_snapshot.py
@@ -93,6 +95,24 @@ jobs:
           python run_checks.py
           python tests/verify_facet_independent.py
 
+  # One packaging job, after the whole matrix has passed.  Two matrix jobs uploading the same
+  # artifact name is an error under upload-artifact@v4, and `overwrite: true` would only make
+  # them race for it.  Building TeX once is also cheaper than building it per Python version.
+  package:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install verification dependencies
+        run: python -m pip install --quiet -r requirements.txt
+
+      - name: Build the verification snapshot
+        run: python make_snapshot.py
+
       # A visitor should not need a TeX install to read a typeset paper.
       - name: Build the manuscript
         run: |
@@ -101,12 +121,13 @@ jobs:
           bash paper/build.sh
           pdfinfo build/paper/manuscript.pdf
 
-      - name: Upload the verification snapshot and the paper
-        if: always()
+      # Uploaded only after the matrix verified: this is the checked package, not a
+      # diagnostic dump from a failed run.
+      - name: Upload the verified package
         uses: actions/upload-artifact@v4
         with:
-          name: verification-snapshot-and-paper
+          name: verified-package
           path: |
             build/verification-snapshot-*.tar.gz
             build/paper/manuscript.pdf
-          if-no-files-found: warn
+          if-no-files-found: error

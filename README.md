@@ -143,6 +143,10 @@ adding any.
 | everything else — verifiers, certificates, tests, other docs | Claude |
 
 Neither system's output has been reviewed by a human domain expert. Where one system's
-mathematics was adopted from the other, it was re-derived independently first, and the
-disagreements that surfaced are recorded in the two review documents rather than silently
-reconciled.
+mathematics was adopted by the other it was re-derived first, and the specific re-derivations
+are named rather than assumed: the qubit benchmarks are rebuilt symbolically in
+`proofs/verify_i3322_family.py` and `proofs/verify_novelty_comparison.py`, and the geometry and
+Born reconstruction are redone from different mathematics in
+`tests/verify_facet_independent.py`. Two systems participating does not by itself make any
+other statement independent. Disagreements that surfaced are recorded in the review documents
+rather than silently reconciled.

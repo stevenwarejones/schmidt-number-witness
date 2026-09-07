@@ -30,10 +30,10 @@ unlisted file in an extracted snapshot.
 
 The draft was written by **ChatGPT (OpenAI), working as "Astra"**, as part of the review
 recorded in `docs/review_2026-09-07_ai.md`, and is contributed here under the repository's
-license. It has not been rewritten by Claude. It has
+license, and is not rewritten here. It has
 not been rewritten, only repointed: the verifier path it names was renamed after it was
 written -- the old routing verifier became `proofs/verify_qutrit.py` -- and the pinned commit
-is updated to the snapshot the paper actually describes.
+tracks the snapshot the paper describes.
 
 Its scope statements are the repository's: the valid inequality on the partial-local hull is a
 corollary of published M3322 inequalities plus positivity; the proposed contribution is the

@@ -10,8 +10,16 @@ the functional wrong would not isolate the missing condition -- for instance the
 case keeps F = 7, keeps locality on the designated restriction, and keeps the affine rank, so
 only a global positivity check can catch it.
 
-Rejection is required to happen for the INTENDED reason: a missing dependency, a syntax error
-or an unrelated crash is recorded as a failure, not as a pass.
+Rejection is required to happen for the INTENDED reason, and "intended reason" means a
+SPECIFIC stable diagnostic code emitted by the check that is supposed to fire -- not merely a
+nonzero exit.  An earlier version only excluded four exception names, which a review defeated
+by prepending an unrelated `raise SystemExit` to the checker: every mutation was then rejected
+before its path was ever analysed, and the suite still reported each as rejected for the
+intended reason.
+
+The last case below is the control for exactly that.  It reproduces the reviewer's sentinel and
+requires this suite's own acceptance condition to REJECT it.  If the control ever stops firing,
+the reason-checking has regressed to exit-code checking.
 """
 import sys as _sys
 
@@ -39,19 +47,35 @@ def copy_repo(dest):
     return dest
 
 
-def expect_reject(script, cwd, what, forbid_file=None):
+SUCCESS_LINES = ('PASS every discovery read and write resolves',
+                 'PASS independent reconstruction agrees',
+                 'CONCLUSION: F <= 7 IS A FACET')
+
+
+def rejection_problem(script, cwd, code):
+    """None if the script rejected with diagnostic `code`, else why that verdict fails."""
     r = subprocess.run([sys.executable, str(script)], cwd=cwd, capture_output=True, text=True)
+    out = (r.stdout or '') + (r.stderr or '')
     if r.returncode == 0:
-        fails.append(f"{what}: ACCEPTED (exit 0) -- the defect is back")
-        return
+        return 'ACCEPTED (exit 0) -- the defect is back'
     noise = [n for n in SETUP_NOISE if n in r.stderr]
     if noise:
-        fails.append(f"{what}: exited nonzero but for the wrong reason ({noise[0]})")
-        return
-    if forbid_file is not None and forbid_file.exists():
-        fails.append(f"{what}: rejected, but the checker itself wrote {forbid_file}")
-        return
-    print(f"  PASS rejected for the intended reason: {what}")
+        return f'exited nonzero but for an unrelated reason ({noise[0]})'
+    if code not in out:
+        first = next((ln for ln in out.splitlines() if ln.strip()), '(no output)')
+        return (f'rejected, but NOT for the intended reason: expected the diagnostic {code} '
+                f'and did not find it; first output line was {first.strip()[:90]!r}')
+    if any(line in out for line in SUCCESS_LINES):
+        return 'rejected, yet still printed an affirmative conclusion'
+    return None
+
+
+def expect_reject(script, cwd, what, code):
+    problem = rejection_problem(script, cwd, code)
+    if problem:
+        fails.append(f"{what}: {problem}")
+    else:
+        print(f"  PASS rejected with {code}: {what}")
 
 
 def expect_accept(script, cwd, what):
@@ -73,22 +97,28 @@ with tempfile.TemporaryDirectory() as td:
 
     # --- path checker: five escapes it has accepted at one time or another ----------------
     ESCAPES = [
-        ("literal traversal out of build/",
+        ("literal traversal out of build/", '[E-TRAVERSAL]',
          "\ndef probe():\n    (OUTPUT_DIR / '..' / 'escaped.txt').write_text('x')\n"),
-        ("unknown directory component then traversal",
+        ("an unbound name used as a path component", '[E-UNBOUND-NAME]',
          "\ndef probe(dynamic):\n    (OUTPUT_DIR / dynamic / '..' / '..' / 'e.txt').write_text('x')\n"),
-        ("traversal hidden inside an f-string filename",
+        ("a proven-safe filename used as a DIRECTORY, then joined again", '[E-UNKNOWN-DIR]',
+         "\nlvl = int('3')\ndef probe():\n    (OUTPUT_DIR / f'{lvl}' / 'e.txt').write_text('x')\n"),
+        ("traversal hidden inside an f-string filename", '[E-TRAVERSAL]',
          "\ndef probe(name):\n    (OUTPUT_DIR / f'../../{name}').write_text('x')\n"),
-        ("Path.open, which was not recognised as a filesystem access",
+        ("Path.open, which was not recognised as a filesystem access", '[E-OUTSIDE-BUILD]',
          "\ndef probe():\n    with (OUTPUT_DIR.parent / 'escaped.txt').open('w') as f:\n        f.write('x')\n"),
-        ("write outside build/ with a '# OUTPUT_DIR' comment on the line",
+        ("write outside build/ with a '# OUTPUT_DIR' comment on the line", '[E-OUTSIDE-BUILD]',
          "\ndef probe():\n    (RESEARCH_DIR / 'escaped.txt').write_text('x')  # OUTPUT_DIR\n"),
+        ("an 'integer' name reassigned to an escaping string", '[E-DYNAMIC-NAME]',
+         "\nlevel = 3\nlevel = '../../escaped'\ndef probe():\n    (OUTPUT_DIR / f'{level}').write_text('x')\n"),
+        ("an 'integer' name shadowed by a function parameter", '[E-DYNAMIC-NAME]',
+         "\nlevel = 3\ndef probe(level):\n    (OUTPUT_DIR / f'{level}').write_text('x')\n"),
     ]
-    for n, (what, snippet) in enumerate(ESCAPES):
+    for n, (what, code, snippet) in enumerate(ESCAPES):
         d = copy_repo(Path(td) / f'esc{n}')
         with (d / 'research' / 'face_sdp.py').open('a') as fh:
             fh.write(snippet)
-        expect_reject(d / PATH_CHECK, td, f"path checker: {what}")
+        expect_reject(d / PATH_CHECK, td, f"path checker: {what}", code)
 
     # An assignment whose right-hand side calls write_text must not make the CHECKER write.
     d = copy_repo(Path(td) / 'sideeffect')
@@ -125,9 +155,30 @@ with tempfile.TemporaryDirectory() as td:
     cert_path.write_text(json.dumps(cert))
     expect_reject(d / FACET_CHECK, td,
                   'independent facet checker: point with F = 7 but a negative probability '
-                  'outside the designated restriction')
+                  'outside the designated restriction', '[E-NEGATIVE-PROB]')
     expect_reject(d / 'proofs' / 'verify_facet.py', td,
-                  'primary facet verifier: the same invalid point')
+                  'primary facet verifier: the same invalid point', 'AssertionError')
+
+    # --- CONTROL: an unrelated early rejection must NOT count as the intended reason ------
+    # Exactly the reviewer's sentinel.  The path checker is made to bail out before it
+    # analyses anything, so every mutation "fails" for a reason that has nothing to do with
+    # paths.  This suite's own acceptance condition must catch that.
+    d = copy_repo(Path(td) / 'sentinel')
+    check = d / PATH_CHECK
+    check.write_text(
+        "from pathlib import Path as _Path\n"
+        "if any('def probe(' in f.read_text()\n"
+        "       for f in (_Path(__file__).resolve().parent.parent / 'research').glob('*.py')):\n"
+        "    raise SystemExit('UNRELATED SENTINEL REJECTION')\n" + check.read_text())
+    with (d / 'research' / 'face_sdp.py').open('a') as fh:
+        fh.write("\ndef probe():\n    (OUTPUT_DIR / '..' / 'escaped.txt').write_text('x')\n")
+    problem = rejection_problem(check, td, '[E-TRAVERSAL]')
+    if problem is None:
+        fails.append("CONTROL FAILED: an unrelated early rejection was accepted as the "
+                     "intended reason -- this suite is back to checking exit codes only")
+    else:
+        print(f"  PASS control: an unrelated rejection is not mistaken for the intended one "
+              f"({problem[:58]}...)")
 
 if fails:
     print("\nFAILED:")

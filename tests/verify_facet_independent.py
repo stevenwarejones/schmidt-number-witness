@@ -177,8 +177,8 @@ for n, e in enumerate(facet['saturating_points']):
     worst = min(prob(v, x, y, a, b) for x, y, a, b
                 in product(range(3), range(3), range(2), range(2)))
     if worst < 0:
-        fails.append(f"facet point {n}: negative probability {worst} outside the designated "
-                     f"restriction -- not a behavior at all")
+        fails.append(f"facet point {n}: [E-NEGATIVE-PROB] negative probability {worst} "
+                     f"outside the designated restriction -- not a behavior at all")
     if e.get('side') not in ('A', 'B') or tuple(e.get('pair', ())) not in \
             {(0, 1), (0, 2), (1, 2)}:
         fails.append(f"facet point {n}: bad side/pair metadata {e.get('side')} {e.get('pair')}")
@@ -262,5 +262,7 @@ if fails:
     for f in fails:
         print("   " + f)
     raise SystemExit(1)
-print("\nPASS independent reconstruction agrees: face dimensions 13/13/14 and the qutrit "
-      "separation")
+print("\nPASS independent reconstruction agrees: supplied point ranks 13/13/14, and the "
+      "qutrit separation.\n     Those ranks are LOWER bounds on the face dimensions; the "
+      "matching upper bounds are\n     established by proofs/verify_face_dimensions.py, not "
+      "by this file.")

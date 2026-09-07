@@ -72,6 +72,21 @@ class Unsupported(Exception):
     """A path expression outside the restricted language.  Reported, never skipped."""
 
 
+# Stable diagnostic codes.  tests/test_checker_mutations.py requires the SPECIFIC code for
+# each mutation, so that an unrelated early failure cannot be mistaken for the intended
+# rejection.  Do not reword these without updating that suite.
+E_TRAVERSAL = '[E-TRAVERSAL]'
+E_ABSOLUTE = '[E-ABSOLUTE]'
+E_UNKNOWN_DIR = '[E-UNKNOWN-DIR]'
+E_DYNAMIC = '[E-DYNAMIC-NAME]'
+E_UNBOUND = '[E-UNBOUND-NAME]'
+E_UNSUPPORTED = '[E-UNSUPPORTED]'
+E_OUTSIDE = '[E-OUTSIDE-BUILD]'
+E_READ_GENERATED = '[E-READ-GENERATED]'
+E_MISSING = '[E-MISSING-INPUT]'
+E_LITERAL = '[E-STRING-LITERAL]' 
+
+
 class Resolved:
     """A path, plus whether its final component is only known at run time."""
 
@@ -95,24 +110,40 @@ def integer_valued(node, ints):
 
 
 def integer_names(tree):
-    """Module-level names bound to a provably integer value."""
-    found = set()
+    """Module-level names for which EVERY binding is provably integer.
+
+    The earlier version only ever added to this set, so
+
+        level = 3
+        level = '../../escaped'
+
+    left `level` classified as an integer and its value usable as a filename.  A name is
+    accepted here only if every top-level assignment to it is integer-valued, computed to a
+    fixpoint so that chains like `a = 3; b = a` still resolve.
+    """
+    targets = {}
     for stmt in tree.body:
-        if (isinstance(stmt, ast.Assign) and len(stmt.targets) == 1
-                and isinstance(stmt.targets[0], ast.Name)
-                and integer_valued(stmt.value, found)):
-            found.add(stmt.targets[0].id)
-    return found
+        if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 \
+                and isinstance(stmt.targets[0], ast.Name):
+            targets.setdefault(stmt.targets[0].id, []).append(stmt.value)
+        elif isinstance(stmt, ast.AugAssign) and isinstance(stmt.target, ast.Name):
+            targets.setdefault(stmt.target.id, []).append(stmt.value)
+    good = set(targets)
+    while True:
+        shrunk = {n for n in good if all(integer_valued(v, good) for v in targets[n])}
+        if shrunk == good:
+            return shrunk
+        good = shrunk
 
 
 def _component(name):
     """Validate one path component before joining it. Traversal never gets past here."""
     p = PurePosixPath(name)
     if p.is_absolute() or name.startswith('/') or name.startswith('\\'):
-        raise Unsupported(f"absolute path component {name!r}")
+        raise Unsupported(f"{E_ABSOLUTE} absolute path component {name!r}")
     for part in p.parts:
         if part in ('..', '.'):
-            raise Unsupported(f"traversal component {part!r} in {name!r}")
+            raise Unsupported(f"{E_TRAVERSAL} traversal component {part!r} in {name!r}")
     return name
 
 
@@ -121,7 +152,7 @@ def evaluate(node, env, script, ints=frozenset()):
     if isinstance(node, ast.Constant):
         if isinstance(node.value, str):
             return node.value
-        raise Unsupported(f"non-string constant {node.value!r}")
+        raise Unsupported(f"{E_UNSUPPORTED} non-string constant {node.value!r}")
     if isinstance(node, ast.JoinedStr):
         # Acceptable only if it PROVABLY cannot contain a separator or traversal.
         for part in node.values:
@@ -130,10 +161,11 @@ def evaluate(node, env, script, ints=frozenset()):
             elif isinstance(part, ast.FormattedValue):
                 if not integer_valued(part.value, ints):
                     raise Unsupported(
-                        f'f-string interpolates {ast.unparse(part.value)}, which is not '
-                        f'provably an integer, so it may contain a path separator')
+                        f'{E_DYNAMIC} f-string interpolates '
+                        f'{ast.unparse(part.value)}, which is not provably an integer here, '
+                        f'so it may contain a path separator')
             else:
-                raise Unsupported('unsupported f-string part')
+                raise Unsupported(f'{E_UNSUPPORTED} unsupported f-string part')
         return SAFE_NAME
     if isinstance(node, ast.Name):
         if node.id == '__file__':
@@ -142,16 +174,16 @@ def evaluate(node, env, script, ints=frozenset()):
             return 'Path'                              # only ever used as Path(...)
         if node.id in env:
             return env[node.id]
-        raise Unsupported(f'name {node.id!r} is not a path bound in this module')
+        raise Unsupported(f'{E_UNBOUND} name {node.id!r} is not a path bound in this module')
     if isinstance(node, ast.Attribute):
         if node.attr in PATH_ATTRS:
             base = evaluate(node.value, env, script, ints)
             if not isinstance(base, Resolved):
-                raise Unsupported(f".{node.attr} on a non-path")
+                raise Unsupported(f"{E_UNSUPPORTED} .{node.attr} on a non-path")
             if not base.exact:
-                raise Unsupported(f".{node.attr} applied after an unknown component")
+                raise Unsupported(f"{E_UNSUPPORTED} .{node.attr} applied after an unknown component")
             return Resolved(base.path.parent)
-        raise Unsupported(f"attribute .{node.attr}")
+        raise Unsupported(f"{E_UNSUPPORTED} attribute .{node.attr}")
     if isinstance(node, ast.Call):
         f = node.func
         if isinstance(f, ast.Name) and f.id == 'Path' and len(node.args) == 1:
@@ -159,29 +191,30 @@ def evaluate(node, env, script, ints=frozenset()):
             if isinstance(arg, Resolved):
                 return arg
             if arg is None:
-                raise Unsupported("Path() of a value not known statically")
+                raise Unsupported(f"{E_UNSUPPORTED} Path() of a value not known statically")
             return Resolved(Path(arg))
         if isinstance(f, ast.Attribute) and f.attr in PATH_CALLS and not node.args:
             base = evaluate(f.value, env, script, ints)
             if not isinstance(base, Resolved):
-                raise Unsupported(f".{f.attr}() on a non-path")
+                raise Unsupported(f"{E_UNSUPPORTED} .{f.attr}() on a non-path")
             return Resolved(base.path.resolve(), base.exact)
-        raise Unsupported(f"call {ast.unparse(f)}(...)")
+        raise Unsupported(f"{E_UNSUPPORTED} call {ast.unparse(f)}(...)")
     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
         left = evaluate(node.left, env, script, ints)
         if not isinstance(left, Resolved):
-            raise Unsupported("left operand of / is not a path")
+            raise Unsupported(f"{E_UNSUPPORTED} left operand of / is not a path")
         if not left.exact:
             # the reviewer's escape: a later component after an unknown one is a directory,
             # and an unknown directory can carry the destination anywhere.
-            raise Unsupported("component joined after an unknown directory component")
+            raise Unsupported(f"{E_UNKNOWN_DIR} component joined after an unknown "
+                              f"directory component")
         right = evaluate(node.right, env, script, ints)
         if right is SAFE_NAME:
             return Resolved(left.path, exact=False)    # a PROVEN single filename component
         if isinstance(right, Resolved):
-            raise Unsupported("right operand of / is itself a path")
+            raise Unsupported(f"{E_UNSUPPORTED} right operand of / is itself a path")
         return Resolved(left.path / _component(right))
-    raise Unsupported(f"expression form {type(node).__name__}")
+    raise Unsupported(f"{E_UNSUPPORTED} expression form {type(node).__name__}")
 
 
 def bind_paths(tree, script, ints):
@@ -211,27 +244,50 @@ def _open_kind(node, first_arg_is_mode=False):
     return 'read' if mode is None else 'write'
 
 
-def io_sites(tree):
-    """(lineno, path-expression node, 'read'|'write') for every filesystem access."""
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Call):
-            continue
+def bound_in(node):
+    """Every name a function scope binds: parameters, assignments, loops, comprehensions."""
+    names = set()
+    a = node.args
+    for grp in (a.posonlyargs, a.args, a.kwonlyargs):
+        names.update(x.arg for x in grp)
+    for x in (a.vararg, a.kwarg):
+        if x:
+            names.add(x.arg)
+    for sub in ast.walk(node):
+        if isinstance(sub, ast.Name) and isinstance(sub.ctx, ast.Store):
+            names.add(sub.id)
+        elif isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            names.add(sub.name)
+    return names
+
+
+def io_sites(node, shadowed=frozenset()):
+    """(lineno, path-expression node, kind, names shadowed by enclosing function scopes).
+
+    Recurses through every node, carrying the names each enclosing function binds, because a
+    module-level `level = 3` says nothing about the `level` inside `def probe(level)`.
+    """
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+        shadowed = shadowed | bound_in(node)
+    if isinstance(node, ast.Call):
         f = node.func
         if isinstance(f, ast.Attribute) and f.attr in READ_METHODS:
-            yield node.lineno, f.value, 'read'
+            yield node.lineno, f.value, 'read', shadowed
         elif isinstance(f, ast.Attribute) and f.attr in WRITE_METHODS:
-            yield node.lineno, f.value, 'write'
+            yield node.lineno, f.value, 'write', shadowed
         elif (isinstance(f, ast.Attribute) and isinstance(f.value, ast.Name)
               and f.value.id in ('np', 'numpy') and node.args):
             if f.attr in NP_READERS:
-                yield node.lineno, node.args[0], 'read'
+                yield node.lineno, node.args[0], 'read', shadowed
             elif f.attr in NP_WRITERS:
-                yield node.lineno, node.args[0], 'write'
+                yield node.lineno, node.args[0], 'write', shadowed
         elif isinstance(f, ast.Name) and f.id == 'open' and node.args:
-            yield node.lineno, node.args[0], _open_kind(node)
+            yield node.lineno, node.args[0], _open_kind(node), shadowed
         elif isinstance(f, ast.Attribute) and f.attr == 'open':
             # Path.open(...) -- the receiver is the path, and the mode is argument 0.
-            yield node.lineno, f.value, _open_kind(node, first_arg_is_mode=True)
+            yield node.lineno, f.value, _open_kind(node, first_arg_is_mode=True), shadowed
+    for child in ast.iter_child_nodes(node):
+        yield from io_sites(child, shadowed)
 
 
 def mkdir_targets(tree):
@@ -263,15 +319,16 @@ for p in sorted((RESEARCH / 'inputs').iterdir()):
 for p in scripts:
     rel, env = p.relative_to(ROOT), envs[p]
     n_sites = 0
-    for lineno, expr, kind in sorted(io_sites(trees[p]), key=lambda t: (t[0], t[2])):
+    for lineno, expr, kind, shadowed in sorted(io_sites(trees[p]),
+                                               key=lambda t: (t[0], t[2])):
         n_sites += 1
         where, shown = f"{rel}:{lineno}", ast.unparse(expr)
         if isinstance(expr, ast.Constant) and isinstance(expr.value, str):
-            fails.append(f"{where}: {kind} is bound to the string literal {shown}, not to a "
-                         f"path -- parenthesize the path expression")
+            fails.append(f"{where}: {E_LITERAL} {kind} is bound to the string literal {shown}, "
+                         f"not to a path -- parenthesize the path expression")
             continue
         try:
-            r = evaluate(expr, env, p, ints[p])
+            r = evaluate(expr, env, p, ints[p] - shadowed)
         except Unsupported as exc:
             fails.append(f"{where}: unsupported {kind} path expression `{shown}` -- {exc}")
             continue
@@ -282,18 +339,19 @@ for p in scripts:
         note = '' if r.exact else '  [directory only; the file name is computed at run time]'
         if kind == 'write':
             if not (BUILD in resolved.parents or (not r.exact and resolved == BUILD)):
-                fails.append(f"{where}: writes to {resolved}, outside the output directory "
-                             f"{BUILD}")
+                fails.append(f"{where}: {E_OUTSIDE} writes to {resolved}, outside the output "
+                             f"directory {BUILD}")
             else:
                 print(f"  PASS write resolves into build/: {where} -> "
                       f"{resolved.relative_to(ROOT)}{note}")
         elif BUILD in resolved.parents:
-            fails.append(f"{where}: reads the generated file {resolved.relative_to(ROOT)}; "
-                         f"discovery inputs must come from the source tree")
+            fails.append(f"{where}: {E_READ_GENERATED} reads the generated file "
+                         f"{resolved.relative_to(ROOT)}; discovery inputs must come from the "
+                         f"source tree")
         elif RESEARCH.resolve() not in resolved.parents:
-            fails.append(f"{where}: `{shown}` resolves outside research/: {resolved}")
+            fails.append(f"{where}: {E_OUTSIDE} `{shown}` resolves outside research/: {resolved}")
         elif r.exact and not resolved.is_file():
-            fails.append(f"{where}: `{shown}` resolves to {resolved}, which does not exist")
+            fails.append(f"{where}: {E_MISSING} `{shown}` resolves to {resolved}, which does not exist")
         else:
             print(f"  PASS read resolves: {where} -> {resolved.relative_to(ROOT)}{note}")
     if n_sites == 0:
@@ -301,7 +359,7 @@ for p in scripts:
 
 # 3. a script that writes routes its writes through an OUTPUT_DIR that resolves to build/
 for p in scripts:
-    if not any(k == 'write' for _, _, k in io_sites(trees[p])):
+    if not any(k == 'write' for _, _, k, _s in io_sites(trees[p])):
         continue
     rel, env = p.relative_to(ROOT), envs[p]
     if 'OUTPUT_DIR' not in env:

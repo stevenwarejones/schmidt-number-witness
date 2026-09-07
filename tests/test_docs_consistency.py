@@ -126,8 +126,8 @@ for a, b, an, bn in ((readme, contrib, 'README.md', 'CONTRIBUTING.md'),
 #    * DELIMITERS.  GitHub documents `$...$` (or $`...`$) for inline math and `$$ ... $$`
 #      (or a ```math fence) for display math.  `\[ ... \]` is not among them and appears
 #      verbatim.  This rule follows GitHub's own documented syntax.
-#    * MACROS.  \operatorname was observed to produce "The following macros are not allowed"
-#      on GitHub.  GitHub's documentation says it renders with MathJax, and \operatorname is
+#    * MACROS.  \operatorname in paper/manuscript.md was reported to produce "The following
+#      macros are not allowed" when that file was viewed on GitHub (7 September 2026).  GitHub's documentation says it renders with MathJax, and \operatorname is
 #      supported by both MathJax and KaTeX in general, so this is a restriction of GitHub's
 #      configuration rather than of either engine.  An earlier version of this file asserted
 #      that GitHub uses KaTeX and that KaTeX rejects the command; BOTH were wrong, even
