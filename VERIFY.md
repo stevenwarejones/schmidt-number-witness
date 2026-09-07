@@ -60,8 +60,11 @@ gate and refuses to run under `python -O`, where assertions would be stripped;
 - **Not peer review.** No human domain expert has reviewed any of this. The reviews under
   `docs/` are by AI systems.
 - **Not authenticity or provenance.** `python manifest.py check` compares file hashes against
-  the Git index. That is an integrity check on a checkout — it is not mathematical
-  correctness, and it does not work from an archive with no Git metadata.
+  the Git index: it is an integrity check on a checkout, and it refuses to run without one.
+  `python manifest.py verify-archive` answers the different question a downloaded archive
+  raises — do these files match the hashes shipped beside them, and is anything present
+  unlisted — with no Git metadata. **Neither implies the other**, and neither is mathematical
+  correctness, proof authenticity, or historical priority.
 - **Not experimental feasibility.** The violation is `0.0129`, with roughly `0.18%` tolerance
   to uniform white-noise admixture of the output distribution. That is not a detection
   efficiency, a visibility, or a demonstrated experimental tolerance.
@@ -78,9 +81,12 @@ gate and refuses to run under `python -O`, where assertions would be stripped;
 | `python tests/test_standalone_optimized.py` | the same under `python -O` |
 | `python tests/check_sharp_pauli.py` | exact Pauli reconstruction of the identity |
 | `python tests/verify_sos_independent.py` | a second implementation of the SOS check, sharing no code with the primary verifier |
+| `python tests/verify_facet_independent.py` | an independent reconstruction of the geometry and the realization — local models built from scratch by Fine's theorem, Born rule from full 9×9 operators. Standard library only |
 | `python tests/test_research_paths.py` | discovery scripts' input/output paths resolve |
 | `python tests/test_docs_consistency.py` | documented paths exist; no unreferenced script |
-| `python manifest.py check` | file hashes against the Git index |
+| `python manifest.py check` | file hashes **and index coverage**; needs a checkout |
+| `python manifest.py verify-archive` | file hashes only; works in an unpacked archive, no Git needed |
+| `python make_snapshot.py` | build `build/verification-snapshot-<commit>.tar.gz`: extract it anywhere and it verifies itself |
 | `python research/audit_catalog_folds.py` | a scoped comparison, not a proof gate |
 | `python tests/test_comparison_acceptance.py` | corrupt Q and the catalogue, require both comparisons to reject |
 | `python research/legacy/verify_routing.py --legacy-routing` | historical; supports no current claim |

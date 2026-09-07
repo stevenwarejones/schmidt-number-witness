@@ -10,12 +10,14 @@ python tests/adversarial_sharp_checks.py
 python tests/test_standalone_optimized.py
 python tests/check_sharp_pauli.py
 python tests/verify_sos_independent.py
+python tests/verify_facet_independent.py
 python tests/test_research_paths.py
 python tests/test_docs_consistency.py
 python tests/test_comparison_acceptance.py
 python research/audit_catalog_folds.py
 python research/legacy/verify_routing.py --legacy-routing
 python manifest.py check
+python make_snapshot.py
 ```
 
 Run without `-O`. Assertions are used as proof gates, and every verifier refuses optimized

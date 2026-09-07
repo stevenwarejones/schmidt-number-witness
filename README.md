@@ -53,12 +53,14 @@ python tests/adversarial_sharp_checks.py     # corruption and -O rejection
 python tests/test_standalone_optimized.py    # standalone verifiers reject under -O too
 python tests/check_sharp_pauli.py            # exact Pauli reconstruction
 python tests/verify_sos_independent.py       # numerical, independent of the word reduction
+python tests/verify_facet_independent.py     # independent reconstruction, no dependencies
 python tests/test_research_paths.py          # discovery input/output paths
 python tests/test_docs_consistency.py        # documented paths exist; no unreferenced script
 python tests/test_comparison_acceptance.py   # corrupt the comparison data, require rejection
 python research/audit_catalog_folds.py       # comparison only, not a proof gate
 python research/legacy/verify_routing.py --legacy-routing   # historical; no current claim
-python manifest.py check                     # hash and coverage
+python manifest.py check                     # hash and coverage (needs a checkout)
+python make_snapshot.py                      # a self-contained, Git-free verification archive
 ```
 
 `run_checks.py` resolves paths against itself and can be run from any working directory.
