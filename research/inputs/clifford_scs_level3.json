@@ -1,0 +1,9 @@
+{
+  "level": 3,
+  "matrix_size": 84,
+  "moments": 924,
+  "status": "optimal",
+  "numerical_value": 6.9999999996806475,
+  "seconds": 28.921313285827637,
+  "warning": "No exact PSD or dual certificate; do not claim proved bound"
+}

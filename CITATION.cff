@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it as below."
+title: "Two-sided partial locality: exact certificates for a partial-locality facet and a sharp Schmidt-number-two Bell bound"
+abstract: >-
+  Exact certificates for a Bell functional F in the 3-setting, 2-outcome bipartite scenario.
+  F <= 7 is a facet of the convex hull of the Alice-side and Bob-side partial-local sets, and
+  of neither one-sided hull. An exact positive rational Gram certificate proves F <= 7 for
+  every behavior of Schmidt number at most two, and an exactly specified qutrit realization
+  violates it. Priority is unresolved and the results have not had human expert review.
+type: software
+authors:
+  - family-names: Jones
+    given-names: Steven W.
+repository-code: "https://github.com/stevenwarejones/two-sided-partial-locality"
+license: MIT
