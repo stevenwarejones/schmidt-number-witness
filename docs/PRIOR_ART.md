@@ -259,8 +259,10 @@ What follows from the part that *is* checked:
 
 - **Do not claim novelty for "an exact, independently checkable bound in this scenario."**
   Whatever its full text says, a machine-formalized proof about I3322 in (3,3,2,2) exists as a
-  preprint from August 2026. The claim this repository can support is about a *specific
-  penalized functional*, not about exactness or checkability as such.
+  preprint from August 2026. Exact checkability remains valuable in itself — it is why anything
+  here can be audited at all — but it does not by itself establish novelty, and it did not
+  before this preprint either. The claim this repository can support is about a *specific
+  penalized functional*.
 - **Do not conflate the two I3322 announcements.** Pauwels and Connor are different names,
   different dates and different venues, and only one of them has been seen here at all. This
   document adjudicates neither priority nor correctness between them.

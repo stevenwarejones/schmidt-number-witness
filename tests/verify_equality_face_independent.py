@@ -7,23 +7,36 @@ two-phase simplex (Bland's rule, so it cannot cycle) and re-derives, for every o
 deterministic-observable patterns, the fact the certificate asserts:
 
   * for the 17 "no-signaling" patterns, that the face {A v <= 1, F.v = 7, deterministic
-    marginals} is INFEASIBLE -- a strictly stronger statement than the supplied max F < 7;
+    marginals} is INFEASIBLE.  That is the SAME conclusion the supplied dual reaches -- max F < 7
+    already says the F = 7 face is empty -- but reached by a different mechanism: phase-1
+    infeasibility rather than a dual bound on the objective;
   * for the other 31, the exact maximum of every one of the 36 event functionals on that face,
     and hence exactly which joint probabilities are forced to vanish.  The forced set is
     then required to CONTAIN the certificate's claimed zeros, so a certificate claiming a zero
     that is not forced would be caught here even though its dual checks out.
 
-The projector closure is not repeated -- proofs/verify_equality_face.py implements it once
-from the five geometric rules, and running a second copy of the same rules would test the
-implementation rather than the rules.  Instead this file corroborates the CONCLUSION
-numerically: a see-saw search over rank-two two-qubit states, structured to each pattern, must
-fail to reach F = 7 wherever the certificate says the pattern is impossible.  That is
-corroboration, not proof, and is labelled as such.
+WHAT THIS FILE DOES NOT ESTABLISH.  It re-derives the branch infeasibilities and the forced
+zeros.  It does NOT independently establish the five projector rules or their closure, and so it
+does not independently establish the equality theorem.  The closure is implemented once, in
+proofs/verify_equality_face.py; a second copy of the same rules here would test the
+implementation rather than the rules, and the rules themselves are argued in prose in
+docs/CERTIFICATE_EQUALITY_FACE.md section 3 and reviewed in
+docs/review_2026-09-07_equality_face.md.
 
-Runtime is dominated by the exact LPs -- roughly two minutes.  That is the price of not
+The last section is NUMERICAL EXPLORATION, kept deliberately separate from the exact work
+above: a search over rank-two two-qubit states per branch, reporting how close each branch gets
+to the bound and how far the best point sits from L_F.  It gates nothing.  The equality theorem
+supplies no quantitative relation between a score deficit and a distance, so no threshold on
+either could be an acceptance condition without inventing a guarantee the mathematics does not
+provide.  The one assertion there is a falsification guard -- a search must not EXCEED F = 7,
+which the sharp bound forbids outright.
+
+Runtime is dominated by the exact LPs -- roughly four minutes.  That is the price of not
 trusting the supplied numbers.
 
-Diagnostic codes: [E-LP-FEASIBLE] [E-LP-ZERO] [E-LP-VERTICES] [E-LP-SEARCH]
+Diagnostic codes: [E-LP-FEASIBLE] [E-LP-ZERO] [E-LP-VERTICES] [E-LP-SEARCH].  Only the first
+three gate anything; [E-LP-SEARCH] guards the numerical section against finding a violation of
+the sharp bound, and nothing there gates on a distance.
 """
 import sys as _sys
 
@@ -69,7 +82,10 @@ def _pivot(T, obj, basis, ncols):
         if not ratios:
             return False                                  # unbounded
         best = min(r for r, _ in ratios)
-        row = min(i for r, i in ratios if r == best)      # Bland's rule: lowest index
+        # Bland's rule breaks a ratio tie by the smallest BASIC-VARIABLE index, not the smallest
+        # row index.  Row order is an artefact of how the tableau was assembled and carries no
+        # anti-cycling guarantee; the variable index is what makes the rule terminate.
+        row = min((i for r, i in ratios if r == best), key=lambda i: basis[i])
         piv = T[row][col]
         T[row] = [x / piv for x in T[row]]
         for i in range(len(T)):
@@ -187,8 +203,9 @@ for c in cert['patterns']:
                          f'vanish, but the exact simplex does not force them')
     if forced - claimed:
         extra.append((det, len(forced - claimed)))
-print(f'  PASS {n_inf} patterns have a provably EMPTY F = 7 face (stronger than the certified '
-      f'max F < 7), by exact simplex', flush=True)
+print(f'  PASS {n_inf} branch infeasibilities re-derived by exact simplex: their F = 7 faces are '
+      f'empty, reached by phase-1 infeasibility rather than by the supplied dual bound -- the '
+      f'same conclusion, a second derivation', flush=True)
 print(f'  PASS every claimed forced zero re-derived independently; {n_zero_checked} exact event '
       f'maxima computed over 31 faces, no supplied dual read', flush=True)
 if extra:
@@ -211,11 +228,13 @@ print('  PASS five local deterministic saturators, every one with p = 0', flush=
 # =============================================================================
 # numerical corroboration -- NOT proof -- of the theorem itself
 # =============================================================================
-# The obvious test, "no pattern reaches F = 7", is WRONG: one of the 31 patterns is closed as
-# LOCAL rather than impossible, and a local behaviour on that branch does reach 7.  So the
-# corroboration tests what the theorem actually says -- every near-saturating rank-two
-# two-qubit behaviour found by search sits close to L_F -- rather than a stronger claim that
-# happens to be false.
+# This section REPORTS; it does not gate.  Two traps are worth recording.  First, the obvious
+# test "no pattern reaches F = 7" is WRONG: one of the 31 patterns is closed as LOCAL rather
+# than impossible, and a local behaviour on that branch does reach 7.  Second, an earlier
+# version asserted that a small score deficit implies a small distance to L_F.  The equality
+# theorem says a behaviour AT F = 7 lies in L_F; it says nothing about how fast a
+# near-saturating behaviour approaches it, so any threshold pairing the two would have been a
+# fitted constant dressed as a check.  What remains is a falsification guard plus measurements.
 try:
     import numpy as np
 except ImportError:                                             # pragma: no cover
@@ -251,12 +270,42 @@ else:
         return A, B
 
     def distance_to_LF(v):
-        """Least-squares distance from a behaviour to the affine hull of L_F, and the most
-        negative barycentric weight (negative means outside the simplex)."""
-        Aeq = np.vstack([W.T, np.ones(5) * 50.0])                # sum(lambda) = 1, weighted
-        rhs = np.concatenate([v, [50.0]])
-        lam, *_ = np.linalg.lstsq(Aeq, rhs, rcond=None)
-        return float(np.linalg.norm(W.T @ lam - v)), float(lam.min())
+        """Euclidean distance from a behaviour to the SIMPLEX L_F, and the active support.
+
+        This is the constrained problem
+            min || W^T lambda - v ||   subject to   sum(lambda) = 1,  lambda >= 0,
+        not an unconstrained least squares with a penalty term.  An earlier version of this
+        function solved the penalised unconstrained system, which enforces neither exact
+        normalisation nor nonnegativity, so the number it produced was not a distance to L_F --
+        nor even to its affine hull.
+
+        With only five vertices the constrained minimum can be found exactly rather than
+        iteratively: the optimum has some support S, and on each candidate support it is an
+        equality-constrained least-squares problem.  Enumerating all 31 nonempty supports and
+        keeping the feasible one with least residual gives the true minimum.
+        """
+        best = (np.inf, None)
+        for mask in range(1, 32):
+            idx = [k for k in range(5) if mask >> k & 1]
+            # Eliminate the normalisation instead of penalising it.  With the last vertex of the
+            # support as base point, lambda_last = 1 - sum(mu) and W^T lambda = u + D mu, so the
+            # constrained problem becomes an UNCONSTRAINED least squares in mu and sum(lambda) = 1
+            # holds identically rather than approximately.
+            u = W[idx[-1]]
+            D = np.array([W[k] - u for k in idx[:-1]]).T          # 15 x (|S|-1)
+            if D.size:
+                mu, *_ = np.linalg.lstsq(D, v - u, rcond=None)
+                lam = np.append(mu, 1.0 - mu.sum())
+            else:
+                lam = np.array([1.0])
+            if lam.min() < -1e-12:
+                continue                                          # optimum is not on this face
+            res = float(np.linalg.norm(W[idx].T @ lam - v))
+            if res < best[0]:
+                best = (res, tuple(idx))
+        assert best[1] is not None, ('[E-LP-SEARCH] the simplex projection found no feasible '
+                                     'support, which cannot happen for a nonempty simplex')
+        return best
 
     def climb(det, restarts, iters):
         best, best_v = -np.inf, None
@@ -286,26 +335,28 @@ else:
     results = []
     for det in patterns + [{}]:                                   # + the nondegenerate branch
         top, v = climb(det, 25, 120)
+        # The ONE assertion in this section, and it is a falsification guard rather than an
+        # acceptance gate: the sharp bound forbids F > 7 outright, so a search finding one would
+        # mean something is badly wrong.  Nothing below gates on a distance.
         assert top < 7 + 1e-6, (f'[E-LP-SEARCH] a rank-two two-qubit search reached F = {top:.9f} '
                                 f'> 7 in pattern {det}, contradicting the sharp bound')
-        res, lam = distance_to_LF(v)
-        results.append((7 - top, res, lam, det))
+        res, support = distance_to_LF(v)
+        results.append((7 - top, res, support, det))
     results.sort()
-    gap, res, lam, where = results[0]
-    # The search is a hill climb, so it gets close to the bound without reaching it.  The
-    # assertion is on the point that got CLOSEST: the theorem says a behaviour at F = 7 is in
-    # L_F, so the nearest-to-saturating point found had better be nearly in L_F too.  A tight
-    # numerical threshold would be a fitted constant, not a check, so the margin is generous and
-    # the measured value is printed.
-    assert gap < 2e-2, (f'[E-LP-SEARCH] the search got no closer than F = 7 - {gap:.4f}, so it is '
-                        f'too weak to corroborate anything')
-    assert res < 1e-1, (f'[E-LP-SEARCH] the closest-to-saturating behaviour found, at '
-                        f'F = 7 - {gap:.6f} in pattern {where}, sits {res:.3e} from L_F')
-    near = [r for g, r, _, _ in results if g < 5e-2]
-    print(f'  PASS numerical corroboration over {len(results)} branches: no search exceeded '
-          f'F = 7; the closest, at F = 7 - {gap:.6f}, lies {res:.2e} from L_F with least '
-          f'barycentric weight {lam:+.1e}; over the {len(near)} branches within 0.05 of the '
-          f'bound the distance stays below {max(near):.2e} (corroboration, not proof)', flush=True)
+    gap, res, support, where = results[0]
+    print(f'  REPORT numerical exploration over {len(results)} branches (gates nothing): no '
+          f'search exceeded F = 7. The branch optimum closest to the bound, at F = 7 - '
+          f'{gap:.6f}, lies {res:.2e} from the simplex L_F, on the face spanned by vertices '
+          f'{support}.', flush=True)
+    band = [(g, r) for g, r, _, _ in results if g < 5e-2]
+    if band:
+        print(f'  REPORT the {len(band)} branch optima within 0.05 of the bound have '
+              f'L_F distances from {min(r for _, r in band):.2e} to '
+              f'{max(r for _, r in band):.2e}. The equality theorem gives no quantitative '
+              f'relation between a score deficit and a distance, so these numbers are '
+              f'exploration, not evidence of a rate, and nothing here asserts on them.',
+              flush=True)
 
-print('PASS the equality face re-derived independently: every deterministic-observable pattern '
-      'closed without reading a supplied dual', flush=True)
+print('PASS branch infeasibility and every forced zero re-derived independently, reading no '
+      'supplied dual. The projector rules and their closure are NOT re-derived here, so this '
+      'is not an independent proof of the equality theorem.', flush=True)

@@ -1,9 +1,11 @@
 # The equality face: `S2 ∩ {F = 7}` is a four-simplex of local behaviours
 
 Status: exact computer-assisted certificate, independently reviewed inside this repository
-(`docs/review_2026-09-07_equality_face.md`) and re-derived by a second route that reads none of
-the supplied duals (`tests/verify_equality_face_independent.py`). No human expert has reviewed
-it. Novelty is **not** established — see §7.
+(`docs/review_2026-09-07_equality_face.md`). Its branch infeasibilities and forced zeros are
+re-derived by a second route that reads none of the supplied duals
+(`tests/verify_equality_face_independent.py`); that route does **not** re-derive the projector
+rules or their closure, so it is not a second proof of the theorem. No human expert has reviewed
+any of it. Novelty is **not** established — see §7.
 
 ## 1. The statement
 
@@ -68,8 +70,10 @@ counting deterministic observables `(d_A, d_B)` partitions everything:
 merely 48 of them.
 
 **17 patterns** carry one dual proving `max F < 7` over that branch of the no-signaling
-polytope, so equality is unreachable there before any quantum structure is used. (The
-independent checker strengthens this: the face is exactly *empty*.)
+polytope, so equality is unreachable there before any quantum structure is used — `max F < 7`
+already says the `F = 7` face is empty. The independent checker reaches that same conclusion by
+a different mechanism, detecting infeasibility in phase 1 rather than bounding the objective;
+that is a second derivation, not a stronger one.
 
 **31 patterns** carry duals forcing individual joint probabilities to vanish on the face —
 **665** of them in total, 12 to 27 per pattern. Each certifies that the event's row functional
@@ -158,7 +162,7 @@ read as settling it.
 | the three projector identities in the basis map | machine-checked, re-derived from the map | `proofs/verify_equality_face.py` |
 | the 48 patterns are exactly the required set | machine-checked | `proofs/verify_equality_face.py` |
 | 17 no-signaling duals excluding `F = 7` | machine-checked | `proofs/verify_equality_face.py` |
-| the same 17 faces are **empty**, by exact simplex | machine-checked, independent route | `tests/verify_equality_face_independent.py` |
+| the same 17 branch infeasibilities, re-derived by exact simplex | machine-checked, independent route | `tests/verify_equality_face_independent.py` |
 | 665 forced-zero duals | machine-checked | `proofs/verify_equality_face.py` |
 | the same 665 zeros re-derived from the constraints alone, reading no supplied dual | machine-checked, independent route | `tests/verify_equality_face_independent.py` |
 | the projector closure, from the five rules | machine-checked | `proofs/verify_equality_face.py` |
@@ -173,11 +177,20 @@ read as settling it.
 the specific diagnostic code for the defect introduced, with the same two controls as the other
 mutation suites.
 
-**One honest limit on the independent route.** The exact simplex re-derives every *fact* the
-duals assert, so no supplied number is trusted. It does not re-derive the *closure*: running a
+**One honest limit on the independent route.** The exact simplex re-derives the branch
+infeasibilities and the forced zeros, so no supplied number is trusted for those. It does **not**
+re-derive the *closure*, and therefore does not independently establish the theorem: running a
 second implementation of the same five rules would test the implementation, not the rules. The
 rules were checked by hand in `docs/review_2026-09-07_equality_face.md`, and that hand-check is
 the weakest link in the argument.
+
+The numerical section of that file **gates nothing**. It measures how close each branch optimum
+gets to the bound and how far it sits from `L_F`, using a genuine projection onto the simplex
+(constrained: `sum(lambda) = 1` eliminated exactly, `lambda >= 0` enforced by enumerating the 31
+supports). Those numbers are exploration. The theorem says a behaviour *at* `F = 7` lies in
+`L_F`; it gives no quantitative relation between a score deficit and a distance, so no threshold
+pairing the two could be an acceptance condition without inventing a guarantee the mathematics
+does not supply.
 
 ## 7. What is not established
 

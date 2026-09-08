@@ -52,7 +52,10 @@ THE WHOLE CERTIFIED FAMILY HAS THIS SAME FACE.  For 0 <= eps <= eps0 = 383689/10
   * eps < eps0: if F + eps p = 7 then F + eps0 p = 7 + (eps0 - eps) p, which the endpoint
     certificate bounds by 7, so p = 0 and F = 7 -- the theorem above applies.
   * eps = eps0: the endpoint Gram is positive definite, so equality forces J_j |psi> = 0 for
-    every j, including J_8 = 4K, whence p = <K> = 0 and the branch-1 argument runs unchanged.
+    every j, including J_8, which this file checks equals (I+A1)(I+B0) = 4K in the same basis
+    map -- so p = <K> = 0 and the branch-1 argument runs unchanged.  (K^2 = K then follows from
+    A1^2 = B0^2 = I and [A1, B0] = 0, and is checked symbolically in
+    tests/verify_endpoint_independent.py route A.)
     In a deterministic branch F + 4p <= 7 with eps0 < 4 gives p = 0 the same way.  The
     componentwise reduction is unchanged.
   * conversely all five vertices have p = 0 as well as F = 7, so they saturate every member.
@@ -66,7 +69,7 @@ certified family stops at eps0, and a nonlocal behaviour with p > 0 attaining th
 true endpoint is neither exhibited nor excluded here.
 
 Diagnostic codes: [E-FACE-COVERAGE] [E-FACE-DUAL] [E-FACE-ZERO] [E-FACE-UNRESOLVED]
-[E-FACE-VERTICES] [E-FACE-DIM] [E-FACE-PROJECTOR-ID] [E-FAMILY-SATURATION]
+[E-FACE-VERTICES] [E-FACE-DIM] [E-FACE-PROJECTOR-ID] [E-FACE-K-IDENTITY] [E-FAMILY-SATURATION]
 """
 import sys
 
@@ -242,6 +245,17 @@ for y, col in enumerate((5, 6, 7)):
         f'[E-FACE-PROJECTOR-ID] J_{col} - J_0 is not (I-A0)(I-B{y}), so the equality argument fails'
 print('PASS J_5 - J_0, J_6 - J_0, J_7 - J_0 are (I-A0)(I-B_y): equality forces '
       'P(A0 = -1, B_y = -1) = 0 for every y', flush=True)
+
+# The family corollary at eps = eps0 needs one further identity from the same basis map:
+# J_8 = (I+A1)(I+B0) = 4K, where K is the projector onto the event p counts.  It was previously
+# only STATED here.  It is checked now, on the same footing as the three above, because the
+# corollary rests on it: J_8 |psi> = 0 is what turns equality at the endpoint into p = 0.
+want_K = word_vector([([], [], 1), ([1], [], 1), ([], [0], 1), ([1], [0], 1)])
+assert [row[8] for row in P] == want_K, \
+    '[E-FACE-K-IDENTITY] J_8 is not (I+A1)(I+B0), so J_8 = 4K fails and the family corollary at ' \
+    'the endpoint does not follow'
+print('PASS J_8 = (I+A1)(I+B0) = 4K in the same basis map, so equality at the endpoint forces '
+      'p = <K> = 0', flush=True)
 
 # --- the face itself -------------------------------------------------------------------------
 vertices = []

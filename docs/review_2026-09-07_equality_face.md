@@ -181,9 +181,11 @@ bound is neither exhibited nor excluded. Both are recorded as open in
 `docs/CERTIFICATE_EQUALITY_FACE.md` §5 and §7.
 
 The theorem is integrated as of this addendum. `tests/verify_equality_face_independent.py`
-carries an exact rational simplex that re-derives every fact the 48 pattern certificates assert
-without reading any of their duals — including the stronger statement that the 17 "no-signaling"
-faces are *empty* rather than merely bounded below 7 — and
-`tests/test_equality_face_mutations.py` requires rejection for the intended reason, including a
-single deleted forced zero that leaves every remaining dual exact and is caught only by the
-projector closure.
+carries an exact rational simplex that re-derives the branch infeasibilities and all 665 forced
+zeros without reading any of the supplied duals. For the 17 "no-signaling" patterns it reaches
+the same conclusion by a different mechanism — phase-1 infeasibility rather than a dual bound —
+which is a second derivation and not a stronger one, since `max F < 7` already says the `F = 7`
+face is empty. It does **not** re-derive the projector rules or their closure, so it is not an
+independent proof of the theorem. `tests/test_equality_face_mutations.py` requires rejection for
+the intended reason, including a single deleted forced zero that leaves every remaining dual
+exact and is caught only by the projector closure.

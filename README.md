@@ -84,7 +84,7 @@ python tests/test_output_helper.py           # the validated output-path helper
 python tests/test_checker_mutations.py       # replay the defects the checkers once accepted
 python tests/verify_endpoint_independent.py  # the endpoint by three non-proof-path routes
 python tests/test_endpoint_mutations.py      # corrupt each endpoint certificate (~6 min)
-python tests/verify_equality_face_independent.py  # exact simplex; reads no supplied dual (~4 min)
+python tests/verify_equality_face_independent.py  # exact simplex, no supplied dual (~4 min)
 python tests/test_equality_face_mutations.py      # corrupt the equality-face certificate (~3 min)
 python research/audit_catalog_folds.py       # comparison only, not a proof gate
 python research/legacy/verify_routing.py --legacy-routing   # historical; no current claim
@@ -113,7 +113,7 @@ exact; none calls a solver.
 | `proofs/verify_penalty_endpoint.py` | `proofs/penalty_endpoint_certificate.json`, `proofs/penalty_branch_certificates.json`, `proofs/penalty_lower_certificate.json` | `F + 3.83689 p <= 7` on Schmidt number two, from a second positive-definite 70×70 Gram on the same word basis, twelve exact no-signaling duals for the deterministic-observable branches, and an explicit two-qubit strategy pinning `alpha_star` from below |
 | `proofs/verify_improved_qutrit.py` | `proofs/improved_qutrit_certificate.json` | all 36 Born probabilities rebuilt from raw integers: Schmidt rank three by a nonzero determinant, `G = 7.0928393387 > 7`, original `F = 6.4692250395 <= 7`, and the exact white-noise threshold |
 | `proofs/verify_penalty_not_partial_local.py` | `proofs/facet_certificate.json` | the scope guard: `G <= 7` is **false** on `H` for every `eps > 0`, proved at one of the repository's own facet-defining points |
-| `proofs/verify_equality_face.py` | `proofs/equality_face_certificate.json` | `S2` intersected with `{F = 7}` is exactly a four-simplex of five local deterministic behaviors: 48 deterministic-observable patterns closed by 665 exact forced-zero duals plus a projector-equality closure, and the same face for the whole certified family |
+| `proofs/verify_equality_face.py` | `proofs/equality_face_certificate.json` | `S2` intersected with `{F = 7}` is exactly a four-simplex of five local deterministic behaviors: 48 deterministic-observable patterns closed by 665 exact forced-zero duals plus a projector-equality closure, the basis-map identities the two Hilbert-space arguments need (including `J_8 = 4K`), and the same face for the whole certified family |
 
 | Path | Role |
 |---|---|

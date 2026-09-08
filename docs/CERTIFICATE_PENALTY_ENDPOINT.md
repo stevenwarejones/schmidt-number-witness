@@ -277,8 +277,9 @@ would accept it.
   verification was possible here, plus one (Connor) of which no text has been read at all.
   Nothing here has been cleared against the dimension-witness or quantum-set-geometry
   literature. In particular, a machine-formalized exact result about I3322 in this same
-  scenario exists as an August 2026 preprint, so "exact and independently checkable" is not by
-  itself a contribution.
+  scenario exists as an August 2026 preprint, so "exact and independently checkable" does not by
+  itself establish novelty. Exact checkability is worth having on its own terms; it was never
+  sufficient to establish priority, and it is not sufficient now.
 
 ## 9. Provenance
 

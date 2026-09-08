@@ -6,7 +6,8 @@ the defect introduced actually appears.  The two controls at the end guard the s
 the refuse-everything sentinel that defeated an earlier suite in this repository must NOT count
 as a valid rejection, and a mutation must not satisfy the wrong code.
 
-The cases are chosen so that each isolates one part of the argument.  Two are worth calling out:
+The cases are chosen so that each isolates one part of the argument.  Three are worth calling
+out:
 
   * Deleting a single forced zero from ONE pattern leaves every remaining dual valid and every
     other pattern untouched.  The certificate still checks out arithmetically; what breaks is
@@ -15,6 +16,10 @@ The cases are chosen so that each isolates one part of the argument.  Two are wo
   * Weakening one forced-zero dual so that it certifies the event to 0 instead of -1 keeps the
     dual IDENTITY exact -- it is still a valid bound, just a useless one, since it no longer
     forces the probability to vanish.  Only the `== -1` test sees it.
+  * Corrupting column 8 of the basis map breaks J_8 = 4K while leaving columns 0 and 5-7 -- and
+    therefore the three projector identities and the whole nondegenerate branch -- untouched.
+    Only the family corollary depends on it, and before that identity was checked rather than
+    merely asserted, this mutation would have gone unnoticed.
 """
 import sys as _sys
 
@@ -32,10 +37,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 fails = []
 SETUP_NOISE = ('ModuleNotFoundError', 'FileNotFoundError', 'SyntaxError', 'ImportError')
-SUCCESS_LINES = ('EQUALITY FACE VALID', 'PASS the equality face re-derived independently')
+SUCCESS_LINES = ('EQUALITY FACE VALID',
+                 'PASS branch infeasibility and every forced zero re-derived independently')
 
 FACE = 'proofs/verify_equality_face.py'
 CERT = 'proofs/equality_face_certificate.json'
+SHARP = 'proofs/sharp_qubit_certificate.json'
 
 
 def copy_repo(dest):
@@ -214,6 +221,38 @@ def delete_a_forced_zero(tree):
 expect_reject('one forced zero deleted: every remaining dual is still exact, and only the '
               'projector closure can see that the pattern no longer resolves',
               '[E-FACE-UNRESOLVED]', delete_a_forced_zero)
+
+
+# --- the basis-map identities the two Hilbert-space arguments rest on ------------------------
+def break_the_K_identity(tree):
+    """Corrupt column 8 of the basis map, so J_8 is no longer (I+A1)(I+B0) = 4K.
+
+    Columns 0 and 5-7 are untouched, so the three projector identities still hold and the
+    nondegenerate branch of the theorem is unaffected.  What breaks is only the identity the
+    FAMILY COROLLARY needs at eps = eps0, where J_8 |psi> = 0 is what turns equality into p = 0.
+    Before this check existed the file merely asserted J_8 = 4K in prose, and this mutation
+    would have passed unnoticed.
+    """
+    path = tree / SHARP
+    c = json.loads(path.read_text())
+    c['basis_map'][0][8] += 1                      # the empty word: adds I to J_8
+    path.write_text(json.dumps(c))
+
+
+def break_a_projector_identity(tree):
+    """Corrupt column 6, so J_6 - J_0 is no longer (I-A0)(I-B1). Column 8 is untouched."""
+    path = tree / SHARP
+    c = json.loads(path.read_text())
+    c['basis_map'][0][6] += 1
+    path.write_text(json.dumps(c))
+
+
+expect_reject('column 8 of the basis map corrupted, so J_8 = 4K fails and the family corollary '
+              'at the endpoint no longer follows -- the three projector identities are '
+              'untouched, so only the new check sees it',
+              '[E-FACE-K-IDENTITY]', break_the_K_identity)
+expect_reject('column 6 of the basis map corrupted, so J_6 - J_0 is no longer (I-A0)(I-B1)',
+              '[E-FACE-PROJECTOR-ID]', break_a_projector_identity)
 
 
 # --- the face and the family -----------------------------------------------------------------

@@ -322,8 +322,8 @@ For (3), the right side is 0.3119910285437303... >31.19%. This bounds the quantu
 
 ### 7.1 The Schmidt-number-two equality face is a four-simplex of local behaviors
 
-Theorem 3 is sharp, so its equality set is a nonempty exposed face of $S_2$. It is as small as
-it could be.
+Theorem 3 is sharp, so its equality set is a nonempty exposed face of $S_2$. That face contains
+no additional SN2 behaviors beyond the local saturating face.
 
 **Theorem 6.** $S_2\cap\{F=7\}=L_F$, the convex hull of the five local deterministic behaviors
 
@@ -553,4 +553,4 @@ Completeness is relevant to a membership test. The upper-bound dual certificates
 20. K. F. Pál and T. Vértesi, [Maximal violation of the I3322 inequality using infinite dimensional quantum systems](https://arxiv.org/abs/1006.3032).
 21. K. T. Goh, J. Kaniewski, E. Wolfe, T. Vértesi, X. Wu, Y. Cai, Y.-C. Liang and V. Scarani, [Geometry of the set of quantum correlations](https://arxiv.org/abs/1710.05892). Cited for the general phenomenon of several Bell functionals exposing one face; only its abstract was accessible when this section was written, and the comparison with its Appendix G example is outstanding.
 22. A. Rai, C. Duarte, S. Brito and R. Chaves, [Geometry of the quantum set on no-signaling faces](https://arxiv.org/abs/1812.06057). The closest comparator for zero-probability faces on which the quantum set has no nonlocal points; comparison outstanding.
-23. J. Pauwels, [The quantum supremum of the I3322 Bell inequality is not attained in finite dimension](https://arxiv.org/abs/2608.29734), August 2026 preprint. Unrefereed, and only its abstract was accessible here; noted because it shows that an exact, machine-checkable result in this scenario is not by itself a contribution.
+23. J. Pauwels, [The quantum supremum of the I3322 Bell inequality is not attained in finite dimension](https://arxiv.org/abs/2608.29734), August 2026 preprint. Unrefereed, and only its abstract was accessible here; noted because an exact, machine-checkable result in this scenario does not by itself establish novelty.
