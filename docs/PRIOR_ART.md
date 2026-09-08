@@ -327,3 +327,35 @@ The partial-locality geometry is a supporting result rather than the headline: d
 the inequality's *validity* does not erase the geometric content, and the 13/13/14 face
 structure with the two-sided facet emergence stands on its own. No exhaustive novelty audit has
 been completed, and neither sentence has been cleared against the dimension-witness literature.
+
+
+## 2026-09-08 follow-up: passages read for the boundary-continuation PR
+
+This dated update supersedes the abstract-only status above for the passages
+specified here; it does not upgrade Pauwels or Connor to a proof inspected in
+this follow-up.
+
+- **Goh et al.** Section III C 2, equation (26), explicitly gives a quantum
+  exposed face equal to its local counterpart. Appendix G 2, equations
+  (G1)-(G3), has a five-vertex, four-dimensional local face but a
+  five-dimensional quantum face containing a nonlocal Hardy point. Those
+  passages were read directly from the [PDF](https://arxiv.org/pdf/1710.05892).
+  They establish conceptual prior art, not this specific SN2 classification.
+  General local/quantum face coincidence and multiple functionals exposing one
+  face are not novelty claims here.
+- **Rai et al.** The introduction and stated classification scope were read
+  directly from the [PDF](https://arxiv.org/pdf/1812.06057). Their quantum-void
+  classification concerns the two-setting CHSH scenario. It is relevant to the
+  forced-zero method; this scope check is not a proof that no consequence of
+  their work can imply the present three-setting result.
+- **Remaining gap.** Targeted searches did not identify this exact equality
+  face or critical one-event coefficient. This is a bounded negative search,
+  not priority clearance. A parameterized three-setting inequality plus
+  positivity could still imply the tradeoff. Rank-one Gram downdates and
+  PSD Cauchy-Schwarz are standard tools, not innovations claimed by the new
+  continuation.
+
+The candidate contribution is the specific SN2 equality classification and
+nearly optimal one-event tradeoff with an explicit qutrit separation.
+`docs/CERTIFICATE_PENALTY_BOUNDARY.md` adds a singular-certificate equality
+argument and a small quadratic remainder, both awaiting separate review.

@@ -137,3 +137,16 @@ Tested on CPython 3.10.12 with sympy 1.14.0 and numpy 2.2.6; CI also runs 3.12.
 the exact qubit benchmarks and the Pauli check; NumPy for the independent SOS cross-check and
 for loading archived inputs. SDP solvers appear only in `research/requirements.txt` and are
 never needed to verify anything.
+
+## Draft boundary continuation
+
+The original endpoint transcript above remains correct for the original
+certificate. The latest bound comes from `proofs/verify_penalty_boundary.py`,
+which the full runner also executes: `alpha_star <= 0.16310672`, with an exactly
+specified singular-certificate bound approximately `0.1631067188466586`.
+The new conclusion follows only after the inherited endpoint and equality-face
+verifiers succeed. New prose arguments still await separate review.
+
+Run `python tests/test_penalty_boundary_mutations.py` for targeted corruptions
+and dependency-failure controls. Read `docs/CERTIFICATE_PENALTY_BOUNDARY.md`
+for the singular-kernel equality proof and the quadratic correction.

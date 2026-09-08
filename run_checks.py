@@ -40,6 +40,8 @@ run(PROOFS / 'verify_penalty_not_partial_local.py')
 # The equality set of the sharp bound, and -- via the endpoint certificate above -- of the whole
 # certified family.  Reviewed in docs/review_2026-09-07_equality_face.md before integration.
 run(PROOFS / 'verify_equality_face.py')
+# Draft continuation: exact arithmetic plus the prose lemmas in its certificate guide.
+run(PROOFS / 'verify_penalty_boundary.py')
 
 q = json.loads((PROOFS / 'qutrit_certificate.json').read_text())
 s = json.loads((PROOFS / 'sharp_qubit_certificate.json').read_text())
@@ -64,5 +66,6 @@ print(f"Penalty endpoint: M_A <= 6 + {endpoint['alpha']} p on Schmidt number two
       f"strategy at 0.16310160 -- and NOT valid on the partial-local hull H.")
 print('Equality face: F = 7 is attained on Schmidt number two only inside a four-simplex of '
       'local behaviours, and the same face serves the whole certified family.')
+print('Boundary continuation: alpha_star <= 0.16310672; exact singular bound ~ 0.1631067188466586. New prose arguments await separate review.')
 print('Global quantum maximum, tight decomposition cost, the exact optimal penalty alpha_star, '
       'the equality face AT that critical penalty, novelty, and external review remain open.')

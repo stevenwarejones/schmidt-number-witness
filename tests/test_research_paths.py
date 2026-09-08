@@ -324,6 +324,15 @@ def imports_helper(tree):
 
 
 scripts = sorted(p for p in RESEARCH.glob('*.py') if p.name != 'outputs.py')
+# This regeneration step continues two shipped certificates rather than an
+# archived solver run. Permit precisely those immutable inputs for this script;
+# all writes still go to build/, and other proof files are not permitted here.
+CERTIFICATE_INPUTS = {
+    'derive_penalty_boundary.py': {
+        (ROOT / 'proofs/penalty_endpoint_certificate.json').resolve(),
+        (ROOT / 'proofs/sharp_qubit_certificate.json').resolve(),
+    },
+}
 trees = {p: ast.parse(p.read_text()) for p in scripts}
 envs = {p: bind_paths(t, p) for p, t in trees.items()}
 
@@ -378,7 +387,8 @@ for p in scripts:
             fails.append(f"{where}: {E_READ_GENERATED} reads the generated file "
                          f"{resolved.relative_to(ROOT)}; discovery inputs must come from the "
                          f"source tree")
-        elif RESEARCH.resolve() not in resolved.parents:
+        elif (RESEARCH.resolve() not in resolved.parents
+              and resolved not in CERTIFICATE_INPUTS.get(p.name, set())):
             fails.append(f"{where}: {E_OUTSIDE} `{shown}` resolves outside research/: {resolved}")
         elif r.exact and not resolved.is_file():
             fails.append(f"{where}: {E_MISSING} `{shown}` resolves to {resolved}, which does not exist")

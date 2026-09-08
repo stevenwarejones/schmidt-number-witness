@@ -1,5 +1,10 @@
 # The penalty endpoint: `M_A <= 6 + alpha0 p`, with `alpha0 = 0.16311`
 
+**Later draft continuation:** `docs/CERTIFICATE_PENALTY_BOUNDARY.md` extends the
+certificate range while retaining these original inputs. Bounds and endpoint
+limitations below describe this original certificate, not a proof of optimality.
+The new prose extension is awaiting separate review.
+
 Status: exact computer-assisted certificate, verified along four independent routes in this
 repository. No human expert has reviewed it. The **exact** optimal coefficient is not
 determined, and is not claimed to be.

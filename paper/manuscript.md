@@ -451,10 +451,15 @@ and the comparison with the $0.1841\%$ of Section 8 is between two different fun
 different realizations. The see-saw search that produced this realization is a lower-bound
 discovery method, not a proof of the global qutrit maximum of $G$.
 
-Certificates and verifiers: `proofs/verify_penalty_endpoint.py`,
-`proofs/verify_improved_qutrit.py` and `proofs/verify_penalty_not_partial_local.py`, with an
-independent reconstruction along three routes that are not the proof path in
-`tests/verify_endpoint_independent.py`, and `docs/CERTIFICATE_PENALTY_ENDPOINT.md` as the guide.
+Certificates and verifiers:
+
+- `proofs/verify_penalty_endpoint.py`
+- `proofs/verify_improved_qutrit.py`
+- `proofs/verify_penalty_not_partial_local.py`
+
+Independent reconstruction is provided by
+`tests/verify_endpoint_independent.py`.
+The guide is `docs/CERTIFICATE_PENALTY_ENDPOINT.md`.
 
 **Corollary 8.** For every $\varepsilon\in[0,\varepsilon_0]$, the equality set of
 $F+\varepsilon p$ on $S_2$ is the same $L_F$.
@@ -469,7 +474,8 @@ $\varepsilon_0<4$ gives $p=0$ the same way, and componentwise saturation extends
 Schmidt-number-two mixtures. Conversely all five vertices of $L_F$ have $F=7$ **and** $p=0$, so
 they saturate every member of the family. $\square$
 
-This does **not** extend past $\varepsilon_0$. The true validity endpoint is
+Corollary 8 itself certifies only the range through $\varepsilon_0$; the draft
+continuation below establishes a larger range. The true validity endpoint is
 $4-\alpha_\star$, which is undetermined, and what happens to the equality face at that exact
 critical penalty is a separate open question: a nonlocal behavior with $p>0$ attaining the bound
 there is neither exhibited nor excluded.
@@ -479,6 +485,63 @@ penalty; the global qutrit or unrestricted quantum maximum of $G$; any facet, di
 partial-locality property of $G$; a self-testing statement at the conjectured critical penalty;
 or novelty of any of it.
 
+
+### 7.3 Draft continuation to a singular Gram boundary
+
+**Review status of this subsection.** The following extension was constructed
+and arithmetically checked after the preceding results were reviewed. Its
+additional prose arguments await a separate adversarial review.
+
+Let $X$ denote the positive-definite Gram of Theorem 7, let $e=e_8$, and solve
+$Xv=e$. Define
+
+$$
+\delta=16/v_8,\qquad Y=X-\frac{\delta}{16}ee^T,\qquad
+\varepsilon_b=\varepsilon_0+\delta,\qquad\alpha_b=4-\varepsilon_b.
+$$
+
+Conjugation by $X^{-1/2}$ shows that $Y$ is positive semidefinite with kernel
+spanned by $v$. Since $J_8^\dagger J_8=16K$, the same operator identity proves
+$F+\varepsilon_b p\le7$ on the nondegenerate projective branch. The deterministic
+branches still obey $F+4p\le7$; the previous convex reduction applies. Exact data
+specify $\alpha_b=0.1631067188466586\ldots$, and in particular give the simpler
+rational bound $\alpha_\star\le1019417/6250000=0.16310672$. This is the endpoint
+of one Gram continuation, not the unknown optimal penalty.
+
+The equality face persists at this singular certificate. The exact identities
+$J_8=(I+A_1)(I+B_0)$ and $J_9=(I+A_1)(I+B_1)$ make both operators positive
+semidefinite. Equality implies $J_j|\psi\rangle=v_j|\eta\rangle$ for one vector
+$|\eta\rangle$. The checked ratio $r=v_9/v_8$ is negative, so
+$\langle J_9\rangle=r\langle J_8\rangle$ forces both expectations to vanish.
+Positivity gives $J_8|\psi\rangle=0$, hence $|\eta\rangle=0$. All $J_j$ annihilate
+the state and Theorem 6 applies. Deterministic branches force $p=0$ using
+$\varepsilon_b<4$. The POVM and mixture reductions and converse inclusion are
+as in Corollary 8. The same equality face therefore holds throughout
+$0\le\varepsilon\le\varepsilon_b$.
+
+An explicit remainder is also available. Put $a=e_9-r e_8$, solve $Yz=a$, and
+set $c_0=1/(a^Tz)$. PSD Cauchy-Schwarz gives $Y\succeq c_0aa^T$. Since
+$H=J_9-rJ_8\succeq0$ and $\langle H\rangle\ge-4rp$, one obtains
+
+$$
+7-F-\varepsilon_b p\ge c_0\|H\psi\|^2
+\ge16c_0r^2p^2=Cp^2.
+$$
+
+The exact coefficient satisfies $9\times10^{-7}<C<\alpha_b$ and is approximately
+$9.23281185174\times10^{-7}$. Deterministic branches satisfy
+$7-F-\varepsilon_b p\ge\alpha_b p\ge Cp^2$; Jensen's inequality extends the
+remainder to mixtures. This bounds an event probability, not distance to the
+local face. Its numerical size is too small to offer a meaningful additional
+experimental advantage. The limit of the ratio as $p\to0$, the exact optimal
+penalty and its equality face remain open.
+
+The continuation is documented in:
+
+- `proofs/verify_penalty_boundary.py`
+- `docs/CERTIFICATE_PENALTY_BOUNDARY.md`
+
+Existing qutrit scores and noise tolerances in Section 7.2 refer to $\varepsilon_0$.
 
 ## 8. Limits and reproducibility
 
@@ -551,6 +614,6 @@ Completeness is relevant to a membership test. The upper-bound dual certificates
 18. E. Zambrini Cruzeiro and N. Gisin, [Complete list of Bell inequalities with four binary settings](https://arxiv.org/abs/1811.11820).
 19. A. Mukherjee et al., [Device independent Schmidt rank witness by using Hardy paradox](https://arxiv.org/abs/1407.2146).
 20. K. F. Pál and T. Vértesi, [Maximal violation of the I3322 inequality using infinite dimensional quantum systems](https://arxiv.org/abs/1006.3032).
-21. K. T. Goh, J. Kaniewski, E. Wolfe, T. Vértesi, X. Wu, Y. Cai, Y.-C. Liang and V. Scarani, [Geometry of the set of quantum correlations](https://arxiv.org/abs/1710.05892). Cited for the general phenomenon of several Bell functionals exposing one face; only its abstract was accessible when this section was written, and the comparison with its Appendix G example is outstanding.
-22. A. Rai, C. Duarte, S. Brito and R. Chaves, [Geometry of the quantum set on no-signaling faces](https://arxiv.org/abs/1812.06057). The closest comparator for zero-probability faces on which the quantum set has no nonlocal points; comparison outstanding.
+21. K. T. Goh, J. Kaniewski, E. Wolfe, T. Vértesi, X. Wu, Y. Cai, Y.-C. Liang and V. Scarani, [Geometry of the set of quantum correlations](https://arxiv.org/abs/1710.05892). Cited for the general phenomenon of several Bell functionals exposing one face; the relevant Section III C 2 and Appendix G passages were inspected in the 2026-09-08 follow-up recorded in `docs/PRIOR_ART.md`. This does not establish novelty of the present classification.
+22. A. Rai, C. Duarte, S. Brito and R. Chaves, [Geometry of the quantum set on no-signaling faces](https://arxiv.org/abs/1812.06057). A comparator for zero-probability faces on which the quantum set has no nonlocal points; the introduction and two-setting classification scope were checked in the 2026-09-08 follow-up. Possible implications for this three-setting result remain under review.
 23. J. Pauwels, [The quantum supremum of the I3322 Bell inequality is not attained in finite dimension](https://arxiv.org/abs/2608.29734), August 2026 preprint. Unrefereed, and only its abstract was accessible here; noted because an exact, machine-checkable result in this scenario does not by itself establish novelty.

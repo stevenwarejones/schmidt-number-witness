@@ -1,5 +1,10 @@
 # The equality face: `S2 ∩ {F = 7}` is a four-simplex of local behaviours
 
+**Later draft continuation:** `docs/CERTIFICATE_PENALTY_BOUNDARY.md` extends the
+certificate range while retaining these original inputs. Bounds and endpoint
+limitations below describe this original certificate, not a proof of optimality.
+The new prose extension is awaiting separate review.
+
 Status: exact computer-assisted certificate, independently reviewed inside this repository
 (`docs/review_2026-09-07_equality_face.md`). Its branch infeasibilities and forced zeros are
 re-derived by a second route that reads none of the supplied duals
