@@ -69,8 +69,19 @@ Outputs: `qubit_theta_profile.py`, `qubit_joint_search.py` and `qubit_endpoint_s
 write **nothing** — their results go to stdout. Seeds and workloads are hard-coded in their
 source, and the joint search prints its restart count; what is missing is a machine-readable
 run artifact recording environment, optimizer status and results. Every other script here
-writes to the git-ignored `build/`. Nothing under `research/`
-is committed as a result file, so no claim can rest on a stale one.
+writes to the git-ignored `build/`.
+
+**One committed result file, and it is numerical evidence.** `research/endpoint_numerics.json`
+records a numerical stationary point of the ratio `(M_A - 6)/p` over qubit strategies, at
+`0.16310160137893...`, with its gradient residual and transverse Hessian spectrum. It is the
+only result file under `research/`, it carries its own disclaimer in a `note` field, and **no
+claim anywhere in this repository rests on it**. The certified statement is the interval
+`0.1631016 < alpha_star <= 16311/100000`, proved from exact rational data by
+`proofs/verify_penalty_endpoint.py`; the exact value of `alpha_star` is undetermined. A gradient
+residual near zero at finite working precision is not a certified root, and a numerically
+positive Hessian is not a proof of local optimality, let alone global. It is committed because
+`docs/CERTIFICATE_PENALTY_ENDPOINT.md` refers to the suggestion that the certified upper endpoint
+is close to optimal, and that suggestion should be inspectable rather than asserted.
 
 Some scripts still read another script's source text to reuse a builder; replacing that with
 explicit builder functions is a known follow-up, to be done only after comparing basis ordering

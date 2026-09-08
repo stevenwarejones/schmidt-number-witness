@@ -16,6 +16,10 @@ python tests/test_docs_consistency.py
 python tests/test_comparison_acceptance.py
 python tests/test_output_helper.py
 python tests/test_checker_mutations.py
+python tests/verify_endpoint_independent.py   # ~30 s; four independent routes to the endpoint
+python tests/test_endpoint_mutations.py       # ~6 min; corrupts each endpoint certificate
+python tests/verify_equality_face_independent.py   # ~4 min; exact simplex, reads no supplied dual
+python tests/test_equality_face_mutations.py       # ~3 min; corrupts the equality-face certificate
 python research/audit_catalog_folds.py
 python research/legacy/verify_routing.py --legacy-routing
 python manifest.py check
@@ -35,7 +39,18 @@ overwrite an archived input or a shipped certificate in place. Discovery needs P
 and 3.12.
 
 Do not merge the independent checker `tests/verify_sos_independent.py` into the primary verifier's
-word normalization. Its value is that it is a separate implementation.
+word normalization. Its value is that it is a separate implementation. The same applies to
+`tests/verify_endpoint_independent.py`, which reaches the endpoint certificate by three routes
+none of which is the proof path: its own Clifford rewriting, explicit Gaussian-rational qubit
+matrices with no normal ordering at all, and integer Bareiss minors instead of rational LDL.
+
+## Scope discipline for the penalised functional
+
+`F` and `G = F + eps * p` are different functionals and their results do not transfer. `F` is a
+facet of `H` **and** bounded by 7 on Schmidt number two; `G` keeps only the second property,
+and `proofs/verify_penalty_not_partial_local.py` proves the first fails for every `eps > 0`.
+Do not describe `G` as a partial-locality witness, and do not attach `F`'s facet or
+convex-class statements to it without a separate proof.
 
 ## Changing a certificate
 

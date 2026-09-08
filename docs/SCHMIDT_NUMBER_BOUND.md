@@ -194,11 +194,40 @@ The global quantum maximum of F is not determined here. Nor is the decomposition
 
 A bounded, specific follow-up was identified in the 7 September review: the sharp bound is
 equivalent to the probability-conditioned tradeoff `M_A <= 6 + 4 p(00|10)` for Schmidt number at
-most two, and it is **open whether 4 is the smallest universally valid coefficient**. Sharpness
+most two, and it was **open whether 4 is the smallest universally valid coefficient**. Sharpness
 of `F <= 7` does not settle this, because the saturating points have `p(00|10) = 0` and so give
-no lower bound on the ratio `(M_A - 6)/p(00|10)`. Either an exact family with positive `p`
-approaching ratio 4, or a certified smaller coefficient, would turn one functional into a sharp
-tradeoff statement.
+no lower bound on the ratio `(M_A - 6)/p(00|10)`.
+
+**That question is now answered in the negative, and by a wide margin.** An exact certificate
+proves `M_A <= 6 + alpha0 * p` with `alpha0 = 16311/100000 = 0.16311`, and an explicit two-qubit
+strategy with `p > 0` reaches ratio `0.16310160...`, so
+
+    0.1631016 < alpha_star <= 0.16311,
+
+an interval of width below `8.4 * 10^-6`. The **exact value of `alpha_star` is still open**: no
+algebraic value, no matching sharp sum-of-squares, and no self-testing statement at the critical
+penalty is claimed. See `docs/CERTIFICATE_PENALTY_ENDPOINT.md` and
+`proofs/verify_penalty_endpoint.py`.
+
+**The equality set of `F <= 7` is now classified too.** It is exactly the convex hull of five
+local deterministic behaviours, of affine dimension four, so the sharp bound is attained only
+locally — see `docs/CERTIFICATE_EQUALITY_FACE.md` and `proofs/verify_equality_face.py`. The
+argument reuses §1 above, but needs the Gram to be positive **definite** rather than merely
+semidefinite, which it is. It also classifies the equality set of every `F + eps p` with
+`0 <= eps <= 0.16311`'s complementary `eps0`, and says nothing about the exact critical penalty.
+
+Two things about the penalty result belong here rather than there, because they bear directly on
+the argument above:
+
+* **The deterministic-observable branch had to be redone.** Section 2 disposes of a
+  deterministic observable by routing the behavior into a partial-local class and invoking the
+  facet certificate. That route is **closed** for `F + eps * p` with `eps > 0`, because that
+  functional is not valid on `H` at all — `proofs/verify_penalty_not_partial_local.py` exhibits
+  a facet-defining point of `H` with `F = 7` and `p = 1/3`. Twelve exact no-signaling dual
+  certificates replace it, one per (observable, sign) pair.
+* **Nothing above changes.** `F` itself, its facet property, its sharp bound and the 31.19%
+  remainder are untouched. The penalised functional is an addition with a strictly smaller
+  scope, not a replacement.
 
 Dimension-constrained SDP methods are established, for example in [Navascues and Vertesi (2015)](https://arxiv.org/abs/1412.0924) and [Navascues et al. (2015)](https://arxiv.org/abs/1507.07521). The contribution to audit is this particular sharp witness bound, its two-sided facet role, and the joint physical conclusion—not the general idea of dimension certification.
 
@@ -210,3 +239,10 @@ Dimension-constrained SDP methods are established, for example in [Navascues and
 4. Check that the same F appears in every certificate and the qutrit construction.
 5. Review the dimension-unrestricted upper certificate and the interpretation of the 31.19% bound.
 6. Audit equivalent witnesses, relabelings and prior entanglement-dimension results before any priority claim or paper announcement.
+7. For the penalised endpoint, review the twelve no-signaling duals and the claim that they
+   cover every deterministic-observable case; check that the constant `eps/4` is carried
+   correctly in both the operator identity and the noise threshold; and try to break the scope
+   separation in `docs/CERTIFICATE_PENALTY_ENDPOINT.md` §0.
+8. For the equality face, attack the five projector rules themselves rather than their
+   implementation — that hand-check is the weakest link — and the order-sensitivity of the
+   POVM/compression reduction in `docs/CERTIFICATE_EQUALITY_FACE.md` §4.

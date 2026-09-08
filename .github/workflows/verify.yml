@@ -66,6 +66,27 @@ jobs:
       - name: Checker mutation regressions
         run: python tests/test_checker_mutations.py
 
+      # Three routes to the endpoint certificate, none of them the proof path: a second
+      # Clifford rewriting, exact Gaussian-rational qubit matrices with no normal ordering,
+      # and integer Bareiss minors instead of rational LDL.
+      - name: Independent reconstruction of the penalty endpoint (EXACT, all routes)
+        run: python tests/verify_endpoint_independent.py
+
+      # ~6 minutes, so it runs once rather than per Python version.  It is a statement about
+      # the checkers, not about the interpreter, and the checkers are pure standard library
+      # apart from the numpy corroboration section.
+      - name: Endpoint mutation regressions (rejection for the intended reason)
+        if: matrix.python-version == '3.12'
+        run: python tests/test_endpoint_mutations.py
+
+      # The equality face re-derived by an exact rational simplex that reads no supplied dual.
+      - name: Independent reconstruction of the equality face (EXACT)
+        run: python tests/verify_equality_face_independent.py
+
+      - name: Equality-face mutation regressions (rejection for the intended reason)
+        if: matrix.python-version == '3.12'
+        run: python tests/test_equality_face_mutations.py
+
       - name: Documentation paths and entry-point coverage
         run: python tests/test_docs_consistency.py
 

@@ -224,8 +224,10 @@ Two qualifications matter, and an earlier version of this document got both wron
 
 - Pál and Vértesi ([arXiv:1006.3032](https://arxiv.org/abs/1006.3032)) exhibit a construction
   approaching `0.250875…`, above the qubit value `0.25`, and **conjecture** that the supremum
-  is not attained in any finite dimension. That is their conjecture, not a theorem, and this
-  document previously cited it as one.
+  is not attained in any finite dimension. That was their conjecture, not a theorem, and this
+  document previously cited it as one. As of 30 August 2026 an **unrefereed preprint** claims to
+  prove it — see "New comparators" below. This document does not restate it as settled fact, and
+  nothing here depends on which way it goes.
 - Navascués and Vértesi ([arXiv:1412.0924](https://arxiv.org/abs/1412.0924)) report a
   **numerical** SDP computation, certified to seven significant digits, that the `C³⊗C³`
   maximum is also `0.25`. That is a numerical result, not an exact equality theorem.
@@ -238,6 +240,42 @@ per party ([arXiv:0810.1615](https://arxiv.org/abs/0810.1615)) found higher-dime
 advantage in 43 cases, all at four and five settings, remarking that the simplest three-setting
 inequality was "surprisingly" not among them. `F` is **not** a facet of the local polytope, so
 it falls outside that survey — which is also why absence from it proves nothing.
+
+### New comparators located in the 7 September 2026 review round
+
+These arrived with the penalty-endpoint package (`docs/CERTIFICATE_PENALTY_ENDPOINT.md`) as
+reported findings. They are recorded here with **what was independently checked in this
+repository's session and what was not**, because the difference is the whole point of this file.
+The rule applied: a comparator is only described by what a source actually seen here says.
+
+| Source | Checked here | Not checked here |
+|---|---|---|
+| Pauwels, *The quantum supremum of the I3322 Bell inequality is not attained in finite dimension*, [arXiv:2608.29734](https://arxiv.org/abs/2608.29734) | the listing exists; author, title and submission date 30 Aug 2026 confirmed; the abstract states that it proves both Pál–Vértesi claims, that the set of finite-dimensional quantum correlations is **not closed** in the (3,3,2,2) scenario, and that "the core of the proof was formalized in Lean 4" | **the full text.** Every attempt to fetch the PDF and the HTML from this session returned HTTP 429 from the fetch proxy. The reported Appendix A universal two-qubit value `I3322 <= 1/4`, the reported Lean scope (a pure-projective finite-dimensional core, with the mixed-state and POVM reduction explicitly outside it), and the linked Lean repository were **not inspected here** |
+| Goh, Kaniewski, Wolfe, Vértesi, Wu, Cai, Liang, Scarani, *Geometry of the set of quantum correlations*, [arXiv:1710.05892](https://arxiv.org/abs/1710.05892) | the listing exists; the abstract is about the convex geometry of the quantum set and its consequences for self-testing. The abstract does **not** mention exposed faces or local faces | **the full text**, and in particular the reported Appendix G five-vertex four-dimensional local face whose quantum face has dimension five. That specific claim is reported, not verified here |
+| Rai, Duarte, Brito, Chaves, *Geometry of the quantum set on no-signaling faces*, [arXiv:1812.06057](https://arxiv.org/abs/1812.06057) | the listing exists; the abstract does concern faces of the no-signaling set on which every nonlocal correlation is postquantum ("quantum voids"), a full characterization in the simplest Bell scenario, and use as a dimension witness | the full text, and any detailed relation to the forced-zero-probability reasoning used in the endpoint work |
+| Connor, *Maximal I3322 Violation Requires Infinite Local Dimension*, ResearchGate listing 411642957 | nothing | **everything.** The reporting agent recorded "No file available" on the listing and failed fetches of the author's linked PDFs. No version of this text has been read in this repository's sessions. It is named here only so that a later reader knows it was raised and not resolved |
+
+What follows from the part that *is* checked:
+
+- **Do not claim novelty for "an exact, independently checkable bound in this scenario."**
+  Whatever its full text says, a machine-formalized proof about I3322 in (3,3,2,2) exists as a
+  preprint from August 2026. Exact checkability remains valuable in itself — it is why anything
+  here can be audited at all — but it does not by itself establish novelty, and it did not
+  before this preprint either. The claim this repository can support is about a *specific
+  penalized functional*.
+- **Do not conflate the two I3322 announcements.** Pauwels and Connor are different names,
+  different dates and different venues, and only one of them has been seen here at all. This
+  document adjudicates neither priority nor correctness between them.
+- **Nothing above changes any claim here.** The comparisons in this file rest on *achievable*
+  qubit benchmarks constructed inside the verifiers, never on a literature maximum, so a
+  resolved or unresolved I3322 supremum leaves them intact.
+- The Goh and Rai comparisons deserve a real reading before the equality-face material is
+  written up. That material is deliberately **not** in this repository yet.
+
+**Access failure, stated plainly.** arXiv abstract pages were reachable from this session;
+the arXiv full-text endpoints (both the PDF and the HTML rendering) were not,
+returning HTTP 429 on every attempt across several minutes. So for all three arXiv comparators above, only abstract-level verification was
+possible here. That is a limitation of this session, not a statement about the papers.
 
 ### Status of each comparison
 
@@ -256,6 +294,8 @@ done, in the same file as the sections reporting them done.
 | broader Gigena–Kaniewski family | **open, attempted** | an exploratory projected-simulator search was **inconclusive** — its finite strategy library left eight targets uncovered, so neither detection nor non-detection follows | not in this repository |
 | Hardy-type comparators | **partially resolved** | the displayed exact-zero test does not apply to `Q`; robust or transformed variants are untouched | below |
 | wirings, filtering, many-copy protocols, combinations of several inequalities, conditional tradeoffs generally | **open** | — | — |
+| the three new arXiv comparators (Pauwels, Goh et al., Rai et al.) | **open; abstract-level only** | listings, authors, dates and abstracts confirmed here; no full text reachable from this session | the table above |
+| Connor's announced I3322 characterization | **open; no text seen** | nothing has been read | the table above |
 
 Searching was English-language web search only, not INSPIRE or full-text scholarly search.
 Absence of hits is not evidence of novelty, and none of this was performed by a human expert.
@@ -270,8 +310,9 @@ Absence of hits is not evidence of novelty, and none of this was performed by a 
 | [Navascues and Vertesi](https://arxiv.org/abs/1412.0924), [Navascues et al.](https://arxiv.org/abs/1507.07521) | The sharp bound certifies Schmidt number >= 3 for the supplied behavior. Compare against dimension and entanglement-dimension witnesses. The general method is established; priority of this particular witness is not. |
 
 The highest-value remaining work, per the status table above: the untested remainder of the
-four-setting catalogue, the broader Gigena–Kaniewski family, and any robust form of the Hardy
-Schmidt-rank comparator. A targeted expert question should show the coefficient vector, the two
+four-setting catalogue, the broader Gigena–Kaniewski family, any robust form of the Hardy
+Schmidt-rank comparator, and full-text readings of the three new arXiv comparators — which will
+need a session that can reach arXiv full text. A targeted expert question should show the coefficient vector, the two
 positivity identities, and the correlator-support argument — not the phrase "two-sided partial
 locality". No outreach has been performed.
 
