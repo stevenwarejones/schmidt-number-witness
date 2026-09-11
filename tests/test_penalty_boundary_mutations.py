@@ -40,6 +40,27 @@ ALL_CODES = {'[E-BOUNDARY-INPUT]', '[E-BOUNDARY-SHAPE]', '[E-BOUNDARY-SOLVE]',
              '[E-BOUNDARY-SIMPLE]', '[E-BOUNDARY-PROJECTOR]'}
 
 
+# A rank-one subtraction along u = cross((v0,v1,v2), (z0,z1,z2)) on indices 0,1,2.  That u is
+# orthogonal to BOTH v and z, so the perturbed Y still satisfies Yv = 0 AND Yz = a: every
+# arithmetic identity in check_arithmetic survives, and the only thing it breaks is positivity,
+# which an exact symmetric-pivot LDL confirms it genuinely destroys.  So this isolates the new
+# structural guard -- nothing else in the file can catch it.
+#
+# An earlier version used u = (v1, -v0, 0, ...).  That is orthogonal to v but NOT to z, so it
+# also broke Yz = a and would have been caught by [E-BOUNDARY-RANGE] had the guard been absent.
+# It still exercised the guard, because the guard runs first, but the comment claiming it
+# preserved every identity was false.
+INJECTED = ('    Y[8][8] -= delta/16\n'
+            '    _i, _j, _k = 0, 1, 2\n'
+            '    _u = [Q(0)]*n\n'
+            '    _u[_i] = v[_j]*z[_k] - v[_k]*z[_j]\n'
+            '    _u[_j] = v[_k]*z[_i] - v[_i]*z[_k]\n'
+            '    _u[_k] = v[_i]*z[_j] - v[_j]*z[_i]\n'
+            '    for _p in range(n):\n'
+            '        for _q in range(n):\n'
+            '            Y[_p][_q] -= _u[_p]*_u[_q]\n')
+
+
 def rejected_for(message, code):
     """True only if `message` names this defect and no other case's defect."""
     return code in message and not (ALL_CODES - {code}) & {c for c in ALL_CODES if c in message}
@@ -116,15 +137,7 @@ with tempfile.TemporaryDirectory() as td:
     target = tree/'proofs/verify_penalty_boundary.py'
     text = target.read_text()
     assert '    Y[8][8] -= delta/16\n' in text
-    # Subtract a rank-one term along u = (v1, -v0, 0, ...).  Since u.v = 0 this leaves Yv = 0
-    # intact, so the kernel check still passes; it is exactly the kind of edit that keeps every
-    # arithmetic identity and silently destroys the positivity the bound rests on.
-    injected = ('    Y[8][8] -= delta/16\n'
-                '    _u = [v[1], -v[0]] + [Q(0)]*(n-2)\n'
-                '    for _i in range(n):\n'
-                '        for _j in range(n):\n'
-                '            Y[_i][_j] -= _u[_i]*_u[_j]\n')
-    target.write_text(text.replace('    Y[8][8] -= delta/16\n', injected))
+    target.write_text(text.replace('    Y[8][8] -= delta/16\n', INJECTED))
     hurt = importlib.util.spec_from_file_location('boundary_hurt', target)
     hurt_module = importlib.util.module_from_spec(hurt)
     hurt.loader.exec_module(hurt_module)
@@ -134,7 +147,8 @@ with tempfile.TemporaryDirectory() as td:
         assert rejected_for(str(exc), '[E-BOUNDARY-PSD]'), ('extra rank-one term', str(exc))
     else:
         raise AssertionError('an extra rank-one subtraction orthogonal to v was accepted')
-    print('PASS targeted rejection [E-BOUNDARY-PSD] an extra rank-one term that preserves Yv = 0')
+    print('PASS targeted rejection [E-BOUNDARY-PSD] a rank-one term orthogonal to v and z: '
+          'every arithmetic identity survives, only positivity dies')
 
 # --- controls on this suite's own acceptance condition ---------------------------------------
 # A checker that refuses everything with one message naming every code satisfies `code in
@@ -158,6 +172,24 @@ except AssertionError as exc:
 else:
     raise AssertionError('CONTROL: the delta mutation was accepted')
 print('PASS control: a scale mutation does not satisfy the sign code')
+
+# The runner must not swallow a failing verifier's diagnostics.  An earlier run_checks.py
+# captured the boundary verifier's output and passed check=True, so subprocess.run raised
+# BEFORE anything was written and the specific code vanished from what the reader was shown.
+# Break the verifier, run the FULL runner, and require the code to survive into its output.
+with tempfile.TemporaryDirectory() as td:
+    tree = Path(td)/'repo'
+    shutil.copytree(ROOT, tree, ignore=shutil.ignore_patterns('.git', 'build', '__pycache__'))
+    target = tree/'proofs/verify_penalty_boundary.py'
+    target.write_text(target.read_text().replace('    Y[8][8] -= delta/16\n', INJECTED))
+    r = subprocess.run([sys.executable, str(tree/'run_checks.py')], capture_output=True, text=True)
+    shown = (r.stdout or '') + (r.stderr or '')
+    assert r.returncode != 0, 'run_checks accepted a broken boundary verifier'
+    assert '[E-BOUNDARY-PSD]' in shown, (
+        "run_checks hid the failing verifier's diagnostic: it must show the transcript before "
+        'raising, not capture it into an exception nobody prints')
+    assert 'PENALTY BOUNDARY VALID' not in shown, 'the runner printed a conclusion anyway'
+    print("PASS run_checks shows a failing verifier's diagnostic instead of swallowing it")
 
 # The path lint permits only the two source certificates consumed by this
 # regeneration script, not arbitrary reads outside research/.

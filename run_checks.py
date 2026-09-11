@@ -2,7 +2,7 @@
 
 Run from anywhere:  python run_checks.py
 Paths resolve against this file, not the caller's working directory."""
-import sys, subprocess, json
+import sys, subprocess, json, os
 from fractions import Fraction
 from pathlib import Path
 
@@ -31,12 +31,30 @@ def run_subsuming(path, *required):
     If this call is ever removed, restore the two run(...) lines it replaces:
         run(PROOFS / 'verify_penalty_endpoint.py')
         run(PROOFS / 'verify_equality_face.py')
+
+    The child's stdout is STREAMED as it arrives rather than captured and replayed at the end.
+    Capturing it and passing check=True would raise before anything was written, so a failing
+    verifier's diagnostic code -- the one thing a reader needs -- would vanish from the displayed
+    failure; tests/test_penalty_boundary_mutations.py regression-tests exactly that.  Streaming
+    also keeps a long exact-arithmetic run from looking like a hang.  stderr is inherited, so
+    assertion tracebacks appear as they happen.
     """
-    r = subprocess.run([sys.executable, str(path)], check=True, capture_output=True, text=True)
-    sys.stdout.write(r.stdout)
-    sys.stderr.write(r.stderr)
+    env = dict(os.environ, PYTHONUNBUFFERED='1')
+    proc = subprocess.Popen([sys.executable, str(path)], stdout=subprocess.PIPE,
+                            text=True, bufsize=1, env=env)
+    transcript = []
+    with proc.stdout:
+        for line in proc.stdout:
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            transcript.append(line)
+    proc.wait()
+    # Same failure mode as run(): CalledProcessError, but only after the transcript is visible.
+    subprocess.CompletedProcess(proc.args, proc.returncode, ''.join(transcript), None
+                                ).check_returncode()
+    text = ''.join(transcript)
     for line in required:
-        if line not in r.stdout:
+        if line not in text:
             raise SystemExit(f'{path.name} did not reach: {line}')
 
 

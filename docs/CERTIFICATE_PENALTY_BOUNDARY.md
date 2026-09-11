@@ -47,11 +47,11 @@ epsilon_b  = 3.8368932811533414...
 
 **Rank-one lemma.** If X is positive definite, then `X - t e e^T` is positive semidefinite precisely for `t <= 1/(e^T X^-1 e)`, and at equality its kernel is exactly the span of `X^-1 e`. This follows by conjugating with `X^-1/2`: the resulting matrix is identity minus a rank-one projector at the boundary. Here `e^T X^-1 e = v8 > 0`. That is what fixes the value of `delta`.
 
-**The positivity itself is checked, not assumed.** At the boundary the conclusion does not need the lemma at all, and does not need any new computation either. `Y` differs from `X` in entry `(8,8)` and nowhere else, so its principal submatrix on the other 69 indices *is* `X`'s, which is positive definite because `X` is — a fact the inherited endpoint verifier establishes by exact LDL. Given `Yv = 0` and `v8 != 0`, every `w` splits as `w = (w8/v8) v + w'` with `w'[8] = 0`, and then
+**The positivity is also checked, not only argued.** The conjugation argument above is valid and was valid as written; nothing below repairs it. What follows adds verification coverage: it reduces the same conclusion to facts this repository already checks by machine, so that the load-bearing positivity claim is not the one step a reader has to take on trust. At the boundary the conclusion needs neither the lemma nor any new computation. `Y` differs from `X` in entry `(8,8)` and nowhere else, so its principal submatrix on the other 69 indices *is* `X`'s, which is positive definite because `X` is — a fact the inherited endpoint verifier establishes by exact LDL. Given `Yv = 0` and `v8 != 0`, every `w` splits as `w = (w8/v8) v + w'` with `w'[8] = 0`, and then
 
     w^T Y w  =  w'^T Y w'  =  w'^T X|_(i,j != 8) w'  >=  0,
 
-zero exactly when `w' = 0`, that is exactly on `span(v)`. So `Y >= 0` with kernel exactly `span(v)`, and `proofs/verify_penalty_boundary.py` checks the one structural fact this rests on — that `Y` carries `X` away from entry `(8,8)` — with diagnostic code `[E-BOUNDARY-PSD]`. An earlier draft of this document left the whole positivity claim to the `X^-1/2` conjugation above.
+zero exactly when `w' = 0`, that is exactly on `span(v)`. So `Y >= 0` with kernel exactly `span(v)`, and `proofs/verify_penalty_boundary.py` checks the one structural fact this rests on — that `Y` carries `X` away from entry `(8,8)` — with diagnostic code `[E-BOUNDARY-PSD]`. An earlier draft left this conclusion to the conjugation argument alone -- correct, but unchecked.
 
 Consequently Y is PSD with corank one and
 
