@@ -45,6 +45,11 @@ There are two entry points a reader most likely wants, and neither touches resea
 | 10 | a qutrit realization with `G = 7.0928393387` and `1.5136%` white-noise tolerance, which the original `F` does **not** detect | `proofs/verify_improved_qutrit.py` |
 | 11 | that same strengthening is **not** valid on the partial-local hull `H`, for any `eps > 0` | `proofs/verify_penalty_not_partial_local.py` |
 | 12 | `S2` intersected with `{F = 7}` is exactly a four-simplex of five local deterministic behaviours — and the same face for every `F + eps p` with `0 <= eps <= 3.83689` | `proofs/verify_equality_face.py` |
+| 13 | a draft continuation of that Gram to its singular boundary: `alpha_star <= 0.1631067188466586...`, hence the quotable `0.16310672`. **Its arithmetic is exact; its equality and remainder arguments are prose awaiting review** | `proofs/verify_penalty_boundary.py` |
+
+Check 13 subsumes checks 9 and 12: it re-runs both before printing anything of its own, so
+`run_checks.py` calls it instead of running them twice and requires both of their conclusions to
+appear in the transcript.
 
 Checks 9–11 concern a **different functional**, `G = F + eps * p` with `p = P(00|10)`. Check 11
 is the scope guard: `F` is both a facet of `H` and bounded on Schmidt number two, and `G` keeps
@@ -142,8 +147,11 @@ never needed to verify anything.
 
 The original endpoint transcript above remains correct for the original
 certificate. The latest bound comes from `proofs/verify_penalty_boundary.py`,
-which the full runner also executes: `alpha_star <= 0.16310672`, with an exactly
-specified singular-certificate bound approximately `0.1631067188466586`.
+which the full runner also executes. What is certified is the singular-continuation
+bound, exactly: `alpha_star <= 0.1631067188466586...`, the exact rational living in
+`proofs/penalty_boundary_certificate.json`. The quotable `alpha_star <= 0.16310672`
+follows from it, and is quotable only because the exact rational has several
+thousand digits.
 The new conclusion follows only after the inherited endpoint and equality-face
 verifiers succeed. New prose arguments still await separate review.
 

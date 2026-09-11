@@ -6,8 +6,8 @@ Draft research supplement: new prose arguments await adversarial review; no huma
 
 ## Results and calibration
 
-1. An exact rank-one continuation of the existing Gram lowers the upper bound on the critical penalty from 0.16311 to approximately **0.1631067188466586**. The exact value is specified by a rational matrix solve below, not by the printed decimal.
-2. The convenient rational coefficient **0.16310672 = 1019417/6250000** gives a positive-definite certificate that passes the repository's existing verifier unchanged. This closes approximately 39% of the previous gap to the explicit lower strategy, without a new SDP optimization.
+1. An exact rank-one continuation of the existing Gram lowers the upper bound on the critical penalty from 0.16311 to approximately **0.1631067188466586**. That is the CERTIFIED bound: the exact value is the rational produced by the matrix solve below and stored in `proofs/penalty_boundary_certificate.json`, and the positive semidefiniteness it needs is machine-checked, not argued in prose. The printed decimal is a display of it, nothing more.
+2. Because that exact rational has several thousand digits, the quotable form is the short rational just above it, **0.16310672 = 1019417/6250000**. It is a CONSEQUENCE of result 1, not a separate claim: the verifier checks `alpha_b < 1019417/6250000 < 0.16311`. A strictly positive-definite Gram also exists at that rounder value and the repository's existing endpoint verifier accepts it, but no such Gram is shipped and none is needed, since the singular certificate proves the stronger statement. Together this closes approximately 39% of the previous gap to the explicit lower strategy, without a new SDP optimization.
 3. The five-vertex equality face persists even at the singular endpoint of this rank-one continuation. Positive definiteness is sufficient for the earlier proof, but not necessary for this new proof.
 4. A small certified quadratic correction is available: `G_boundary <= 7 - C p^2`, with exact rational `C` approximately `9.23281185174e-7`. One may replace C by the simpler smaller value `9e-7`.
 5. None of these results determines alpha_star. The new witness changes the experimental noise tolerance only negligibly. Do not describe this additional step as another eightfold robustness improvement.
@@ -45,7 +45,13 @@ alpha_b    = 0.1631067188466586...
 epsilon_b  = 3.8368932811533414...
 ```
 
-**Rank-one lemma.** If X is positive definite, then `X - t e e^T` is positive semidefinite precisely for `t <= 1/(e^T X^-1 e)`, and at equality its kernel is exactly the span of `X^-1 e`. This follows by conjugating with `X^-1/2`: the resulting matrix is identity minus a rank-one projector at the boundary. Here `e^T X^-1 e = v8 > 0`.
+**Rank-one lemma.** If X is positive definite, then `X - t e e^T` is positive semidefinite precisely for `t <= 1/(e^T X^-1 e)`, and at equality its kernel is exactly the span of `X^-1 e`. This follows by conjugating with `X^-1/2`: the resulting matrix is identity minus a rank-one projector at the boundary. Here `e^T X^-1 e = v8 > 0`. That is what fixes the value of `delta`.
+
+**The positivity itself is checked, not assumed.** At the boundary the conclusion does not need the lemma at all, and does not need any new computation either. `Y` differs from `X` in entry `(8,8)` and nowhere else, so its principal submatrix on the other 69 indices *is* `X`'s, which is positive definite because `X` is — a fact the inherited endpoint verifier establishes by exact LDL. Given `Yv = 0` and `v8 != 0`, every `w` splits as `w = (w8/v8) v + w'` with `w'[8] = 0`, and then
+
+    w^T Y w  =  w'^T Y w'  =  w'^T X|_(i,j != 8) w'  >=  0,
+
+zero exactly when `w' = 0`, that is exactly on `span(v)`. So `Y >= 0` with kernel exactly `span(v)`, and `proofs/verify_penalty_boundary.py` checks the one structural fact this rests on — that `Y` carries `X` away from entry `(8,8)` — with diagnostic code `[E-BOUNDARY-PSD]`. An earlier draft of this document left the whole positivity claim to the `X^-1/2` conjugation above.
 
 Consequently Y is PSD with corank one and
 
@@ -70,6 +76,8 @@ For a pure state saturating the new bound, the vector of Hilbert-space vectors `
 `J_j |psi> = v_j |eta>` for one vector eta.
 
 In particular `J9 |psi> = r J8 |psi>`. Taking expectation values gives `<J9> = r <J8>`. Both expectations are nonnegative, while r is negative. Hence both vanish. Positivity of J8 then implies `J8 |psi> = 0`; because v8 is nonzero, eta is zero and every `J_j |psi>` vanishes. The original SOS implies F=7; the original equality theorem puts the behavior in L_F.
+
+**This argument is specific to this Gram.** It turns on `r = v9/v8` being negative, which is an outcome of the exact solve rather than a structural feature of the construction. Had `r` come out positive, the two expectations would be consistent at nonzero value and the equality face at `epsilon_b` would be open. Do not read §2 as a general mechanism for singular continuations.
 
 For a deterministic branch, `F+4p<=7` and `F+epsilon_b p=7`, with `epsilon_b<4`, force p=0 and F=7. Saturation passes componentwise through the inherited POVM and mixed-state reductions. Conversely the five local vertices all have F=7 and p=0.
 
@@ -125,17 +133,24 @@ library; the original proof chain remains a dependency. `python run_checks.py`
 includes it. Assertions are proof gates: optimized Python execution is refused.
 
 `tests/test_penalty_boundary_mutations.py` rejects altered input hashes, solved
-vectors, coefficients and the advertised rational bound for the intended reasons.
-It also tests that either inherited dependency failing suppresses the new
-conclusion. This is scoped regression coverage, not a proof of arbitrary-program
-soundness.
+vectors, coefficients and the advertised rational bound for the intended reasons,
+where "intended reason" means the message carries this defect's diagnostic code
+and no other case's. It also tests that either inherited dependency failing
+suppresses the new conclusion, that an extra rank-one term orthogonal to `v` --
+which preserves `Yv = 0` and every arithmetic identity while silently destroying
+the positivity the bound rests on -- is rejected with `[E-BOUNDARY-PSD]`, and
+that the regeneration script cannot read an unrelated proof certificate. Two
+controls guard the suite itself: a refusal naming every diagnostic code must NOT
+count as a valid rejection, and a mutation must not satisfy another case's code.
+This is scoped regression coverage, not a proof of arbitrary-program soundness.
 
 `research/derive_penalty_boundary.py` regenerates the rational data using
 Python-FLINT and writes `build/penalty_boundary_certificate.json`. It performs
 no SDP search. Regeneration and Fraction-based verification use different
-arithmetic implementations, but share the mathematical construction. The
-rank-one lemma, the positivity argument and convex extension are prose proofs,
-not Lean formalizations or independent human verification.
+arithmetic implementations, but share the mathematical construction. Positive
+semidefiniteness of `Y` is now machine-checked by the reduction in §1. The
+singular-kernel equality argument of §2 and the convex extension of §3 remain
+prose proofs, not Lean formalizations or independent human verification.
 
 The old endpoint certificate is intentionally retained: its positive definiteness
 is an input to the continuation. The old qutrit score and noise tolerance still
@@ -144,7 +159,9 @@ refer to the old epsilon0; neither is silently recomputed at epsilon_b.
 ## 5. Questions for the adversarial reviewer
 
 1. Does the application of the rank-one PSD lemma have the right factor 16 and
-   kernel convention, including complex Hilbert-space vectors?
+   kernel convention, including complex Hilbert-space vectors? The positivity
+   conclusion no longer depends on the answer -- see the submatrix reduction in
+   §1 -- but the value of `delta` still does.
 2. Does equality imply that the two positive event operators have expectations
    of opposite signs unless both vanish? Check the transition from zero
    expectation to zero action, and the deterministic-observable branches.

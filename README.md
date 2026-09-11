@@ -24,9 +24,9 @@ For the Bell functional `F` defined in [docs/THEORY.md](docs/THEORY.md):
 | Supplied qutrit realization | `F = 7.0129123854899715...` |
 | Dimension-unrestricted quantum upper bound (certified, not claimed sharp) | `F <= 7.041387041` |
 | Quantum remainder in any Schmidt-two-plus-remainder decomposition of that behavior | `> 31.19%` |
-| Smallest universally valid penalty `alpha_star` in `M_A <= 6 + alpha p`, `p = P(00\|10)` | new continuation: `(0.1631016, 0.16310672]`; exact value **open**; prose extension awaits review |
+| Smallest universally valid penalty `alpha_star` in `M_A <= 6 + alpha p`, `p = P(00\|10)` | new continuation certifies `(0.1631016, 0.1631067188466586...]`, quotably `(0.1631016, 0.16310672]`; exact value **open**; the prose extension awaits review |
 | Qutrit realization for the strengthened `G = F + 3.83689 p` | `G = 7.0928393387`, white-noise tolerance `1.5136%` |
-| Where `F = 7` is attained on Schmidt number two | exactly a four-simplex of five local deterministic behaviors — and the same face for every `F + eps p`, `0 <= eps <= 3.83689` |
+| Where `F = 7` is attained on Schmidt number two | exactly a four-simplex of five local deterministic behaviors — and the same face for every `F + eps p`, `0 <= eps <= 3.83689`; the draft continuation extends that to `3.8368932811533414`, pending review |
 
 The remainder figure is a certified lower bound for the supplied behavior. It is not a measured
 fraction of experimental runs and not a proven optimal decomposition cost.
@@ -194,9 +194,10 @@ rather than silently reconciled.
 ## Draft continuation beyond the original penalty certificate
 
 The original endpoint certificates and their qutrit score remain unchanged.
-`proofs/verify_penalty_boundary.py` continues that Gram to obtain the simpler
-exact upper bound `alpha_star <= 0.16310672` and a singular-certificate endpoint
-approximately `0.1631067188466586`. The new prose argument preserves the same
+`proofs/verify_penalty_boundary.py` continues that Gram to its singular boundary,
+certifying `alpha_star <= 0.1631067188466586...` exactly — positivity of the
+continued Gram included — from which the quotable `alpha_star <= 0.16310672`
+follows. The new prose argument preserves the same
 local equality face there and gives a small quadratic remainder in the event
 probability. It is not a distance-to-face result or a meaningful further noise
 improvement. See `docs/CERTIFICATE_PENALTY_BOUNDARY.md` for proof dependencies,

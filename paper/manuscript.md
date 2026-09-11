@@ -500,18 +500,24 @@ $$
 \varepsilon_b=\varepsilon_0+\delta,\qquad\alpha_b=4-\varepsilon_b.
 $$
 
-Conjugation by $X^{-1/2}$ shows that $Y$ is positive semidefinite with kernel
-spanned by $v$. Since $J_8^\dagger J_8=16K$, the same operator identity proves
+Conjugation by $X^{-1/2}$ fixes $\delta$ as the largest subtraction keeping $Y$
+positive semidefinite. Positivity at that boundary needs no further appeal: $Y$
+differs from $X$ only in entry $(8,8)$, so its principal submatrix on the other
+69 indices is $X$'s and is positive definite, and with $Yv=0$ and $v_8\ne0$ every
+$w$ splits as $w=(w_8/v_8)v+w'$ with $w'_8=0$, giving
+$w^\mathsf{T}Yw=w'^\mathsf{T}X|_{i,j\ne8}w'\ge0$ with equality exactly on
+$\mathrm{span}(v)$. Since $J_8^\dagger J_8=16K$, the same operator identity proves
 $F+\varepsilon_b p\le7$ on the nondegenerate projective branch. The deterministic
-branches still obey $F+4p\le7$; the previous convex reduction applies. Exact data
-specify $\alpha_b=0.1631067188466586\ldots$, and in particular give the simpler
-rational bound $\alpha_\star\le1019417/6250000=0.16310672$. This is the endpoint
+branches still obey $F+4p\le7$; the previous convex reduction applies. The certified bound is
+$\alpha_b=0.1631067188466586\ldots$, an exact rational of several thousand digits;
+the quotable consequence is $\alpha_\star\le1019417/6250000=0.16310672$. This is the endpoint
 of one Gram continuation, not the unknown optimal penalty.
 
 The equality face persists at this singular certificate. The exact identities
 $J_8=(I+A_1)(I+B_0)$ and $J_9=(I+A_1)(I+B_1)$ make both operators positive
 semidefinite. Equality implies $J_j|\psi\rangle=v_j|\eta\rangle$ for one vector
-$|\eta\rangle$. The checked ratio $r=v_9/v_8$ is negative, so
+$|\eta\rangle$. The checked ratio $r=v_9/v_8$ is negative -- an outcome of the exact solve, not a
+structural feature, so this step does not generalize to other continuations -- and hence
 $\langle J_9\rangle=r\langle J_8\rangle$ forces both expectations to vanish.
 Positivity gives $J_8|\psi\rangle=0$, hence $|\eta\rangle=0$. All $J_j$ annihilate
 the state and Theorem 6 applies. Deterministic branches force $p=0$ using

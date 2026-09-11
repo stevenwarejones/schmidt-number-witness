@@ -1,4 +1,14 @@
-"""Targeted regressions for the continuation arithmetic and acceptance order."""
+"""Targeted regressions for the continuation arithmetic and acceptance order.
+
+Rejection counts only when the message carries the code for the defect introduced AND carries
+no OTHER case's code.  That second half matters: this repository has already been bitten once by
+a mutation suite that a checker could satisfy without examining its input -- there the defeat was
+`raise SystemExit` prepended to the script, and the in-process analogue here is a
+`check_arithmetic` that raises one AssertionError mentioning every code.  A plain `code in
+str(exc)` test would accept that for all thirteen cases.  The two controls at the end are the
+guard: the blanket raiser must NOT count as a valid rejection, and a mutation must not satisfy
+some other case's code.
+"""
 import contextlib
 import copy
 import importlib.util
@@ -24,6 +34,17 @@ sharp = (PROOFS / 'sharp_qubit_certificate.json').read_bytes()
 module.check_arithmetic(data, base, sharp)
 print('PASS unmodified continuation arithmetic accepted')
 
+ALL_CODES = {'[E-BOUNDARY-INPUT]', '[E-BOUNDARY-SHAPE]', '[E-BOUNDARY-SOLVE]',
+             '[E-BOUNDARY-SCALE]', '[E-BOUNDARY-KERNEL]', '[E-BOUNDARY-PSD]',
+             '[E-BOUNDARY-SIGN]', '[E-BOUNDARY-RANGE]', '[E-BOUNDARY-REMAINDER]',
+             '[E-BOUNDARY-SIMPLE]', '[E-BOUNDARY-PROJECTOR]'}
+
+
+def rejected_for(message, code):
+    """True only if `message` names this defect and no other case's defect."""
+    return code in message and not (ALL_CODES - {code}) & {c for c in ALL_CODES if c in message}
+
+
 cases = [
     ('base_sha256', '0'*64, '[E-BOUNDARY-INPUT]'),
     ('delta', str(Q(data['delta'])+1), '[E-BOUNDARY-SCALE]'),
@@ -38,7 +59,7 @@ for field, value, code in cases:
     try:
         module.check_arithmetic(changed, base, sharp)
     except AssertionError as exc:
-        assert code in str(exc), (field, 'wrong rejection reason', str(exc))
+        assert rejected_for(str(exc), code), (field, 'wrong rejection reason', str(exc))
     else:
         raise AssertionError(f'{field}: corrupted data accepted')
     print('PASS targeted rejection', code, field)
@@ -49,7 +70,7 @@ for field, idx, code in [('v', 0, '[E-BOUNDARY-SOLVE]'),
     try:
         module.check_arithmetic(changed, base, sharp)
     except AssertionError as exc:
-        assert code in str(exc), (field, 'wrong rejection reason', str(exc))
+        assert rejected_for(str(exc), code), (field, 'wrong rejection reason', str(exc))
     else:
         raise AssertionError(f'{field}: corrupted solve accepted')
     print('PASS targeted rejection', code, field)
@@ -83,6 +104,60 @@ r = subprocess.run([sys.executable, '-O', str(PROOFS/'verify_penalty_boundary.py
 assert r.returncode != 0 and 'Run without -O' in r.stderr+r.stdout
 assert module.SUCCESS not in r.stdout+r.stderr
 print('PASS optimized execution refused; all boundary mutation checks passed')
+
+# The corank-one reduction needs Y to carry X exactly away from entry (8,8).  No edit to the
+# certificate JSON can break that -- Y is derived from X inside the verifier, and touching X
+# trips the input hash first -- so the guard is reachable only by a code change, and it is a
+# code change that would silently invalidate the positivity argument while leaving every
+# arithmetic identity intact.  Tested the same way as the path-lint case below.
+with tempfile.TemporaryDirectory() as td:
+    tree = Path(td)/'repo'
+    shutil.copytree(ROOT, tree, ignore=shutil.ignore_patterns('.git', 'build', '__pycache__'))
+    target = tree/'proofs/verify_penalty_boundary.py'
+    text = target.read_text()
+    assert '    Y[8][8] -= delta/16\n' in text
+    # Subtract a rank-one term along u = (v1, -v0, 0, ...).  Since u.v = 0 this leaves Yv = 0
+    # intact, so the kernel check still passes; it is exactly the kind of edit that keeps every
+    # arithmetic identity and silently destroys the positivity the bound rests on.
+    injected = ('    Y[8][8] -= delta/16\n'
+                '    _u = [v[1], -v[0]] + [Q(0)]*(n-2)\n'
+                '    for _i in range(n):\n'
+                '        for _j in range(n):\n'
+                '            Y[_i][_j] -= _u[_i]*_u[_j]\n')
+    target.write_text(text.replace('    Y[8][8] -= delta/16\n', injected))
+    hurt = importlib.util.spec_from_file_location('boundary_hurt', target)
+    hurt_module = importlib.util.module_from_spec(hurt)
+    hurt.loader.exec_module(hurt_module)
+    try:
+        hurt_module.check_arithmetic(data, base, sharp)
+    except AssertionError as exc:
+        assert rejected_for(str(exc), '[E-BOUNDARY-PSD]'), ('extra rank-one term', str(exc))
+    else:
+        raise AssertionError('an extra rank-one subtraction orthogonal to v was accepted')
+    print('PASS targeted rejection [E-BOUNDARY-PSD] an extra rank-one term that preserves Yv = 0')
+
+# --- controls on this suite's own acceptance condition ---------------------------------------
+# A checker that refuses everything with one message naming every code satisfies `code in
+# message` for every case.  It must NOT satisfy the condition actually used above.
+blanket = ' '.join(sorted(ALL_CODES))
+assert not any(rejected_for(blanket, code) for code in ALL_CODES), (
+    'CONTROL: a blanket refusal naming every diagnostic code was accepted as a valid rejection; '
+    'the acceptance condition has degraded to substring matching')
+print('PASS control: a refusal naming every code is NOT a valid rejection')
+
+# And a genuine rejection must not satisfy some other case's code.
+changed = copy.deepcopy(data)
+changed['delta'] = str(Q(data['delta'])+1)
+try:
+    module.check_arithmetic(changed, base, sharp)
+except AssertionError as exc:
+    assert rejected_for(str(exc), '[E-BOUNDARY-SCALE]'), 'the delta mutation stopped being caught'
+    assert not rejected_for(str(exc), '[E-BOUNDARY-SIGN]'), (
+        'CONTROL: a scale mutation was accepted as a SIGN rejection; the suite is not '
+        'distinguishing between diagnostic codes')
+else:
+    raise AssertionError('CONTROL: the delta mutation was accepted')
+print('PASS control: a scale mutation does not satisfy the sign code')
 
 # The path lint permits only the two source certificates consumed by this
 # regeneration script, not arbitrary reads outside research/.

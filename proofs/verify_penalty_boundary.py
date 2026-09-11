@@ -3,8 +3,13 @@
 Run from any directory: python proofs/verify_penalty_boundary.py
 This entry point verifies the new arithmetic, THEN runs the inherited endpoint
 and equality-face verifiers before printing its conclusion. No skip flag.
-The rank-one PSD lemma, positivity argument and convexity reduction are prose
-proofs in docs/CERTIFICATE_PENALTY_BOUNDARY.md, not machine formalizations.
+
+Positive semidefiniteness of the continued Gram Y -- the fact the whole bound
+rests on -- is checked here rather than argued in prose: Y differs from X only
+in entry (8,8), so the corank-one argument reduces to positive definiteness of a
+principal submatrix of X, which the inherited endpoint verifier establishes.
+The kernel equality argument and the convexity reduction remain prose proofs in
+docs/CERTIFICATE_PENALTY_BOUNDARY.md, not machine formalizations.
 """
 import hashlib
 import json
@@ -46,6 +51,18 @@ def check_arithmetic(d, base_bytes, sharp_bytes):
     Y = [row[:] for row in X]
     Y[8][8] -= delta/16
     assert all(dot(row, v) == 0 for row in Y), '[E-BOUNDARY-KERNEL] Yv != 0'
+    # Y is positive semidefinite with corank EXACTLY one, and that needs no new computation.
+    # Y differs from X only in entry (8,8), so its principal submatrix on the other 69 indices
+    # IS X's, which is positive definite because X is -- established by verify_penalty_endpoint.py,
+    # which main() runs before any conclusion is printed.  Given Yv = 0 and v8 != 0, every w
+    # splits as w = (w8/v8) v + w' with w'[8] = 0, and then
+    #     w^T Y w = w'^T Y w' = w'^T X|_{i,j != 8} w' >= 0,
+    # zero exactly when w' = 0, i.e. exactly on span(v).  So Y >= 0 with kernel span(v).
+    # An earlier draft left this to a prose appeal to conjugation by X^{-1/2}; reducing it to a
+    # principal submatrix of X makes the load-bearing positivity claim checkable right here.
+    assert all(Y[i][j] == X[i][j] for i in range(n) for j in range(n) if (i, j) != (8, 8)), \
+        '[E-BOUNDARY-PSD] Y differs from X away from entry (8,8): the corank-one argument needs ' \
+        'the other 69 indices to carry X exactly'
     assert r == v[9]/v[8] and r < 0, '[E-BOUNDARY-SIGN] event coefficients not opposite'
     assert a == [Q(1) if i == 9 else -r if i == 8 else Q(0) for i in range(n)], '[E-BOUNDARY-RANGE] a mismatch'
     assert dot(a, v) == 0 and [dot(row, z) for row in Y] == a, '[E-BOUNDARY-RANGE] Yz != a'
@@ -72,9 +89,17 @@ def main():
     # results; the NEW conclusion below is printed only after all succeed.
     runpy.run_path(str(PROOFS / 'verify_penalty_endpoint.py'), run_name='__main__')
     runpy.run_path(str(PROOFS / 'verify_equality_face.py'), run_name='__main__')
-    print('PASS continuation identities: Xv=e8, Yv=0, Yz=a, opposite event signs, and J8/J9 projectors')
-    print(f'{SUCCESS}: alpha_star <= 1019417/6250000 = 0.16310672; '
-          f'the exact singular-certificate bound is approximately {float(alpha):.16f}.')
+    print('PASS continuation identities: Xv=e8, Yv=0, Yz=a, opposite event signs, J8/J9 '
+          'projectors, and Y = X off entry (8,8) so Y >= 0 with kernel span(v)')
+    # The certified bound is alpha (exact, but a rational with thousands of digits -- it lives in
+    # penalty_boundary_certificate.json).  The quotable number is the short rational just above
+    # it, and it is IMPLIED by the certified one rather than resting on a separate
+    # positive-definite Gram that this repository does not ship.
+    print(f'{SUCCESS}: the shipped singular certificate proves alpha_star <= {float(alpha):.16f}...,'
+          f' exactly; that implies the quotable alpha_star <= 1019417/6250000 = 0.16310672.')
+    print('     The exact bound is the rational in penalty_boundary_certificate.json, not the '
+          'printed decimal, and it is certified by the Y >= 0 check above rather than by a '
+          'separate positive-definite Gram.')
     print(f'With the prose lemmas, equality remains L_F through epsilon ~ {float(eps):.16f}, '
           f'and 7-G_boundary >= C*p^2 with C ~ {float(C):.12g} > 9e-7.')
     print('The true optimal penalty remains OPEN. New geometric/prose arguments await separate review; '
