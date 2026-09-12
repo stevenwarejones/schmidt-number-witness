@@ -70,3 +70,23 @@ neither is independent review.
 Label numerical results as numerical and exact results as exact. Do not describe an
 AI-produced review as peer review, and do not convert a pending prior-art audit into a
 novelty claim.
+
+## Complete family comparison and local endpoint research
+
+The exact chain now checks 1,152 projected SN2 simulators covering both branches and all
+relabelings of the Gigena–Kaniewski family on the original qutrit behavior. This is a
+scalar-score comparison, not a model for the full behavior or historical priority clearance.
+See [the comparison guide](docs/EXTENDED_COMPARISON.md).
+
+The candidate penalty ratio also has a separate interval-certified strict LOCAL maximum
+including complex qubit perturbations modulo the Schmidt phase gauge. Global optimality is
+still open. It is deliberately separate from the exact global certificate chain:
+
+```sh
+python proofs/verify_local_penalty.py --complex
+python tests/test_local_certificate.py
+```
+
+[The research guide](docs/PENALTY_RESEARCH.md) explains classical dilution, the remaining
+product-state limit, and the analytic elimination of Bob's measurements. These new prose
+arguments and interval implementation await independent review.

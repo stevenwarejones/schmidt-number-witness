@@ -328,6 +328,11 @@ scripts = sorted(p for p in RESEARCH.glob('*.py') if p.name != 'outputs.py')
 # archived solver run. Permit precisely those immutable inputs for this script;
 # all writes still go to build/, and other proof files are not permitted here.
 CERTIFICATE_INPUTS = {
+    'penalty_profile.py': {(ROOT / 'proofs/local_penalty_candidate.json').resolve()},
+    'close_gigena.py': {
+        (ROOT / 'proofs/gigena_complete_certificate.json').resolve(),
+        (ROOT / 'proofs/qutrit_certificate.json').resolve(),
+    },
     'derive_penalty_boundary.py': {
         (ROOT / 'proofs/penalty_endpoint_certificate.json').resolve(),
         (ROOT / 'proofs/sharp_qubit_certificate.json').resolve(),

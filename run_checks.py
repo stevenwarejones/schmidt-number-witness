@@ -68,6 +68,8 @@ run(PROOFS / 'verify_m3322_corollary.py')
 run(PROOFS / 'verify_novelty_comparison.py')
 # And the same for the published one-parameter family, over its whole parameter range.
 run(PROOFS / 'verify_i3322_family.py')
+run(PROOFS / 'verify_gigena_complete.py')
+run(PROOFS / 'verify_convex_geometry.py')
 run(PROOFS / 'verify_qutrit.py')
 run(PROOFS / 'verify_sharp_qubit.py')
 run(PROOFS / 'verify_quantum_upper.py')
