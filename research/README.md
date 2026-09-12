@@ -96,3 +96,14 @@ is standard-library only in `proofs/verify_penalty_boundary.py`.
 The old interval quoted above describes the original endpoint artifact. The
 continuation improves its upper bound to 0.16310672, with the exact optimal
 penalty still undetermined. No new numerical stationary-point claim is added.
+
+## Penalty and projected-family discovery
+
+`research/penalty_profile.py` explores fixed Schmidt angles in the real-projective restriction,
+using `proofs/local_penalty_candidate.json` as a seed. It writes `build/penalty_profile.json`.
+Its event cutoff means it cannot prove a rare-event limit or upper bound.
+
+`research/close_gigena.py` rediscovers the eight new projected mixtures, using the earlier
+cases in `proofs/gigena_complete_certificate.json` and the original qutrit data. It writes
+`build/gigena_extra.json`; it does not overwrite the certificate. Both scripts need the
+research dependencies (SciPy included). Neither runs during verification.

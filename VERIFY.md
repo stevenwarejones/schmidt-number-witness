@@ -5,13 +5,13 @@ python -m pip install -r requirements.txt
 python run_checks.py
 ```
 
-That is the whole thing. It needs no SDP solver, no network, and no Git history.
+No SDP solver, network, or Git history is needed for verification.
 
-**Runtime, measured rather than asserted:** about 30 s on the maintainer's machine and about
-50 s in a cold cloud container, both CPython 3.10–3.12. It is single-threaded exact rational
-arithmetic, so expect it to track single-core speed rather than core count, and to vary by more
-than the two figures above suggest. Output is streamed as each verifier produces it, so a slow
-step looks slow rather than looking hung.
+Runtime depends on the machine. Earlier measurements before the added family comparison
+were about 30–50 seconds; the expanded chain may take longer. Exact Gram calculations
+can be quiet for several minutes. The boundary verifier's output is streamed, and
+`python -u run_checks.py` also avoids buffering in the parent runner.
+
 
 **Verifying these proofs does not require rerunning the search that found them.** The
 certificates are data; the verifiers re-derive every claim from that data in exact arithmetic.
@@ -163,3 +163,16 @@ verifiers succeed. New prose arguments still await separate review.
 Run `python tests/test_penalty_boundary_mutations.py` for targeted corruptions
 and dependency-failure controls. Read `docs/CERTIFICATE_PENALTY_BOUNDARY.md`
 for the singular-kernel equality proof and the quadratic correction.
+
+## New family and local checks
+
+The exact chain additionally runs `proofs/verify_gigena_complete.py` (all 1,152 projected
+family targets) and `proofs/verify_convex_geometry.py` (exact fixtures for the dilution and
+common-B block arguments). The general prose lemmas require mathematical review.
+
+Separately run `python proofs/verify_local_penalty.py --complex` for the LOCAL interval proof.
+It establishes a stationary point and negative Hessian in one chart, not the global penalty.
+`tests/test_local_certificate.py` cross-checks derivatives and rejects a displaced root;
+`tests/test_gigena_mutations.py` checks exact coverage and damaged mixture rejection.
+`tests/test_bob_reduction.py` numerically checks the analytic norm formula against the Born rule.
+All are invoked by CI. Both new verifier paths are read-only.

@@ -90,6 +90,18 @@ jobs:
       - name: Penalty-boundary mutations and dependency-failure controls
         run: python tests/test_penalty_boundary_mutations.py
 
+      - name: Complete GK comparison and corruption controls
+        run: python tests/test_gigena_mutations.py
+
+      - name: Local penalty candidate (interval proof, NOT global optimality)
+        run: |
+          python proofs/verify_local_penalty.py
+          python proofs/verify_local_penalty.py --complex
+          python tests/test_local_certificate.py
+
+      - name: Bob-elimination formula (numerical transcription cross-check)
+        run: python tests/test_bob_reduction.py
+
       - name: Documentation paths and entry-point coverage
         run: python tests/test_docs_consistency.py
 

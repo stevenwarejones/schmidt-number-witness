@@ -280,13 +280,42 @@ $$
 
 in that source's one-based input and signed-outcome notation. For N=3 this is an I3322 marginal penalty; it is used for dimension analysis in [15]. After normalization, its correlator support remains at most eight entries. F has nine. Thus direct equivalence under relabeling, nonzero scaling and an added constant is excluded, even allowing arbitrary marginal tilts. This support argument does not rule out derivations from several inequalities or establish non-detection of Q for all efficiencies.
 
-The broader Gigena-Kaniewski family [16, Eq. (1)] likewise has at most eight nonzero correlators and is not directly equivalent to F. Proposition 4 does not cover that entire family: its additional parameter and branch choices require separate detection comparisons. No conclusion is drawn from incomplete finite-library searches for projected qubit simulators.
+The broader Gigena-Kaniewski family [16, Eq. (1)] likewise has at most eight nonzero correlators and is not directly equivalent to F. A separate exact projected-mixture comparison now covers both branches and all its parameters, as described in Section 5.3. The earlier finite-library search with eight uncovered targets is superseded.
 
 An exact supplementary comparison extracted the 129 J4422 coefficient vectors printed in [17, Table I], verified every local bound by deterministic enumeration, and tested 20 reductions per party: 12 signed pair identifications and eight deterministic substitutions. None of the resulting 51,600 functionals matches the 2304-element F orbit up to a positive scale and a constant. This is a direct-reduction audit of that table, not all 241 inequalities in the survey, the complete 175-class four-setting catalogue [18], or arbitrary combinations and wirings.
 
 The exact-zero Hardy dimension test [19] does not apply to Q directly as written; Q has strictly positive probabilities. This does not exclude robust Hardy penalties or transformed tests. Ordinary I3322 has a history of higher-dimensional advantage [20], so the scalar non-detection comparison above must not be paraphrased as saying I3322 is not a dimension witness.
 
 These checks narrow several concrete equivalence questions. They do not establish historical priority of the conditional Schmidt-number-two tradeoff $M_A\le6+4p(00|10)$. That particular bound remains the proposed contribution requiring expert prior-art assessment.
+
+### 5.3 Exact comparison with the full Gigena--Kaniewski family
+
+In zero-based labels define
+
+$$
+\begin{aligned}
+m_b&=A_0+A_1+b(B_0+B_1),\qquad b\in\{-1,+1\},\\
+c&=E_{00}+E_{01}+E_{10}+E_{11},\\
+d&=E_{20}-E_{21}+E_{02}-E_{12}.
+\end{aligned}
+$$
+
+The family [16, Eq. (1)] has score $\alpha_1 m_b+c+\alpha_3 d$.
+For both branches and every input/output relabeling, the original qutrit behavior Q has
+an exact SN2 simulator for the three statistics $(m_b,c,d)$. The certificate covers all
+1,152 distinct branch-labeled projected targets with convex mixtures of explicit rational
+qubit strategies. Exact matching proves that every parameter choice has its score on Q
+attainable by SN2. At least one pure component achieves at least the mixture's average, so
+that score also cannot exceed the genuine two-qubit maximum.
+
+The verifier `proofs/verify_gigena_complete.py` rebuilds Q from the Born rule, reconstructs
+each qubit strategy, checks nonnegative normalized weights, and independently enumerates
+the complete target set. No published numerical quantum maximum is used. Different
+projections may require different simulators: this is not a simulation of full Q, which
+violates F. Nor does the argument cover general nonlinear joint-score tradeoffs or
+protocol transformations. It concerns original Q, not a newly certified comparison of the
+improved qutrit realization of Section 7.2. Since $p\ge0$, every valid strengthening
+$F+\epsilon p$ with $\epsilon\ge0$ also detects original Q.
 
 ## 6. A joint convex-class consequence
 
@@ -548,6 +577,35 @@ The continuation is documented in:
 - `docs/CERTIFICATE_PENALTY_BOUNDARY.md`
 
 Existing qutrit scores and noise tolerances in Section 7.2 refer to $\varepsilon_0$.
+
+### 7.4 Local endpoint certification and the remaining global limit
+
+The ratio's unrestricted rare-event limit over the convex SN2 class cannot isolate the
+optimal microscopic strategy. For any $L\in L_F$ and $Q\in S_2$ with $p(Q)>0$,
+$P_t=(1-t)L+tQ$ satisfies $p(P_t)=tp(Q)$ and
+$M_A(P_t)-6=t(M_A(Q)-6)$. Its ratio is unchanged as $t\to0$. Thus for every $\eta>0$,
+
+$$
+\sup_{P\in S_2,\ 0<p(P)\le\eta}\frac{M_A(P)-6}{p(P)}=\alpha_*.
+$$
+
+For a competitive sequence of pure nondegenerate projective qubit strategies, however,
+$p\to0$ requires approach to a product state. Indeed, bounded ratios imply $F\to7$.
+In the full-Schmidt-rank equality branch, the original SOS argument forces
+$B_0=B_1=B_2=B$. The conditional Alice operators have upper bounds 3 for $B=+1$ and
+7 for $B=-1$, so $F\le7-4\Pr(B=+1)<7$ for full Schmidt rank. Compactness then excludes
+a limiting positive Schmidt angle. A uniform weak-entanglement bound remains unproved.
+
+Separately, `proofs/verify_local_penalty.py --complex` interval-certifies a unique
+stationary point and strict local maximum near ratio $0.1631016013789309628374$,
+with $p\simeq0.1056846639596287$. The twelve-dimensional pure-projective qubit chart
+includes complex perturbations and fixes only the residual Schmidt phase. An interval
+contraction maps a radius-$10^{-25}$ box strictly into itself; interval LDL certifies a
+negative-definite Hessian throughout the box. This establishes a LOCAL maximum modulo
+gauge, not the global value of $\alpha_*$ or a strict maximum over convex mixtures.
+The code uses validated interval arithmetic, separate from the rational global chain.
+The chart, proof details, analytic elimination of Bob's measurements, and review limitations
+are given in `docs/PENALTY_RESEARCH.md`. These new arguments await independent review.
 
 ## 8. Limits and reproducibility
 
