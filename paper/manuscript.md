@@ -598,7 +598,16 @@ a limiting positive Schmidt angle. A uniform weak-entanglement bound remains unp
 
 Separately, `proofs/verify_local_penalty.py --complex` interval-certifies a unique
 stationary point and strict local maximum near ratio $0.1631016013789309628374$,
-with $p\simeq0.1056846639596287$. The twelve-dimensional pure-projective qubit chart
+with $p\simeq0.1056846639596287$. This candidate is a genuine pure two-qubit projective
+behaviour with $p>0$, so the outward-rounded lower end of its certified ratio enclosure,
+$0.1631016013789309628373704$, is itself a rigorous lower bound on $\alpha_*$ — larger
+than the exact rational lower certificate quoted in Section 7.3 by about
+$2.3\times10^{-13}$, against a remaining gap to the upper bound of about
+$5.1\times10^{-6}$. That consequence needs only the interval evaluation of the ratio at
+one feasible point, not the contraction or Hessian steps described next. We nevertheless
+continue to quote the rational certificate, which uses no interval arithmetic, so that the
+stated interval does not depend on code still awaiting an interval-arithmetic audit.
+The twelve-dimensional pure-projective qubit chart
 includes complex perturbations and fixes only the residual Schmidt phase. An interval
 contraction maps a radius-$10^{-25}$ box strictly into itself; interval LDL certifies a
 negative-definite Hessian throughout the box. This establishes a LOCAL maximum modulo

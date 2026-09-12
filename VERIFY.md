@@ -7,10 +7,19 @@ python run_checks.py
 
 No SDP solver, network, or Git history is needed for verification.
 
-Runtime depends on the machine. Earlier measurements before the added family comparison
-were about 30–50 seconds; the expanded chain may take longer. Exact Gram calculations
-can be quiet for several minutes. The boundary verifier's output is streamed, and
-`python -u run_checks.py` also avoids buffering in the parent runner.
+**Runtime, measured rather than asserted.** The chain including the family comparison takes
+about **76–79 s** over two runs in a cold cloud container on CPython 3.13 (single-threaded exact rational
+arithmetic, so it tracks single-core speed rather than core count). The same container
+measured about 50 s before the family comparison was added, and a maintainer machine
+measured about 30 s then; neither of those two figures has been re-measured on the expanded
+chain, so do not read 30 s as a current number. Output is streamed as each verifier produces
+it, so a slow step looks slow rather than looking hung; `python -u run_checks.py` also
+removes buffering in the parent runner, and a proof script run on its own buffers normally
+unless you pass `python -u` to it too.
+
+The separately invoked suites are slower than the chain in one case: `tests/test_gigena_mutations.py`
+re-runs the family verifier once per corruption case and took about **60 s** in the same
+container. The interval certificate itself is fast, under a second.
 
 
 **Verifying these proofs does not require rerunning the search that found them.** The
@@ -172,6 +181,12 @@ common-B block arguments). The general prose lemmas require mathematical review.
 
 Separately run `python proofs/verify_local_penalty.py --complex` for the LOCAL interval proof.
 It establishes a stationary point and negative Hessian in one chart, not the global penalty.
+Its `ratio_interval` has a second, weaker use: the candidate is a genuine pure two-qubit
+projective behaviour with `p>0`, so the lower end of that enclosure is a rigorous lower bound
+on α\*, larger than the exact rational lower certificate by about 2.3·10⁻¹³. That consequence
+needs only the interval evaluation, not the contraction or the Hessian. The repository still
+quotes the rational certificate, which uses no interval arithmetic; see
+`docs/PENALTY_RESEARCH.md` §4.
 `tests/test_local_certificate.py` cross-checks derivatives and rejects a displaced root;
 `tests/test_gigena_mutations.py` checks exact coverage and damaged mixture rejection.
 `tests/test_bob_reduction.py` numerically checks the analytic norm formula against the Born rule.

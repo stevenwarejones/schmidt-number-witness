@@ -1,6 +1,14 @@
 """Exact projected SN2 simulators for ALL relabelings of Q and both GK branches.
 No supplied quantum bound, numerical optimization, or discovery code is used.
 Three-score matching certifies non-detection by the family, NOT full-Q simulation.
+
+PROVENANCE, the one unchecked input.  `projection` below transcribes Gigena-Kaniewski
+Eq. (1) as beta = a1*m_b + c + a3*d with m_b = A0+A1+b(B0+B1), c = E00+E01+E10+E11 and
+d = E20-E21+E02-E12.  Because the score is linear in those three statistics, matching all
+three exactly matches every parameter choice at once -- but only for the family as
+transcribed here.  That transcription rests on one reader's reading of the source, and a
+misreading would make this file close the wrong family without anything failing.  See
+docs/PRIOR_ART.md, "The one literature-dependent verifier".
 """
 
 import sys, json, itertools
@@ -42,8 +50,14 @@ for x, y, a, b in itertools.product(range(3), range(3), range(2), range(2)):
         (psi.conjugate().T * sp.kronecker_product(A[x][a], B[y][b]) * psi)[0] / norm
     )
     P[x, y, a, b] = F(value)
-    assert value >= 0
-assert list(P.values()) == list(map(F, c["Q"])), "Q Born probabilities mismatch"
+    assert value >= 0, (
+        '[E-GK-BORN-NEGATIVE] a reconstructed Born probability of Q is negative, so the '
+        'supplied state and measurement data do not define a behaviour at all'
+    )
+assert list(P.values()) == list(map(F, c["Q"])), (
+    "[E-GK-Q-MISMATCH] Q Born probabilities mismatch: the reconstruction disagrees with "
+    "the stored qutrit certificate, so the comparison is not about the same behaviour"
+)
 v = (
     tuple(
         sum((-1) ** a * P[x, 0, a, b] for a, b in itertools.product(range(2), repeat=2))
@@ -67,6 +81,9 @@ assert (
         for a, b in zip([1, -1, 1, -1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1], v)
     )
     > 7
+), (
+    '[E-GK-Q-NOT-DETECTED] F(Q) <= 7, so the behaviour being compared is not the one this '
+    'witness detects and the non-detection comparison would concern the wrong point'
 )
 
 
@@ -134,20 +151,29 @@ def strategy(s):
     if k == "local":
         a = tuple(s["A"])
         b = tuple(s["B"])
-        assert all(x in [-1, 1] for x in a + b)
+        assert all(x in [-1, 1] for x in a + b), (
+            '[E-GK-NOT-DETERMINISTIC] a local strategy carries an outcome outside {-1,+1}, '
+            'so its correlators are not those of a deterministic local behaviour'
+        )
         return a + b + tuple(x * y for x in a for y in b)
     if k == "rational_qubit":
         return rename(seed, s["relabel"])
     if k == "phi":
         t = F(s["t"])
         z = F(s["z"])
-        assert t * t + z * z == 1
+        assert t * t + z * z == 1, (
+            '[E-GK-NOT-UNIT] a phi-strategy measurement direction is not a unit vector, '
+            'so its stated correlators are not attained by any projective qubit measurement'
+        )
         a = [(t, z), (-t, z), (F(1), F(0))]
         base = (F(0),) * 6 + tuple(x[0] * y[0] + x[1] * y[1] for x in a for y in a)
         return rename(base, s["relabel"])
     if k == "schmidt_half_tangents":
         q = list(map(F, s["coordinates"]))
-        assert len(q) == 7
+        assert len(q) == 7, (
+            '[E-GK-BAD-CHART] a Schmidt half-tangent strategy needs exactly one state '
+            'parameter and six measurement parameters'
+        )
         t = q[0]
         zs = q[1:]
         C = (1 - t * t) / (1 + t * t)
@@ -157,29 +183,51 @@ def strategy(s):
         return tuple(C * z for z in Z) + tuple(
             S * X[i] * X[3 + j] + Z[i] * Z[3 + j] for i in range(3) for j in range(3)
         )
-    raise AssertionError("unknown strategy kind")
+    raise AssertionError(
+        "[E-GK-UNKNOWN-STRATEGY] unknown strategy kind: only strategy families whose "
+        "Schmidt number is at most two by construction may enter the certificate"
+    )
 
 
 seen = set()
 for entry in data["proofs"]:
     branch = entry["branch"]
-    assert branch in [-1, 1]
+    assert branch in [-1, 1], (
+        '[E-GK-BAD-BRANCH] the family has exactly the two branches b = -1 and b = +1; any '
+        'other value lies outside the family being compared'
+    )
     target = tuple(map(F, entry["target"]))
     key = (branch, target)
-    assert key not in seen, "duplicate target"
+    assert key not in seen, (
+        "[E-GK-DUPLICATE] duplicate target: one branch-labeled target is proved twice, so "
+        "the entry count does not establish coverage of distinct targets"
+    )
     seen.add(key)
     weights = list(map(F, entry["weights"]))
     assert len(weights) == len(entry["strategies"]) == len(entry["points"])
-    assert sum(weights) == 1 and min(weights) >= 0, "invalid convex weights"
+    assert sum(weights) == 1 and min(weights) >= 0, (
+        "[E-GK-WEIGHTS] invalid convex weights: the mixture is not a convex combination, so "
+        "it need not be a Schmidt-number-two behaviour at all"
+    )
     points = [projection(strategy(s), branch) for s in entry["strategies"]]
     assert points == [
         tuple(map(F, p)) for p in entry["points"]
-    ], "strategy projection mismatch"
+    ], (
+        "[E-GK-PROJECTION] strategy projection mismatch: a stored projected point is not the "
+        "projection of the strategy it is attributed to"
+    )
     assert (
         tuple(sum(w * p[j] for w, p in zip(weights, points)) for j in range(3))
         == target
-    ), "target mismatch"
-assert seen == expected, "incomplete relabeling coverage"
+    ), (
+        "[E-GK-TARGET] target mismatch: the convex mixture of the strategies does not reach "
+        "the claimed (m_b, c, d) triple, so this target is not shown attainable by SN2"
+    )
+assert seen == expected, (
+    "[E-GK-COVERAGE] incomplete relabeling coverage: the proved set of branch-labeled "
+    "targets differs from the independently enumerated relabeling orbit, so some family "
+    "member on some relabeling of Q is left uncompared"
+)
 print("PASS: exact qutrit Born probabilities and F(Q)>7")
 print(
     "PASS:",

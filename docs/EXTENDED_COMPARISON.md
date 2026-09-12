@@ -51,6 +51,8 @@ c=E_{00}+E_{01}+E_{10}+E_{11},\qquad
  d=E_{20}-E_{21}+E_{02}-E_{12}.
 $$
 
+**This transcription is the one literature-dependent input to an otherwise exact verifier.** Everything downstream of it is machine-checked, and the verifier enumerates the relabeling orbit itself rather than trusting the certificate's list — but if these three definitions misread Eq. (1), the comparison closes the wrong family and no verifier fails. The reading above was made in this pass from the full-text HTML; it has not been confirmed by a second reader, and a later review session's own attempt to fetch the source was refused. Anyone holding the paper should check these three lines before relying on §2.
+
 The paper studies exact quantum values and optimal realizations in one branch and numerical behavior in the other. It already uses SOS kernels to analyze equality; neither parameterized boundaries nor that method is new. Its correlator matrix has a structural zero, so direct relabeling to our positive-α nine-correlator family is excluded, but that observation alone does not settle whether its score thresholds detect Q.[^1]
 
 ### New certificate and proof of non-detection
@@ -67,7 +69,7 @@ Files:
 
 - `proofs/gigena_complete_certificate.json`: complete exact data, including the earlier 1,144 cases and the eight additions.
 - `proofs/verify_gigena_complete.py`: reconstruction and coverage verifier.
-- `tests/test_gigena_mutations.py`: missing target, negative weight and false projected coordinate must each reject for the intended reason.
+- `tests/test_gigena_mutations.py`: eight corruptions — dropped target, duplicated target, negative weight, unnormalized weights, false projected coordinate, displaced target, a phi direction off the unit circle, and a non-deterministic "local" outcome — each of which must reject with its own diagnostic code and with no other case's code. Three anti-degradation controls sit alongside them: the unmodified certificate must pass in the same staged layout, a verifier that refuses everything must satisfy no case, and a verifier that always prints one code must not stand in for a different case.
 - `proofs/qutrit_certificate.json`: original Q, copied from the repo and independently reconstructed.
 
 All pass. This verifier uses SymPy for Born reconstruction and standard-library exact fractions for the mixture identities. The full family remains infinite in its continuous parameters; exact matching of the three coefficient statistics handles them simultaneously.
@@ -141,7 +143,7 @@ Avoid: “first DI SN3 witness,” “first exact qubit bound,” “first compu
 ## 8. Integration and review checklist
 
 1. Review and integrate the complete GK certificate as a separate change. Replace the existing “eight uncovered targets / inconclusive” status with the precise theorem and verifier command. Keep the older attempted search in historical material, labeled superseded.
-2. Wire the exact verifier and the three rejection mutations into an appropriate validation tier. Validate from a clean export. It must compare the expected target set, not merely count 1,152 entries.
+2. Wire the exact verifier and its rejection mutations into an appropriate validation tier. Validate from a clean export. It must compare the expected target set, not merely count 1,152 entries. (Done: the verifier enumerates the relabeling orbit itself and asserts set equality, and the mutation suite carries anti-degradation controls.)
 3. Keep discovery and verification separate. Numerical optimization was used to find the eight additions; it is not a dependency of the acceptance proof.
 4. Update Goh and Pauwels access rows to “relevant full-text passages inspected.” Keep proof-validation status separate. Connor remains full-proof-uninspected in this pass.
 5. Cite Eq. (1) of Gigena–Kaniewski, Eq. (2) of the 2010 efficiency paper, Eq. (5) of the 2007 asymmetric paper, Goh Appendix G, and Pauwels Appendices A/D precisely.

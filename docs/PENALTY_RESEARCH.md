@@ -18,7 +18,15 @@ $$
 0.16310160137870294\ldots\le\alpha_*\le0.16310671884665862\ldots.
 $$
 
-The interval-certified local candidate gives a slightly larger achievable value near `0.1631016013789309628374`. The difference is scientifically negligible; the value of this result is certification of a local optimizer, not decimal improvement. Do not replace the existing exact lower certificate before independent review of the interval implementation.
+The interval-certified local candidate gives a slightly larger achievable value near `0.1631016013789309628374`. The difference is scientifically negligible — about 2.3·10⁻¹³, against a remaining gap to the upper bound of about 5.1·10⁻⁶ — so the value of this result is certification of a local optimizer, not decimal improvement.
+
+It is nevertheless a *valid* improvement, and that should be said rather than left implicit, because §4 otherwise reports an achievable ratio larger than the lower bound displayed just above it. Every point of the chart in §4 is a genuine pure two-qubit projective behaviour, `p>0` is certified on the box, and the ratio enclosure is outward-rounded; so its lower end is a rigorous lower bound on α\*. That consequence uses only the interval evaluation of the ratio at one feasible point. It does **not** depend on the Krawczyk contraction, on the Hessian, or on the local-maximum conclusion — those establish uniqueness and local optimality, not attainability, and could each fail without affecting the bound.
+
+The interval displayed above therefore remains the *quoted* one by choice, not by necessity: the exact rational lower certificate is standard-library exact arithmetic with no interval-arithmetic dependency, and keeping it as the headline figure means the headline interval survives any adverse finding in the pending audit of the interval code. A reader who accepts the interval implementation may replace its lower end by
+
+$$
+\alpha_*\ \ge\ 0.1631016013789309628373704 .
+$$
 
 ## Definitions and scope
 
@@ -151,6 +159,8 @@ $$
 $$
 
 The event probability is approximately 0.1056846639596287. The JSON report prints more digits, but the enclosure width—not the printed length—determines the certified precision. The 70-digit numerical root is not a 70-digit certified value.
+
+**What the enclosure alone gives.** `ratio_interval` encloses the ratio over the whole box. Since every chart point is a genuine pure two-qubit projective behaviour and `p>0` holds throughout the box, the lower end of that enclosure is a rigorous lower bound on α\*, independently of the contraction and Hessian steps. This is the only part of §4 that bears on the certified interval for α\*; see the reconciliation under "What changed" above. `tests/test_local_certificate.py` asserts that it still exceeds the exact rational lower certificate, so the two cannot drift apart silently.
 
 **Checks performed:** all 144 Hessian entries were compared with an independently implemented scalar expression differentiated by mpmath; discrepancy was below 8×10^-79. A center displaced by 0.001 was rejected specifically for failed interior inclusion. This is an implementation cross-check, not independent human validation of the interval method or model reduction. No global maximum or full-S2 strict local maximum is claimed; classical dilution already supplies flat ratio directions in S2.
 

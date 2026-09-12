@@ -176,12 +176,24 @@ if __name__ == "__main__":
     contraction = max(ends(sum(abs(x) for x in row))[1] for row in T)
     assert max(bounds) < rad, "Krawczyk image is not strictly interior"
     assert contraction < 1, "no contraction"
+    # The ratio enclosure below needs only this interval evaluation and p > 0 on the box:
+    # every chart point is a genuine pure two-qubit projective behaviour, so the LOWER end
+    # of ratio_interval is a rigorous lower bound on alpha* whether or not the Krawczyk and
+    # LDL steps above succeed.  See docs/PENALTY_RESEARCH.md section 4.
+    assert ends(fb.v)[0] > 0, (
+        "[E-LOCAL-RATIO-SIGN] the certified ratio enclosure must be strictly positive for "
+        "it to be usable as a lower bound on alpha*"
+    )
     # Interval LDL of negative Hessian: positive pivots certify all Hessians in box negative definite.
     L = [[iv(int(i == j)) for j in range(N)] for i in range(N)]
     D = []
     for i in range(N):
         d = -fb.h[i][i] - sum(L[i][k] * L[i][k] * D[k] for k in range(i))
-        assert ends(d)[0] > 0
+        assert ends(d)[0] > 0, (
+            "[E-LOCAL-NOT-NEGATIVE-DEFINITE] interval LDL pivot %d of -Hessian is not "
+            "certainly positive, so some Hessian in the box may fail to be negative "
+            "definite and the stationary point is not certified to be a local maximum" % i
+        )
         D.append(d)
         for j in range(i + 1, N):
             L[j][i] = (

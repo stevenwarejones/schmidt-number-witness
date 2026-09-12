@@ -278,10 +278,30 @@ What follows from the part that *is* checked:
 - The equality-face material is in the repository. Goh Appendix G has now been read;
   detailed Rai comparisons and expert assessment remain separate review tasks.
 
-**Access failure, stated plainly.** arXiv abstract pages were reachable from this session;
-the arXiv full-text endpoints (both the PDF and the HTML rendering) were not,
-returning HTTP 429 on every attempt across several minutes. So for all three arXiv comparators above, only abstract-level verification was
-possible here. That is a limitation of this session, not a statement about the papers.
+**Access history, stated plainly.** In the session that first wrote this table, arXiv abstract
+pages were reachable but the full-text endpoints (both the PDF and the HTML rendering) were
+not, returning HTTP 429 on every attempt across several minutes, so only abstract-level
+verification was possible then. A later pass (9 September 2026) did reach those full texts and
+supplied the Pauwels, Goh and Gigena–Kaniewski readings; it is recorded in
+[the extended comparison](EXTENDED_COMPARISON.md). The rows above differ from the earlier
+version because the access differed, not because a paper changed.
+
+**Who read what.** Those full-text readings were performed by the literature pass and have not
+been reproduced in this repository's verification sessions: the reviewing agent's own attempt
+to fetch `arxiv.org/abs/2203.01837` was refused, so it could not independently confirm any
+quoted passage. Treat every "inspected" cell as a single reader's report. What the verifiers
+check is arithmetic that does not depend on those readings — with the one exception recorded
+next.
+
+**The one literature-dependent verifier.** `proofs/verify_gigena_complete.py` compares against
+the Gigena–Kaniewski family *as transcribed* in section 2 of
+[the extended comparison](EXTENDED_COMPARISON.md), namely `beta = a1*m_b + c + a3*d` with
+`m_b = A0+A1+b(B0+B1)`, `c = E00+E01+E10+E11` and `d = E20-E21+E02-E12`. Everything downstream
+of that transcription is exact and machine-checked, and the verifier enumerates the relabeling
+orbit itself rather than trusting the certificate's list. The transcription is a reading of
+[16, Eq. (1)] that no second reader has confirmed against the source. A mis-transcribed family
+would mean the comparison closes the wrong family without any verifier failing, so anyone with
+the paper in hand should check those three definitions first.
 
 ### Status of each comparison
 
