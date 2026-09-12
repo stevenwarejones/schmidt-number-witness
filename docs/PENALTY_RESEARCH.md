@@ -1,8 +1,10 @@
 # Endpoint research: dilution, local certification, and the remaining global problem
 
-**8 September 2026. Research integration draft; new arguments await independent review.**
+This is the reference for the penalty endpoint work in this repository: what the rare-event limit does and does not allow, what the interval certificate near the candidate establishes, how Bob's measurements are eliminated analytically, and what is still unproved about α\*. None of it replaces the existing exact certificates, which remain the repository's global results.
 
-This continues the work underlying schmidt-number-witness PR #2 (local tree `74fad117aa0b907d57b63cd98c0e4da2350afcf8`). It does not replace the existing certificates. New arguments and interval code below need adversarial review before integration. The accompanying novelty report contains a separate completed exact comparison.
+**Review status.** The exact code and certificates here are machine-checked on every run. The prose arguments in §§1–3 and §7, and the interval implementation in §4, have been read by reviewing agents but not by a human specialist; §8 records what to ask one. Treat them accordingly: the global bounds quoted below rest on the older rational chain, not on anything introduced here.
+
+*History.* This began as a research draft written against PR #2 (local tree `74fad117aa0b907d57b63cd98c0e4da2350afcf8`) and was integrated after review; the completed Gigena–Kaniewski comparison it refers to is a separate unit, documented in `docs/EXTENDED_COMPARISON.md`.
 
 ## What changed
 
@@ -159,6 +161,8 @@ $$
 $$
 
 The event probability is approximately 0.1056846639596287. The JSON report prints more digits, but the enclosure width—not the printed length—determines the certified precision. The 70-digit numerical root is not a 70-digit certified value.
+
+**Serialization.** The JSON endpoints are rounded *outward* on an exact decimal grid — lower bounds floored, upper bounds ceiled, converted from the exact binary endpoints as rationals with no nearest-rounding or float step. This matters because review of `661b814` found that the previous `mp.nstr` serialization rounded to nearest and so printed the ratio endpoints *inside* their interval, by about 3·10⁻⁶⁷ (lower) and 9·10⁻⁶⁷ (upper). Those magnitudes are some 35 orders of magnitude below the interval width, so no stated result changed and the coarse enclosure displayed above was always safely outside; but a field advertised as a bound must be one, and `tests/test_local_certificate.py` now compares the emitted strings as exact fractions against the exact endpoints, in both directions, for both reported intervals, and checks that the old nearest-rounded form is detected as inward. The pivot lower bounds and the two radii are rounded in their own safe directions for the same reason.
 
 **What the enclosure alone gives.** `ratio_interval` encloses the ratio over the whole box. Since every chart point is a genuine pure two-qubit projective behaviour and `p>0` holds throughout the box, the lower end of that enclosure is a rigorous lower bound on α\*, independently of the contraction and Hessian steps. This is the only part of §4 that bears on the certified interval for α\*; see the reconciliation under "What changed" above. `tests/test_local_certificate.py` asserts that it still exceeds the exact rational lower certificate, so the two cannot drift apart silently.
 

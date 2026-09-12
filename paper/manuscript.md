@@ -312,8 +312,11 @@ The verifier `proofs/verify_gigena_complete.py` rebuilds Q from the Born rule, r
 each qubit strategy, checks nonnegative normalized weights, and independently enumerates
 the complete target set. No published numerical quantum maximum is used. Different
 projections may require different simulators: this is not a simulation of full Q, which
-violates F. Nor does the argument cover general nonlinear joint-score tradeoffs or
-protocol transformations. It concerns original Q, not a newly certified comparison of the
+violates F. Because the three statistics agree exactly, every function of them is
+reproduced for a fixed relabeling and branch, nonlinear ones included; what is left open
+is a test reading statistics beyond the matched triple -- combining several relabelings or
+projections, or other coordinates of the behavior -- along with filtering, multi-copy
+protocols and conditional tradeoffs. It concerns original Q, not a newly certified comparison of the
 improved qutrit realization of Section 7.2. Since $p\ge0$, every valid strengthening
 $F+\epsilon p$ with $\epsilon\ge0$ also detects original Q.
 

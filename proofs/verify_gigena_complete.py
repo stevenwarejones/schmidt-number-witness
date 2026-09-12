@@ -87,8 +87,37 @@ assert (
 )
 
 
+def check_relabel(args):
+    """Every relabeling read from the certificate must be an actual relabeling.
+
+    `rename` is linear in the sign entries, so a sign of 3 scales a correlator to 3 and the
+    component is no longer a behaviour at all -- yet a pair of such components can be
+    averaged back onto a legitimate target, leaving the mixture, projection and coverage
+    checks all satisfied.  The premise that each component is a genuine qubit strategy is
+    therefore enforced here rather than assumed.
+    """
+    ok = isinstance(args, (list, tuple)) and len(args) == 5
+    if ok:
+        pa, pb, sa, sb, swap = args
+        ok = (
+            sorted(pa) == [0, 1, 2]
+            and sorted(pb) == [0, 1, 2]
+            and len(sa) == 3
+            and len(sb) == 3
+            and all(x in (-1, 1) for x in tuple(sa) + tuple(sb))
+            and swap in (0, 1, False, True)
+        )
+    assert ok, (
+        '[E-GK-BAD-RELABEL] a supplied relabeling is not one: it must be two permutations '
+        'of (0,1,2), two triples of signs in {-1,+1} and a Boolean party exchange. Anything '
+        'else is a more general setting map, and a non-unit sign rescales correlators past '
+        'the range any binary-outcome behaviour can reach'
+    )
+    return args
+
+
 def rename(v, args):
-    pa, pb, sa, sb, swap = args
+    pa, pb, sa, sb, swap = check_relabel(args)
     if swap:
         v = v[3:6] + v[:3] + tuple(v[6 + 3 * j + i] for i in range(3) for j in range(3))
     return (
@@ -151,6 +180,10 @@ def strategy(s):
     if k == "local":
         a = tuple(s["A"])
         b = tuple(s["B"])
+        assert len(a) == len(b) == 3, (
+            '[E-GK-BAD-LOCAL] a local strategy must give exactly three outcomes per party; '
+            'any other length is not a behaviour in this scenario'
+        )
         assert all(x in [-1, 1] for x in a + b), (
             '[E-GK-NOT-DETERMINISTIC] a local strategy carries an outcome outside {-1,+1}, '
             'so its correlators are not those of a deterministic local behaviour'

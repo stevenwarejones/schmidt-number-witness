@@ -6,6 +6,7 @@ Requires mpmath. Identity uses independently coded second-order interval AD.
 
 import json
 import sys
+from fractions import Fraction as Fr
 from pathlib import Path
 
 if sys.flags.optimize:
@@ -136,8 +137,95 @@ def mag(x):
     return max(abs(v) for v in ends(x))
 
 
-def show(x):
-    return [mp.nstr(v, 65) for v in ends(x)]
+# Serialization of certified bounds.
+#
+# mp.nstr rounds to NEAREST, so a printed "enclosure" can be strictly inside the interval
+# it claims to enclose: at this candidate the nearest-rounded ratio endpoints were inward
+# by about 3e-67 (lower) and 9e-67 (upper).  Those magnitudes are far below the interval
+# width and so changed no stated result, but a field advertised as a bound must BE one.
+# Every numeric field below is therefore rounded outward on an exact decimal grid, with no
+# float or nearest-rounding step anywhere in the conversion: lower bounds are floored and
+# upper bounds are ceiled, from the exact binary endpoints as rationals.
+
+
+def exact_end(endpoint):
+    """An mpmath binary endpoint tuple (sign, mantissa, exponent, bc) as an exact Fraction.
+
+    Both mp.mpf._mpf_ and each half of mp.iv.mpf._mpi_ use this representation, so this is
+    the one place a value crosses from binary floating point to exact rational arithmetic.
+    """
+    sign, mantissa, exponent, _ = endpoint
+    return (-1 if sign else 1) * Fr(mantissa) * Fr(2) ** exponent
+
+
+def exact(x):
+    """Exact Fraction for an mp.mpf, or for a scalar already exact."""
+    return exact_end(x._mpf_) if hasattr(x, "_mpf_") else Fr(x)
+
+
+def _places(v, digits):
+    """Decimal places that give `digits` significant digits at magnitude v."""
+    a = abs(Fr(v))
+    if a == 0:
+        return digits
+    e = 0
+    while a >= 1:
+        a /= 10
+        e += 1
+    while a < Fr(1, 10):
+        a *= 10
+        e -= 1
+    return digits - e
+
+
+def _render(n, places):
+    """Exact decimal string for the rational n * 10**-places.
+
+    Scientific notation is used for very small or very large magnitudes, since a bound like
+    4e-43 written out in full is forty leading zeros no reader will count.  Fraction parses
+    both spellings exactly, and floor_str/ceil_str re-parse whatever they return, so the
+    choice of spelling cannot silently turn a bound into a non-bound.
+    """
+    if n == 0:
+        return "0"
+    d = str(abs(n))
+    sign = "-" if n < 0 else ""
+    exponent = len(d) - 1 - places
+    if -5 < exponent < 17:
+        if places <= 0:
+            return sign + d + "0" * -places
+        d = d.rjust(places + 1, "0")
+        return sign + d[: len(d) - places] + "." + d[len(d) - places :]
+    tail = d[1:].rstrip("0")
+    return sign + d[0] + ("." + tail if tail else "") + "e" + str(exponent)
+
+
+def floor_str(v, digits=65):
+    """Decimal string <= v, so a printed lower bound really is a lower bound."""
+    v = Fr(v)
+    k = _places(v, digits)
+    n = (v * Fr(10) ** k)
+    n = n.numerator // n.denominator
+    out = _render(n, k)
+    assert Fr(out) <= v, "[E-LOCAL-SERIALIZE] lower bound rounded inward"
+    return out
+
+
+def ceil_str(v, digits=65):
+    """Decimal string >= v, so a printed upper bound really is an upper bound."""
+    v = Fr(v)
+    k = _places(v, digits)
+    n = (v * Fr(10) ** k)
+    n = -((-n.numerator) // n.denominator)
+    out = _render(n, k)
+    assert Fr(out) >= v, "[E-LOCAL-SERIALIZE] upper bound rounded inward"
+    return out
+
+
+def show(x, digits=65):
+    """Outward-rounded decimal enclosure of an interval: [floor(lo), ceil(hi)]."""
+    lo, hi = (exact_end(t) for t in x._mpi_)
+    return [floor_str(lo, digits), ceil_str(hi, digits)]
 
 
 if __name__ == "__main__":
@@ -207,10 +295,15 @@ if __name__ == "__main__":
         ),
         "radius": "1e-25",
         "interval_decimal_precision": 80,
-        "max_krawczyk_radius": mp.nstr(max(bounds), 20),
-        "contraction_bound": mp.nstr(contraction, 20),
+        # An upper bound on the image radius, so it is rounded UP.
+        "max_krawczyk_radius": ceil_str(exact(max(bounds)), 20),
+        # An upper bound on the contraction factor, so it is rounded UP.
+        "contraction_bound": ceil_str(exact(contraction), 20),
         "ratio_interval": show(fb.v),
         "p_interval": show(pb.v),
-        "negative_hessian_pivot_lower_bounds": [mp.nstr(ends(d)[0], 20) for d in D],
+        # Lower bounds on the LDL pivots, so they are rounded DOWN.
+        "negative_hessian_pivot_lower_bounds": [
+            floor_str(exact_end(d._mpi_[0]), 20) for d in D
+        ],
     }
     print(json.dumps(out, indent=2))

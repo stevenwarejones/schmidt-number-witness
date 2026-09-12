@@ -298,10 +298,18 @@ the Gigena–Kaniewski family *as transcribed* in section 2 of
 [the extended comparison](EXTENDED_COMPARISON.md), namely `beta = a1*m_b + c + a3*d` with
 `m_b = A0+A1+b(B0+B1)`, `c = E00+E01+E10+E11` and `d = E20-E21+E02-E12`. Everything downstream
 of that transcription is exact and machine-checked, and the verifier enumerates the relabeling
-orbit itself rather than trusting the certificate's list. The transcription is a reading of
-[16, Eq. (1)] that no second reader has confirmed against the source. A mis-transcribed family
-would mean the comparison closes the wrong family without any verifier failing, so anyone with
-the paper in hand should check those three definitions first.
+orbit itself rather than trusting the certificate's list. The transcription itself is a reading
+of [16, Eq. (1)], and a mis-transcribed family would close the wrong family without any
+verifier failing, so it is worth naming who has checked it.
+
+*Status, narrowly.* Two independent readings now agree. The transcription was made from the
+full-text HTML in the 9 September literature pass, and the reviewing agent for PR #3 checked
+it against the primary PDF (Eq. (1), page 2), confirming that the branch is written there as
+`(-1)^{alpha_2}` with `alpha_2` in {0,1} and that the marginal and correlator terms match once
+the paper's 1-based setting labels are shifted to the 0-based labels used here. That is two
+agent readings of one equation, not human validation, and not an audit of anything else in
+that paper; the reviewer explicitly did not revalidate the Pauwels, Connor or Goh readings.
+The three definitions above remain the right place for a human with the paper to start.
 
 ### Status of each comparison
 

@@ -9,7 +9,7 @@ No SDP solver, network, or Git history is needed for verification.
 
 **Runtime, measured rather than asserted.** The chain including the family comparison takes
 about **32 s** on a maintainer machine (macOS, arm64, CPython 3.13) and **76–79 s** over two
-runs in a cold cloud container. It is single-threaded exact rational arithmetic, so it tracks
+runs in a cold cloud container, dropping to about 55 s in that container once warm. It is single-threaded exact rational arithmetic, so it tracks
 single-core speed rather than core count, and expect more spread than those two figures
 suggest. For comparison, the same two machines measured about 30 s and 50 s before the family
 comparison was added. Output is streamed as each verifier produces
@@ -186,7 +186,10 @@ projective behaviour with `p>0`, so the lower end of that enclosure is a rigorou
 on α\*, larger than the exact rational lower certificate by about 2.3·10⁻¹³. That consequence
 needs only the interval evaluation, not the contraction or the Hessian. The repository still
 quotes the rational certificate, which uses no interval arithmetic; see
-`docs/PENALTY_RESEARCH.md` §4.
+`docs/PENALTY_RESEARCH.md` §4. Every numeric field of that JSON report is rounded *outward*
+from the exact binary endpoints — lower bounds floored, upper bounds ceiled, no float or
+nearest-rounding step — so a field named as a bound can be re-parsed as one;
+`tests/test_local_certificate.py` checks that in both directions.
 `tests/test_local_certificate.py` cross-checks derivatives and rejects a displaced root;
 `tests/test_gigena_mutations.py` checks exact coverage and damaged mixture rejection.
 `tests/test_bob_reduction.py` numerically checks the analytic norm formula against the Born rule.

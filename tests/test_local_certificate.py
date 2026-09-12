@@ -95,6 +95,67 @@ assert lo > mp.mpf(old.numerator) / mp.mpf(old.denominator), (
 print("PASS the interval ratio at the candidate exceeds the exact rational lower certificate")
 
 
+# Serialization: a field advertised as a bound must be one.  mp.nstr rounds to nearest, so
+# it can print an endpoint strictly INSIDE the interval; at this candidate it did, by about
+# 3e-67 on the ratio's lower end.  These checks compare the emitted decimal strings, as
+# exact Fractions, against the exact binary interval endpoints.  Reported by review of
+# 661b814.
+CAND = json.loads((R / "local_penalty_candidate.json").read_text())["coordinates"]
+boxes = [m.iv(x) + m.iv(["-1e-25", "1e-25"]) for x in CAND + ["0"] * 5]
+ratio_ad, p_ad = m.objective(boxes)
+for label, interval in [("ratio_interval", ratio_ad.v), ("p_interval", p_ad.v)]:
+    text = m.show(interval)
+    true_lo, true_hi = (m.exact_end(t) for t in interval._mpi_)
+    assert Fr(text[0]) <= true_lo, (label, "lower endpoint printed inward", text[0])
+    assert Fr(text[1]) >= true_hi, (label, "upper endpoint printed inward", text[1])
+    assert Fr(text[0]) < Fr(text[1]), (label, "printed enclosure is empty")
+print("PASS both reported intervals are outward-rounded against their exact endpoints")
+
+# Both signs and both directions, on values chosen so that nearest rounding would go the
+# wrong way at the requested precision.
+for value in [
+    Fr(1, 3), Fr(-1, 3), Fr(2, 3), Fr(-2, 3),
+    Fr(10 ** 40 + 1, 3 * 10 ** 40), Fr(-(10 ** 40 + 1), 3 * 10 ** 40),
+    Fr(999999999999, 10 ** 12), Fr(-999999999999, 10 ** 12),
+    Fr(3, 10 ** 45), Fr(-3, 10 ** 45), Fr(0),
+]:
+    for digits in (5, 20, 65):
+        lo, hi = m.floor_str(value, digits), m.ceil_str(value, digits)
+        assert Fr(lo) <= value <= Fr(hi), (value, digits, lo, hi)
+print("PASS floor_str and ceil_str round outward for both signs at three precisions")
+
+# Teeth: the nearest-rounding serialization these replaced must FAIL the check above, or
+# the check is not testing anything.
+import mpmath as _mp  # noqa: E402
+
+nearest = [_mp.nstr(_mp.mpf(t), 65) for t in ratio_ad.v._mpi_]
+true_lo, true_hi = (m.exact_end(t) for t in ratio_ad.v._mpi_)
+assert not (Fr(nearest[0]) <= true_lo and Fr(nearest[1]) >= true_hi), (
+    "nearest rounding no longer produces an inward endpoint at this candidate, so this "
+    "control has stopped demonstrating the bug it guards against"
+)
+print("PASS control: nearest-rounded serialization is detected as inward")
+
+# The pivot lower bounds and the two radii are advertised as bounds, so check their
+# direction too, by re-parsing what the verifier itself emitted.
+report = json.loads(
+    subprocess.run(
+        [sys.executable, str(R / "verify_local_penalty.py"), "--complex"],
+        capture_output=True, text=True, check=True,
+    ).stdout
+)
+assert Fr(report["ratio_interval"][0]) <= true_lo <= true_hi <= Fr(
+    report["ratio_interval"][1]
+), "the emitted report disagrees with a fresh interval evaluation"
+assert all(Fr(x) > 0 for x in report["negative_hessian_pivot_lower_bounds"]), (
+    "a printed pivot lower bound is not positive, so it does not certify definiteness"
+)
+assert Fr(report["contraction_bound"]) < 1 and Fr(report["max_krawczyk_radius"]) < Fr(
+    "1e-25"
+), "a printed bound does not itself satisfy the condition it is meant to witness"
+print("PASS the emitted report's bounds hold as stated when re-parsed exactly")
+
+
 def run_mutated(text, coords_json=None):
     with tempfile.TemporaryDirectory() as td:
         p = Path(td)
