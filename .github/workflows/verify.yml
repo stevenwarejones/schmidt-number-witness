@@ -87,6 +87,9 @@ jobs:
         if: matrix.python-version == '3.12'
         run: python tests/test_equality_face_mutations.py
 
+      - name: Penalty-boundary mutations and dependency-failure controls
+        run: python tests/test_penalty_boundary_mutations.py
+
       - name: Documentation paths and entry-point coverage
         run: python tests/test_docs_consistency.py
 

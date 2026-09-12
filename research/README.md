@@ -86,3 +86,13 @@ is close to optimal, and that suggestion should be inspectable rather than asser
 Some scripts still read another script's source text to reuse a builder; replacing that with
 explicit builder functions is a known follow-up, to be done only after comparing basis ordering
 and coefficient maps against the archived inputs.
+
+## Exact Gram continuation (no SDP search)
+
+`research/derive_penalty_boundary.py` uses Python-FLINT to solve two rational
+linear systems and writes `build/penalty_boundary_certificate.json`.
+The shipped output is `proofs/penalty_boundary_certificate.json`; verification
+is standard-library only in `proofs/verify_penalty_boundary.py`.
+The old interval quoted above describes the original endpoint artifact. The
+continuation improves its upper bound to 0.16310672, with the exact optimal
+penalty still undetermined. No new numerical stationary-point claim is added.
