@@ -8,11 +8,11 @@ python run_checks.py
 No SDP solver, network, or Git history is needed for verification.
 
 **Runtime, measured rather than asserted.** The chain including the family comparison takes
-about **76–79 s** over two runs in a cold cloud container on CPython 3.13 (single-threaded exact rational
-arithmetic, so it tracks single-core speed rather than core count). The same container
-measured about 50 s before the family comparison was added, and a maintainer machine
-measured about 30 s then; neither of those two figures has been re-measured on the expanded
-chain, so do not read 30 s as a current number. Output is streamed as each verifier produces
+about **32 s** on a maintainer machine (macOS, arm64, CPython 3.13) and **76–79 s** over two
+runs in a cold cloud container. It is single-threaded exact rational arithmetic, so it tracks
+single-core speed rather than core count, and expect more spread than those two figures
+suggest. For comparison, the same two machines measured about 30 s and 50 s before the family
+comparison was added. Output is streamed as each verifier produces
 it, so a slow step looks slow rather than looking hung; `python -u run_checks.py` also
 removes buffering in the parent runner, and a proof script run on its own buffers normally
 unless you pass `python -u` to it too.
